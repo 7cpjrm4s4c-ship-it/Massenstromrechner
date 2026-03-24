@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#171b26" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Massenstrom" />
+  <title>Massenstrom Rechner</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #171b26; font-family: 'IBM Plex Sans', sans-serif; color: #fff; min-height: 100vh; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { opacity: 1; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }
+
+    .ambient {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(60,100,180,0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 100%, rgba(100,60,180,0.08) 0%, transparent 50%);
+    }
+    .container { position: relative; z-index: 1; }
+    .header { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .header-inner { max-width: 480px; margin: 0 auto; display: flex; align-items: center; gap: 14; }
+    .logo {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: linear-gradient(135deg, rgba(80,140,255,0.15), rgba(120,80,255,0.1));
+      border: 1px solid rgba(100,150,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700; color: rgba(140,180,255,0.8);
+      box-shadow: 0 4px 20px rgba(80,120,255,0.1);
+    }
+    .header h1 {
+      font-size: 20px; font-weight: 700; letter-spacing: -0.03em; margin: 0;
+      background: linear-gradient(135deg, #fff 0%, rgba(180,200,255,0.8) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .header .sub { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 500; margin-top: 1px; letter-spacing: 0.04em; }
+    .main { max-width: 480px; margin: 0 auto; padding: 20px 20px 60px; }
+
+    /* Mode Toggle */
+    .modes { display: flex; gap: 6px; margin-bottom: 24px; background: rgba(255,255,255,0.06); border-radius: 14px; padding: 4px; border: 1px solid rgba(255,255,255,0.1); }
+    .mode-btn {
+      flex: 1; padding: 12px 8px; border-radius: 11px; border: none; cursor: pointer;
+      background: transparent; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); text-align: center;
+    }
+    .mode-btn.active {
+      background: linear-gradient(135deg, rgba(80,130,255,0.2), rgba(100,80,255,0.12));
+      box-shadow: 0 2px 12px rgba(80,130,255,0.1), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .mode-btn .label { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 700; margin-bottom: 2px; transition: color 0.2s; }
+    .mode-btn.active .label { color: rgba(150,190,255,0.95); }
+    .mode-btn:not(.active) .label { color: rgba(255,255,255,0.25); }
+    .mode-btn .desc { font-size: 10px; font-weight: 500; transition: color 0.2s; }
+    .mode-btn.active .desc { color: rgba(255,255,255,0.55); }
+    .mode-btn:not(.active) .desc { color: rgba(255,255,255,0.25); }
+
+    /* Cards */
+    .card { background: rgba(255,255,255,0.06); border-radius: 18px; border: 1px solid rgba(255,255,255,0.1); }
+    .input-card { padding: 24px 22px 6px; margin-bottom: 16px; }
+
+    /* Fields */
+    .field { margin-bottom: 22px; }
+    .field label {
+      display: block; font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,0.65);
+      margin-bottom: 8px; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .field-wrap { position: relative; }
+    .field input, .field select {
+      width: 100%; padding: 14px 16px; border: 1px solid rgba(255,255,255,0.12); border-radius: 14px;
+      font-size: 17px; font-family: 'IBM Plex Mono', monospace; font-weight: 600;
+      color: #fff; background: rgba(255,255,255,0.07); outline: none;
+      transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+    }
+    .field input:focus, .field select:focus {
+      border-color: rgba(100,160,255,0.5);
+      box-shadow: 0 0 0 3px rgba(100,160,255,0.1), inset 0 0 20px rgba(100,160,255,0.03);
+    }
+    .field input.has-unit { padding-right: 64px; }
+    .field select {
+      cursor: pointer; appearance: none; -webkit-appearance: none; padding-right: 40px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 5.5l3.5 3.5 3.5-3.5' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center;
+    }
+    .field select option { background: #242938; color: #fff; }
+    .field .unit {
+      position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+      font-size: 13px; font-family: 'IBM Plex Mono', monospace; color: rgba(255,255,255,0.45);
+      font-weight: 500; pointer-events: none;
+    }
+    .field .help { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 6px; line-height: 1.5; }
+
+    /* Formula */
+    .formula {
+      display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 16px;
+      border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.05); flex-wrap: wrap;
+    }
+    .formula .f { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; color: rgba(140,180,255,0.7); }
+    .formula .meta { margin-left: auto; font-size: 10px; color: rgba(255,255,255,0.4); }
+
+    /* Results */
+    .result-card {
+      position: relative; border-radius: 16px; padding: 22px 22px 20px; overflow: hidden;
+    }
+    .result-card .glow {
+      position: absolute; top: -30px; right: -30px; width: 100px; height: 100px;
+      border-radius: 50%; background: rgba(255,255,255,0.1); filter: blur(30px);
+    }
+    .result-card .rlabel {
+      font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.7);
+      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;
+      position: relative;
+    }
+    .result-card .rvalue {
+      font-size: 34px; font-weight: 700; color: #fff; font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: -0.03em; text-shadow: 0 2px 20px rgba(0,0,0,0.3); position: relative;
+    }
+    .result-card .runit {
+      font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.65);
+      font-family: 'IBM Plex Mono', monospace; margin-left: 8px; position: relative;
+    }
+    .result-blue { background: linear-gradient(135deg, rgba(60,110,220,0.3) 0%, rgba(80,60,180,0.2) 100%); }
+    .result-green { background: linear-gradient(135deg, rgba(50,160,130,0.25) 0%, rgba(40,120,160,0.18) 100%); }
+    .result-orange { background: linear-gradient(135deg, rgba(220,140,50,0.28) 0%, rgba(200,80,60,0.18) 100%); }
+
+    .stoffwerte {
+      display: flex; gap: 16px; margin-top: 16px; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.05); flex-wrap: wrap;
+      font-size: 11px;
+    }
+    .stoffwerte .sw-label { color: rgba(255,255,255,0.4); }
+    .stoffwerte .sw-val { color: rgba(255,255,255,0.4); font-family: 'IBM Plex Mono', monospace; font-weight: 500; }
+
+    .section-label {
+      font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4);
+      letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px;
+    }
+    .results-wrap { animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1); }
+    .empty { padding: 48px 20px; text-align: center; }
+    .empty .icon { font-size: 24px; margin-bottom: 8px; opacity: 0.15; animation: pulse 3s ease-in-out infinite; }
+    .empty .msg { font-size: 13px; color: rgba(255,255,255,0.4); }
+    .grid-gap { display: grid; gap: 12px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="ambient"></div>
+  <div class="container">
+    <div class="header">
+      <div class="header-inner">
+        <div class="logo">ṁ</div>
+        <div>
+          <h1>Massenstrom</h1>
+          <div class="sub">HVAC · Heizung &amp; Kühlung</div>
+        </div>
+      </div>
+    </div>
+    <div class="main">
+      <!-- Mode Toggle -->
+      <div class="modes">
+        <button class="mode-btn active" data-mode="leistung">
+          <div class="label">Q̇ → ṁ</div>
+          <div class="desc">Leistung → Massenstrom</div>
+        </button>
+        <button class="mode-btn" data-mode="m_leistung">
+          <div class="label">ṁ → Q̇</div>
+          <div class="desc">Massenstrom → Leistung</div>
+        </button>
+        <button class="mode-btn" data-mode="m_spreizung">
+          <div class="label">ṁ → ΔT</div>
+          <div class="desc">Massenstrom → Spreizung</div>
+        </button>
+      </div>
+
+      <!-- Input -->
+      <div class="card input-card">
+        <div class="field">
+          <label>Wärmeträgermedium</label>
+          <div class="field-wrap">
+            <select id="medium">
+              <option value="wasser">Wasser</option>
+              <option value="glykol20">Ethylenglykol 20%</option>
+              <option value="glykol30">Ethylenglykol 30%</option>
+              <option value="glykol40">Ethylenglykol 40%</option>
+              <option value="propylen20">Propylenglykol 20%</option>
+              <option value="propylen30">Propylenglykol 30%</option>
+              <option value="propylen40">Propylenglykol 40%</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Leistung mode fields -->
+        <div id="fields-leistung">
+          <div class="field">
+            <label>Heiz-/Kühllast</label>
+            <div class="field-wrap">
+              <input type="number" id="leistung" value="1200" step="100" min="0" class="has-unit" />
+              <span class="unit">W</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Temperaturspreizung ΔT</label>
+            <div class="field-wrap">
+              <input type="number" id="deltaT" value="20" step="1" min="0" class="has-unit" />
+              <span class="unit">K</span>
+            </div>
+            <div class="help">Differenz zwischen Vorlauf- und Rücklauftemperatur</div>
+          </div>
+        </div>
+
+        <!-- Massenstrom→Leistung fields -->
+        <div id="fields-m_leistung" class="hidden">
+          <div class="field">
+            <label>Massenstrom</label>
+            <div class="field-wrap">
+              <input type="number" id="massenstrom_ml" value="51.6" step="1" min="0" class="has-unit" />
+              <span class="unit">kg/h</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Temperaturspreizung ΔT</label>
+            <div class="field-wrap">
+              <input type="number" id="deltaT_ml" value="20" step="1" min="0" class="has-unit" />
+              <span class="unit">K</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Massenstrom→Spreizung fields -->
+        <div id="fields-m_spreizung" class="hidden">
+          <div class="field">
+            <label>Massenstrom</label>
+            <div class="field-wrap">
+              <input type="number" id="massenstrom_ms" value="51.6" step="1" min="0" class="has-unit" />
+              <span class="unit">kg/h</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Heiz-/Kühllast</label>
+            <div class="field-wrap">
+              <input type="number" id="leistung_ms" value="1200" step="100" min="0" class="has-unit" />
+              <span class="unit">W</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formula -->
+      <div class="formula">
+        <span class="f" id="formel-text">ṁ = Q̇ × 3,6 / (c_p × ΔT)</span>
+        <span class="meta" id="formel-meta">c_p=4.182 · ρ=998</span>
+      </div>
+
+      <!-- Results -->
+      <div id="result-area"></div>
+    </div>
+  </div>
+
+  <script>
+    // Medien-Daten
+    const MEDIEN = {
+      wasser:     { name: "Wasser",              cp: 4.182, dichte: 998  },
+      glykol20:   { name: "Ethylenglykol 20%",   cp: 3.89,  dichte: 1025 },
+      glykol30:   { name: "Ethylenglykol 30%",   cp: 3.68,  dichte: 1038 },
+      glykol40:   { name: "Ethylenglykol 40%",   cp: 3.46,  dichte: 1052 },
+      propylen20: { name: "Propylenglykol 20%",  cp: 3.98,  dichte: 1018 },
+      propylen30: { name: "Propylenglykol 30%",  cp: 3.82,  dichte: 1028 },
+      propylen40: { name: "Propylenglykol 40%",  cp: 3.64,  dichte: 1038 },
+    };
+
+    const FORMELN = {
+      leistung:    "ṁ = Q̇ × 3,6 / (c_p × ΔT)",
+      m_leistung:  "Q̇ = ṁ × c_p × ΔT / 3,6",
+      m_spreizung: "ΔT = Q̇ × 3,6 / (ṁ × c_p)",
+    };
+
+    let modus = "leistung";
+
+    // Select-all on focus
+    document.querySelectorAll('input[type=number]').forEach(input => {
+      input.addEventListener('focus', () => input.select());
+    });
+
+    // Mode switching
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        modus = btn.dataset.mode;
+
+        document.getElementById('fields-leistung').classList.toggle('hidden', modus !== 'leistung');
+        document.getElementById('fields-m_leistung').classList.toggle('hidden', modus !== 'm_leistung');
+        document.getElementById('fields-m_spreizung').classList.toggle('hidden', modus !== 'm_spreizung');
+
+        berechne();
+      });
+    });
+
+    // Recalculate on any input change
+    document.querySelectorAll('input, select').forEach(el => {
+      el.addEventListener('input', berechne);
+      el.addEventListener('change', berechne);
+    });
+
+    function getMedium() {
+      return MEDIEN[document.getElementById('medium').value];
+    }
+
+    function val(id) {
+      return parseFloat(document.getElementById(id).value) || 0;
+    }
+
+    function berechne() {
+      const m = getMedium();
+      document.getElementById('formel-text').textContent = FORMELN[modus];
+      document.getElementById('formel-meta').textContent = `c_p=${m.cp} · ρ=${m.dichte}`;
+
+      let html = '';
+
+      if (modus === 'leistung') {
+        const q = val('leistung'), dt = val('deltaT');
+        if (q > 0 && dt > 0) {
+          const kgh = (q * 3.6) / (m.cp * dt);
+          const m3h = kgh / m.dichte;
+          html = ergebnisHTML([
+            { label: 'Massenstrom', value: kgh.toFixed(2), unit: 'kg/h', cls: 'result-blue' },
+            { label: 'Volumenstrom', value: m3h.toFixed(4), unit: 'm³/h', cls: 'result-green' },
+          ], m);
+        }
+      } else if (modus === 'm_leistung') {
+        const ms = val('massenstrom_ml'), dt = val('deltaT_ml');
+        if (ms > 0 && dt > 0) {
+          const q = (ms * m.cp * dt) / 3.6;
+          html = ergebnisHTML([
+            { label: 'Leistung', value: q.toFixed(1), unit: 'W', cls: 'result-orange' },
+          ], m);
+        }
+      } else if (modus === 'm_spreizung') {
+        const ms = val('massenstrom_ms'), q = val('leistung_ms');
+        if (ms > 0 && q > 0) {
+          const dt = (q * 3.6) / (ms * m.cp);
+          html = ergebnisHTML([
+            { label: 'Temperaturspreizung', value: dt.toFixed(2), unit: 'K', cls: 'result-orange' },
+          ], m);
+        }
+      }
+
+      if (!html) {
+        html = `<div class="card empty"><div class="icon">◎</div><div class="msg">Alle Eingabewerte müssen größer als 0 sein</div></div>`;
+      }
+
+      document.getElementById('result-area').innerHTML = html;
+    }
+
+    function ergebnisHTML(results, m) {
+      const cards = results.map(r => `
+        <div class="result-card ${r.cls}">
+          <div class="glow"></div>
+          <div class="rlabel">${r.label}</div>
+          <span class="rvalue">${r.value}</span><span class="runit">${r.unit}</span>
+        </div>
+      `).join('');
+
+      return `
+        <div class="results-wrap">
+          <div class="card" style="padding:20px">
+            <div class="section-label">Ergebnis</div>
+            <div class="grid-gap">${cards}</div>
+            <div class="stoffwerte">
+              <div><span class="sw-label">Medium: </span><span class="sw-val">${m.name}</span></div>
+              <div><span class="sw-label">c_p: </span><span class="sw-val">${m.cp} kJ/(kg·K)</span></div>
+              <div><span class="sw-label">ρ: </span><span class="sw-val">${m.dichte} kg/m³</span></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Initial calculation
+    berechne();
+  </script>
+</body>
+</html>
