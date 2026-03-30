@@ -116,12 +116,12 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 
 /* ── Card ── */
 .card{
-  background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);
+  background:#111113;border:1px solid rgba(255,255,255,.14);border-radius:var(--rl);
   padding:16px;position:relative;overflow:hidden;
 }
 .card::after{
   content:'';position:absolute;inset:0;border-radius:var(--rl);pointer-events:none;
-  background:linear-gradient(160deg,rgba(255,255,255,.035) 0%,transparent 60%);
+  background:linear-gradient(160deg,rgba(255,255,255,.04) 0%,transparent 60%);
 }
 
 /* ── Section label ── */
@@ -172,24 +172,24 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 .iwrap{position:relative}
 
 .inp{
-  width:100%;background:var(--s3);border:1px solid var(--b1);color:var(--t1);
+  width:100%;background:#1c1c1e;border:1px solid rgba(255,255,255,.28);color:var(--t1);
   font-family:var(--mono);font-size:20px;font-weight:600;
   padding:11px 48px 11px 13px;border-radius:var(--r);outline:none;
   transition:border-color .15s,background .15s;
   -webkit-appearance:none;
 }
-.inp::placeholder{color:var(--t4);font-weight:400}
-.inp:focus{background:var(--s4)}
+.inp::placeholder{color:rgba(255,255,255,.25);font-weight:400}
+.inp:focus{background:#252528;border-color:rgba(255,255,255,.50)}
 .inp-sm{
-  width:100%;background:var(--s3);border:1px solid var(--b3);color:var(--t2);
+  width:100%;background:#1c1c1e;border:1px solid rgba(255,255,255,.22);color:var(--t1);
   font-family:var(--mono);font-size:14px;
   padding:9px 48px 9px 13px;border-radius:var(--r);outline:none;
   transition:border-color .15s;-webkit-appearance:none;
 }
-.inp-sm:focus{color:var(--t1);outline:none}
+.inp-sm:focus{color:var(--t1);border-color:rgba(255,255,255,.45);outline:none}
 .iunit{
   position:absolute;right:12px;top:50%;transform:translateY(-50%);
-  font-family:var(--mono);font-size:10px;color:var(--t3);pointer-events:none;
+  font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.45);pointer-events:none;
 }
 
 /* panel focus colours */
@@ -200,12 +200,12 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 .pa .inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(77,168,255,.10)}
 
 /* panel tints */
-.ph{background:linear-gradient(160deg,rgba(255,107,53,.06) 0%,var(--s1) 50%)!important;border-color:rgba(255,107,53,.20)!important}
-.pc{background:linear-gradient(160deg,rgba(0,196,232,.05) 0%,var(--s1) 50%)!important;border-color:rgba(0,196,232,.16)!important}
+.ph{background:linear-gradient(160deg,rgba(255,107,53,.09) 0%,#111113 60%)!important;border-color:rgba(255,107,53,.32)!important}
+.pc{background:linear-gradient(160deg,rgba(0,196,232,.08) 0%,#111113 60%)!important;border-color:rgba(0,196,232,.28)!important}
 
 /* ── Output card — high contrast ── */
 .out-card{
-  background:var(--s2);border:1px solid var(--b2);border-radius:var(--rl);
+  background:#161618;border:1px solid rgba(255,255,255,.22);border-radius:var(--rl);
   padding:16px;
 }
 .out-grid{
@@ -214,7 +214,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
   gap:8px;
 }
 .out-block{
-  background:var(--s3);border:1px solid var(--b1);border-radius:var(--r);
+  background:#1e1e20;border:1px solid rgba(255,255,255,.18);border-radius:var(--r);
   padding:12px 13px;
   position:relative;overflow:hidden;
 }
@@ -589,7 +589,7 @@ function calcPanel(p){
   if(m==='ms'&&qv>0&&dv>0){ms=qv/(cp*dv);q=qv;dt=dv;ok=true}
   else if(m==='q'&&mv>0&&dv>0){q=mv*cp*dv;ms=mv;dt=dv;ok=true}
   else if(m==='dt'&&qv>0&&mv>0){dt=qv/(mv*cp);q=qv;ms=mv;ok=true}
-  const mh=ms*3600,m3h=mh/rho/1e3;
+  const mh=ms*3600,m3h=mh/rho;
   // inline calc result
   const cv=$(p+'-calc-val');
   if(cv){
@@ -642,7 +642,7 @@ function calcAll(){
 
 /* ── Pipe card HTML ── */
 function pCard(p,isM,vol,mx,isBest){
-  const di=isM?p[6]:p[1],da=isM?p[7]:p[2],wall=isM?p[8]:p[3],eps=isM?EM:ES;
+  const di=isM?p[5]:p[1],da=isM?p[6]:p[2],wall=isM?p[7]:p[3],eps=isM?EM:ES;
   const norm=isM?'Mapress Edelstahl':p[4];
   const{dp,v}=pdrop(vol,di,eps);
   const col=dpCol(dp,mx),pct=Math.min(100,dp/mx*100).toFixed(1);
