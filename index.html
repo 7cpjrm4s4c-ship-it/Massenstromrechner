@@ -1,387 +1,831 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#171b26" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Massenstrom" />
-  <title>Massenstrom Rechner</title>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #171b26; font-family: 'IBM Plex Sans', sans-serif; color: #fff; min-height: 100vh; }
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button { opacity: 1; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="theme-color" content="#0d1b2a"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Massenstrom"/>
+<meta name="description" content="Massenstrom- und Rohrdimensionierung für HLS-Anlagen"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-512.svg"/>
+<link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+<title>Massenstromrechner</title>
 
-    .ambient {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 0;
-      background: radial-gradient(ellipse at 50% 0%, rgba(60,100,180,0.12) 0%, transparent 60%),
-                  radial-gradient(ellipse at 80% 100%, rgba(100,60,180,0.08) 0%, transparent 50%);
-    }
-    .container { position: relative; z-index: 1; }
-    .header { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .header-inner { max-width: 480px; margin: 0 auto; display: flex; align-items: center; gap: 14; }
-    .logo {
-      width: 42px; height: 42px; border-radius: 12px;
-      background: linear-gradient(135deg, rgba(80,140,255,0.15), rgba(120,80,255,0.1));
-      border: 1px solid rgba(100,150,255,0.15);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; font-family: 'IBM Plex Mono', monospace;
-      font-weight: 700; color: rgba(140,180,255,0.8);
-      box-shadow: 0 4px 20px rgba(80,120,255,0.1);
-    }
-    .header h1 {
-      font-size: 20px; font-weight: 700; letter-spacing: -0.03em; margin: 0;
-      background: linear-gradient(135deg, #fff 0%, rgba(180,200,255,0.8) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .header .sub { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 500; margin-top: 1px; letter-spacing: 0.04em; }
-    .main { max-width: 480px; margin: 0 auto; padding: 20px 20px 60px; }
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 
-    /* Mode Toggle */
-    .modes { display: flex; gap: 6px; margin-bottom: 24px; background: rgba(255,255,255,0.06); border-radius: 14px; padding: 4px; border: 1px solid rgba(255,255,255,0.1); }
-    .mode-btn {
-      flex: 1; padding: 12px 8px; border-radius: 11px; border: none; cursor: pointer;
-      background: transparent; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); text-align: center;
-    }
-    .mode-btn.active {
-      background: linear-gradient(135deg, rgba(80,130,255,0.2), rgba(100,80,255,0.12));
-      box-shadow: 0 2px 12px rgba(80,130,255,0.1), inset 0 1px 0 rgba(255,255,255,0.1);
-    }
-    .mode-btn .label { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 700; margin-bottom: 2px; transition: color 0.2s; }
-    .mode-btn.active .label { color: rgba(150,190,255,0.95); }
-    .mode-btn:not(.active) .label { color: rgba(255,255,255,0.25); }
-    .mode-btn .desc { font-size: 10px; font-weight: 500; transition: color 0.2s; }
-    .mode-btn.active .desc { color: rgba(255,255,255,0.55); }
-    .mode-btn:not(.active) .desc { color: rgba(255,255,255,0.25); }
+<style>
+/* ═══════════════════════════════════════════════════════
+   LIQUID GLASS DARK — Design tokens
+═══════════════════════════════════════════════════════ */
+:root {
+  /* Base atmosphere */
+  --bg-deep:    #070e16;
+  --bg-mid:     #0d1b2a;
+  --bg-lift:    #122030;
 
-    /* Cards */
-    .card { background: rgba(255,255,255,0.06); border-radius: 18px; border: 1px solid rgba(255,255,255,0.1); }
-    .input-card { padding: 24px 22px 6px; margin-bottom: 16px; }
+  /* Glass surfaces */
+  --glass-1:    rgba(255,255,255,0.055);
+  --glass-2:    rgba(255,255,255,0.038);
+  --glass-3:    rgba(255,255,255,0.022);
+  --glass-border: rgba(255,255,255,0.10);
+  --glass-border-bright: rgba(255,255,255,0.18);
+  --glass-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.4);
+  --glass-inset:  inset 0 1px 0 rgba(255,255,255,0.12);
 
-    /* Fields */
-    .field { margin-bottom: 22px; }
-    .field label {
-      display: block; font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,0.65);
-      margin-bottom: 8px; letter-spacing: 0.06em; text-transform: uppercase;
-    }
-    .field-wrap { position: relative; }
-    .field input, .field select {
-      width: 100%; padding: 14px 16px; border: 1px solid rgba(255,255,255,0.12); border-radius: 14px;
-      font-size: 17px; font-family: 'IBM Plex Mono', monospace; font-weight: 600;
-      color: #fff; background: rgba(255,255,255,0.07); outline: none;
-      transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
-    }
-    .field input:focus, .field select:focus {
-      border-color: rgba(100,160,255,0.5);
-      box-shadow: 0 0 0 3px rgba(100,160,255,0.1), inset 0 0 20px rgba(100,160,255,0.03);
-    }
-    .field input.has-unit { padding-right: 64px; }
-    .field select {
-      cursor: pointer; appearance: none; -webkit-appearance: none; padding-right: 40px;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 5.5l3.5 3.5 3.5-3.5' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 14px center;
-    }
-    .field select option { background: #242938; color: #fff; }
-    .field .unit {
-      position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
-      font-size: 13px; font-family: 'IBM Plex Mono', monospace; color: rgba(255,255,255,0.45);
-      font-weight: 500; pointer-events: none;
-    }
-    .field .help { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 6px; line-height: 1.5; }
+  /* Semantic colours */
+  --heat:      #ff6b35;
+  --heat-soft: rgba(255,107,53,0.18);
+  --heat-glow: rgba(255,107,53,0.35);
+  --cold:      #00c4e8;
+  --cold-soft: rgba(0,196,232,0.15);
+  --cold-glow: rgba(0,196,232,0.32);
+  --accent:    #5eb8ff;
+  --accent-soft: rgba(94,184,255,0.15);
+  --ok:        #34d399;
+  --warn:      #fbbf24;
 
-    /* Formula */
-    .formula {
-      display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 16px;
-      border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.05); flex-wrap: wrap;
-    }
-    .formula .f { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; color: rgba(140,180,255,0.7); }
-    .formula .meta { margin-left: auto; font-size: 10px; color: rgba(255,255,255,0.4); }
+  /* Text */
+  --t1: rgba(255,255,255,0.92);
+  --t2: rgba(255,255,255,0.55);
+  --t3: rgba(255,255,255,0.28);
+  --t4: rgba(255,255,255,0.14);
 
-    /* Results */
-    .result-card {
-      position: relative; border-radius: 16px; padding: 22px 22px 20px; overflow: hidden;
-    }
-    .result-card .glow {
-      position: absolute; top: -30px; right: -30px; width: 100px; height: 100px;
-      border-radius: 50%; background: rgba(255,255,255,0.1); filter: blur(30px);
-    }
-    .result-card .rlabel {
-      font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.7);
-      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;
-      position: relative;
-    }
-    .result-card .rvalue {
-      font-size: 34px; font-weight: 700; color: #fff; font-family: 'IBM Plex Mono', monospace;
-      letter-spacing: -0.03em; text-shadow: 0 2px 20px rgba(0,0,0,0.3); position: relative;
-    }
-    .result-card .runit {
-      font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.65);
-      font-family: 'IBM Plex Mono', monospace; margin-left: 8px; position: relative;
-    }
-    .result-blue { background: linear-gradient(135deg, rgba(60,110,220,0.3) 0%, rgba(80,60,180,0.2) 100%); }
-    .result-green { background: linear-gradient(135deg, rgba(50,160,130,0.25) 0%, rgba(40,120,160,0.18) 100%); }
-    .result-orange { background: linear-gradient(135deg, rgba(220,140,50,0.28) 0%, rgba(200,80,60,0.18) 100%); }
+  /* Typography */
+  --sans: 'Inter', -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', 'SF Mono', monospace;
 
-    .stoffwerte {
-      display: flex; gap: 16px; margin-top: 16px; padding: 12px 16px; border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.05); flex-wrap: wrap;
-      font-size: 11px;
-    }
-    .stoffwerte .sw-label { color: rgba(255,255,255,0.4); }
-    .stoffwerte .sw-val { color: rgba(255,255,255,0.4); font-family: 'IBM Plex Mono', monospace; font-weight: 500; }
+  /* Layout */
+  --r-sm:  10px;
+  --r-md:  16px;
+  --r-lg:  22px;
+  --r-xl:  28px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
 
-    .section-label {
-      font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4);
-      letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px;
-    }
-    .results-wrap { animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1); }
-    .empty { padding: 48px 20px; text-align: center; }
-    .empty .icon { font-size: 24px; margin-bottom: 8px; opacity: 0.15; animation: pulse 3s ease-in-out infinite; }
-    .empty .msg { font-size: 13px; color: rgba(255,255,255,0.4); }
-    .grid-gap { display: grid; gap: 12px; }
-    .hidden { display: none; }
-  </style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  height: 100%;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  height: 100%;
+  font-family: var(--sans);
+  background: var(--bg-deep);
+  color: var(--t1);
+  overflow-x: hidden;
+  /* Liquid glass depth background */
+  background-image:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(14,42,74,0.7) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 90%, rgba(10,30,55,0.6) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(0,80,120,0.08) 0%, transparent 70%);
+  background-attachment: fixed;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px }
+::-webkit-scrollbar-track { background: transparent }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px }
+
+/* ── App shell ─────────────────────────────────────────── */
+#app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(16px + var(--safe-bottom));
+}
+
+/* ── Header ────────────────────────────────────────────── */
+.hdr {
+  position: sticky; top: 0; z-index: 100;
+  padding: calc(env(safe-area-inset-top, 0px) + 14px) 20px 14px;
+  background: rgba(7,14,22,0.72);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--glass-border);
+  display: flex; align-items: center; gap: 14px;
+}
+
+.hdr-icon {
+  width: 36px; height: 36px;
+  background: var(--glass-1);
+  border: 1px solid var(--glass-border-bright);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+  box-shadow: var(--glass-inset);
+}
+
+.hdr-title {
+  font-size: 17px; font-weight: 600;
+  letter-spacing: -0.3px; color: var(--t1);
+  line-height: 1.1;
+}
+.hdr-sub {
+  font-size: 11px; color: var(--t3);
+  font-weight: 400; letter-spacing: 0.02em;
+}
+
+/* ── Tab bar ───────────────────────────────────────────── */
+.tab-bar {
+  display: flex; gap: 6px;
+  padding: 12px 16px 4px;
+  margin-left: auto;
+}
+.tab-btn {
+  background: var(--glass-2);
+  border: 1px solid var(--glass-border);
+  color: var(--t2);
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  padding: 6px 14px; border-radius: 20px;
+  cursor: pointer; transition: all .2s;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.tab-btn:hover { color: var(--t1); border-color: var(--glass-border-bright); }
+.tab-btn.active {
+  background: var(--accent-soft);
+  border-color: rgba(94,184,255,0.35);
+  color: var(--accent);
+  box-shadow: 0 0 16px rgba(94,184,255,0.12);
+}
+
+/* ── Main content ──────────────────────────────────────── */
+.content { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+/* ── Glass card ────────────────────────────────────────── */
+.glass-card {
+  background: var(--glass-1);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-xl);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: var(--glass-shadow), var(--glass-inset);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+/* Specular shimmer */
+.glass-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 30%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0.2) 70%, transparent 100%);
+}
+
+/* ── Section label ─────────────────────────────────────── */
+.lbl {
+  font-size: 10px; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--t3); margin-bottom: 10px;
+}
+
+/* ── Select ────────────────────────────────────────────── */
+.gl-select {
+  width: 100%;
+  background: var(--glass-2);
+  border: 1px solid var(--glass-border);
+  color: var(--t1);
+  font-family: var(--mono); font-size: 13px;
+  padding: 11px 36px 11px 14px;
+  border-radius: var(--r-md); outline: none; appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.35)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 13px center;
+  transition: border-color .15s;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+.gl-select:focus { border-color: var(--accent); outline: none; }
+.gl-select option { background: #0d1b2a; color: #fff; }
+
+/* ── Fluid chips ───────────────────────────────────────── */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chip {
+  background: var(--glass-3); border: 1px solid var(--glass-border);
+  border-radius: 8px; padding: 3px 10px;
+  font-family: var(--mono); font-size: 10px; color: var(--t2);
+}
+.chip strong { color: var(--accent); }
+
+/* ── Twin panels ───────────────────────────────────────── */
+.twin { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 420px) { .twin { grid-template-columns: 1fr; } }
+
+/* Panel variants */
+.panel-heat { border-color: var(--heat-soft) !important; }
+.panel-heat::before { background: linear-gradient(90deg, transparent, var(--heat-glow), transparent); opacity: .4; }
+.panel-cold { border-color: var(--cold-soft) !important; }
+.panel-cold::before { background: linear-gradient(90deg, transparent, var(--cold-glow), transparent); opacity: .3; }
+
+.panel-heat:focus-within { border-color: rgba(255,107,53,0.45) !important; box-shadow: var(--glass-shadow), 0 0 24px rgba(255,107,53,0.12); }
+.panel-cold:focus-within { border-color: rgba(0,196,232,0.45) !important;  box-shadow: var(--glass-shadow), 0 0 24px rgba(0,196,232,0.1); }
+
+.p-title {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; margin-bottom: 14px;
+}
+.dot { width: 7px; height: 7px; border-radius: 50%; }
+.dot-h { background: var(--heat); box-shadow: 0 0 8px var(--heat); }
+.dot-c { background: var(--cold); box-shadow: 0 0 8px var(--cold); }
+.panel-heat .p-title { color: #ff9a6a; }
+.panel-cold .p-title { color: #5ee0f5; }
+
+/* ── Input group ───────────────────────────────────────── */
+.inp-g { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+.inp-g:last-of-type { margin-bottom: 0; }
+.inp-lbl { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--t3); }
+
+.inp-wrap { position: relative; }
+.gl-input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--glass-border);
+  color: var(--t1);
+  font-family: var(--mono); font-size: 18px; font-weight: 600;
+  padding: 10px 44px 10px 12px;
+  border-radius: var(--r-sm); outline: none;
+  transition: border-color .15s, background .15s, box-shadow .15s;
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.gl-input::placeholder { color: var(--t4); font-weight: 400; }
+.gl-input:focus { background: rgba(255,255,255,0.08); }
+.panel-heat .gl-input:focus { border-color: var(--heat); box-shadow: 0 0 0 3px rgba(255,107,53,0.1); }
+.panel-cold .gl-input:focus { border-color: var(--cold); box-shadow: 0 0 0 3px rgba(0,196,232,0.1); }
+
+.dt-input {
+  width: 100%;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  color: var(--t2); font-family: var(--mono); font-size: 13px;
+  padding: 7px 44px 7px 12px; border-radius: var(--r-sm); outline: none;
+  transition: border-color .15s;
+}
+.panel-heat .dt-input:focus { border-color: rgba(255,107,53,0.5); }
+.panel-cold .dt-input:focus { border-color: rgba(0,196,232,0.5); }
+
+.inp-unit {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  font-family: var(--mono); font-size: 10px; color: var(--t3); pointer-events: none;
+}
+
+/* ── Result block ──────────────────────────────────────── */
+.result-block { border-top: 1px solid var(--glass-border); margin-top: 14px; padding-top: 14px; }
+
+.res-main {
+  font-family: var(--mono); font-size: 26px; font-weight: 600; line-height: 1;
+  color: var(--t3); transition: color .25s, text-shadow .25s;
+  margin-bottom: 10px; letter-spacing: -.5px;
+}
+.res-unit { font-size: 11px; font-weight: 400; margin-left: 4px; color: var(--t3); }
+.panel-heat .res-main.on { color: #ff9a6a; text-shadow: 0 0 20px rgba(255,107,53,0.4); }
+.panel-cold .res-main.on { color: #5ee0f5; text-shadow: 0 0 20px rgba(0,196,232,0.35); }
+
+.res-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.res-row:last-child { border-bottom: none; }
+.res-k { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--t3); }
+.res-v { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--t3); transition: color .2s; }
+.res-v.on { color: var(--t1); }
+
+/* ── Formula strip ─────────────────────────────────────── */
+.formula-strip {
+  text-align: center; font-family: var(--mono); font-size: 11px; color: var(--t3);
+  padding: 4px 0 2px; line-height: 1.8;
+}
+.formula-strip span { color: var(--t2); }
+
+/* ══════════════════════════════════════════════════════
+   PIPE SIZING TAB
+══════════════════════════════════════════════════════ */
+
+/* ── Velocity input ─ */
+.vel-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+@media (max-width: 380px) { .vel-row { grid-template-columns: 1fr; } }
+
+/* ── Pipe result cards ─────────────────────────────────── */
+.pipe-results { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+
+.pipe-card {
+  background: var(--glass-2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  display: grid; grid-template-columns: auto 1fr auto;
+  align-items: center; gap: 12px;
+  transition: border-color .2s, box-shadow .2s;
+  position: relative; overflow: hidden;
+}
+.pipe-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%);
+  pointer-events: none;
+}
+.pipe-card.recommended {
+  border-color: rgba(94,184,255,0.4);
+  box-shadow: 0 0 20px rgba(94,184,255,0.08);
+  background: rgba(94,184,255,0.06);
+}
+.pipe-card.too-fast { border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.04); }
+.pipe-card.inactive { opacity: .45; }
+
+.pipe-std-badge {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 10px; font-weight: 700;
+  letter-spacing: .04em; text-align: center; line-height: 1.2;
+}
+.badge-steel { background: rgba(156,163,175,0.15); border: 1px solid rgba(156,163,175,0.25); color: #9ca3af; }
+.badge-mapress { background: rgba(94,184,255,0.12); border: 1px solid rgba(94,184,255,0.25); color: var(--accent); }
+
+.pipe-info { min-width: 0; }
+.pipe-dn { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--t1); }
+.pipe-dim { font-family: var(--mono); font-size: 11px; color: var(--t3); margin-top: 1px; }
+.pipe-std-label { font-size: 10px; color: var(--t3); margin-top: 3px; }
+
+.pipe-vel-block { text-align: right; }
+.pipe-vel {
+  font-family: var(--mono); font-size: 16px; font-weight: 600;
+  transition: color .2s;
+}
+.vel-ok   { color: var(--ok); }
+.vel-warn { color: var(--warn); }
+.vel-fast { color: #f87171; }
+.pipe-vel-unit { font-size: 10px; color: var(--t3); }
+
+.rec-badge {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(94,184,255,0.18); border: 1px solid rgba(94,184,255,0.3);
+  color: var(--accent); font-size: 9px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 5px;
+}
+
+/* Paired card — steel + mapress side by side */
+.pipe-pair { display: flex; flex-direction: column; gap: 6px; }
+.pipe-pair-title {
+  font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--t3); margin-bottom: 2px;
+}
+.pipe-pair-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (max-width: 400px) { .pipe-pair-inner { grid-template-columns: 1fr; } }
+
+.mini-pipe-card {
+  background: var(--glass-2); border: 1px solid var(--glass-border);
+  border-radius: var(--r-md); padding: 12px;
+  transition: border-color .2s;
+}
+.mini-pipe-card.recommended { border-color: rgba(94,184,255,0.4); background: rgba(94,184,255,0.05); }
+.mini-pipe-card.too-fast { border-color: rgba(251,191,36,0.3); }
+
+.mini-std { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--t3); margin-bottom: 6px; }
+.mini-dn { font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--t1); }
+.mini-dim { font-family: var(--mono); font-size: 10px; color: var(--t3); }
+.mini-vel { font-family: var(--mono); font-size: 13px; font-weight: 600; margin-top: 6px; }
+
+/* ── Install banner ────────────────────────────────────── */
+#install-bar {
+  position: fixed; bottom: calc(20px + var(--safe-bottom)); left: 50%;
+  transform: translateX(-50%);
+  background: rgba(13,27,42,0.9);
+  border: 1px solid var(--glass-border-bright);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border-radius: var(--r-lg); padding: 12px 18px;
+  display: none; align-items: center; gap: 12px;
+  font-size: 13px; color: var(--t1); white-space: nowrap;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  z-index: 999;
+  animation: fadeUp .3s ease both;
+}
+#install-bar button.ib-install {
+  background: var(--accent); border: none; color: #040d18;
+  font-family: var(--sans); font-size: 12px; font-weight: 700;
+  padding: 7px 16px; border-radius: 10px; cursor: pointer;
+  transition: opacity .15s;
+}
+#install-bar button.ib-install:hover { opacity: .88; }
+#install-bar button.ib-close {
+  background: none; border: none; color: var(--t3);
+  font-size: 18px; cursor: pointer; line-height: 1; padding: 0 2px;
+}
+
+/* ── Animations ────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity:0; transform: translate(-50%, 10px); }
+  to   { opacity:1; transform: translate(-50%, 0); }
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(14px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.glass-card, .twin { animation: slideUp .35s ease both; }
+.glass-card:nth-child(2) { animation-delay: .06s; }
+.glass-card:nth-child(3) { animation-delay: .12s; }
+.twin > * { animation: slideUp .35s ease both; }
+.twin > *:nth-child(2) { animation-delay: .05s; }
+</style>
 </head>
 <body>
-  <div class="ambient"></div>
-  <div class="container">
-    <div class="header">
-      <div class="header-inner">
-        <div class="logo">ṁ</div>
-        <div>
-          <h1>Massenstrom</h1>
-          <div class="sub">HVAC · Heizung &amp; Kühlung</div>
-        </div>
+<div id="app">
+
+  <!-- ── Header ── -->
+  <header class="hdr">
+    <div class="hdr-icon">ṁ</div>
+    <div>
+      <div class="hdr-title">Massenstromrechner</div>
+      <div class="hdr-sub">HLS-Anlagen · Heizung · Kälte · Rohr</div>
+    </div>
+    <nav class="tab-bar">
+      <button class="tab-btn active" data-tab="flow">Massenstrom</button>
+      <button class="tab-btn"        data-tab="pipe">Rohr</button>
+    </nav>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════
+       TAB: MASSENSTROM
+  ═══════════════════════════════════════════════ -->
+  <div id="tab-flow" class="content">
+
+    <!-- Medium -->
+    <div class="glass-card">
+      <div class="lbl">Wärmeträger</div>
+      <select class="gl-select" id="medium">
+        <option value="water">Wasser</option>
+        <option value="g20">Wasser / Glykol 20 %</option>
+        <option value="g25">Wasser / Glykol 25 %</option>
+        <option value="g30">Wasser / Glykol 30 %</option>
+        <option value="g35">Wasser / Glykol 35 %</option>
+        <option value="g40">Wasser / Glykol 40 %</option>
+      </select>
+      <div class="chips">
+        <div class="chip">c<sub>p</sub> = <strong id="cp-val">4.180</strong> kJ/(kg·K)</div>
+        <div class="chip">ρ = <strong id="rho-val">998</strong> kg/m³</div>
+        <div class="chip" id="frost-chip" style="display:none">Frostschutz <strong id="frost-val"></strong></div>
       </div>
     </div>
-    <div class="main">
-      <!-- Mode Toggle -->
-      <div class="modes">
-        <button class="mode-btn active" data-mode="leistung">
-          <div class="label">Q̇ → ṁ</div>
-          <div class="desc">Leistung → Massenstrom</div>
-        </button>
-        <button class="mode-btn" data-mode="m_leistung">
-          <div class="label">ṁ → Q̇</div>
-          <div class="desc">Massenstrom → Leistung</div>
-        </button>
-        <button class="mode-btn" data-mode="m_spreizung">
-          <div class="label">ṁ → ΔT</div>
-          <div class="desc">Massenstrom → Spreizung</div>
-        </button>
-      </div>
 
-      <!-- Input -->
-      <div class="card input-card">
-        <div class="field">
-          <label>Wärmeträgermedium</label>
-          <div class="field-wrap">
-            <select id="medium">
-              <option value="wasser">Wasser</option>
-              <option value="glykol20">Ethylenglykol 20%</option>
-              <option value="glykol30">Ethylenglykol 30%</option>
-              <option value="glykol40">Ethylenglykol 40%</option>
-              <option value="propylen20">Propylenglykol 20%</option>
-              <option value="propylen30">Propylenglykol 30%</option>
-              <option value="propylen40">Propylenglykol 40%</option>
-            </select>
+    <!-- Heat + Cold -->
+    <div class="twin">
+
+      <!-- Heizung -->
+      <div class="glass-card panel-heat">
+        <div class="p-title"><div class="dot dot-h"></div>Heizung</div>
+        <div class="inp-g">
+          <div class="inp-lbl">Heizlast</div>
+          <div class="inp-wrap">
+            <input class="gl-input" id="hl" type="number" min="0" step="50" placeholder="0" inputmode="decimal"/>
+            <span class="inp-unit">W</span>
           </div>
         </div>
-
-        <!-- Leistung mode fields -->
-        <div id="fields-leistung">
-          <div class="field">
-            <label>Heiz-/Kühllast</label>
-            <div class="field-wrap">
-              <input type="number" id="leistung" value="1200" step="100" min="0" class="has-unit" />
-              <span class="unit">W</span>
-            </div>
-          </div>
-          <div class="field">
-            <label>Temperaturspreizung ΔT</label>
-            <div class="field-wrap">
-              <input type="number" id="deltaT" value="20" step="1" min="0" class="has-unit" />
-              <span class="unit">K</span>
-            </div>
-            <div class="help">Differenz zwischen Vorlauf- und Rücklauftemperatur</div>
+        <div class="inp-g">
+          <div class="inp-lbl">ΔT</div>
+          <div class="inp-wrap">
+            <input class="dt-input" id="dth" type="number" min="0.5" step="0.5" value="10" inputmode="decimal"/>
+            <span class="inp-unit">K</span>
           </div>
         </div>
-
-        <!-- Massenstrom→Leistung fields -->
-        <div id="fields-m_leistung" class="hidden">
-          <div class="field">
-            <label>Massenstrom</label>
-            <div class="field-wrap">
-              <input type="number" id="massenstrom_ml" value="51.6" step="1" min="0" class="has-unit" />
-              <span class="unit">kg/h</span>
-            </div>
-          </div>
-          <div class="field">
-            <label>Temperaturspreizung ΔT</label>
-            <div class="field-wrap">
-              <input type="number" id="deltaT_ml" value="20" step="1" min="0" class="has-unit" />
-              <span class="unit">K</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Massenstrom→Spreizung fields -->
-        <div id="fields-m_spreizung" class="hidden">
-          <div class="field">
-            <label>Massenstrom</label>
-            <div class="field-wrap">
-              <input type="number" id="massenstrom_ms" value="51.6" step="1" min="0" class="has-unit" />
-              <span class="unit">kg/h</span>
-            </div>
-          </div>
-          <div class="field">
-            <label>Heiz-/Kühllast</label>
-            <div class="field-wrap">
-              <input type="number" id="leistung_ms" value="1200" step="100" min="0" class="has-unit" />
-              <span class="unit">W</span>
-            </div>
-          </div>
+        <div class="result-block">
+          <div class="res-main" id="h-main">–<span class="res-unit">kg/s</span></div>
+          <div class="res-row"><span class="res-k">kg/h</span><span class="res-v" id="h-kgh">–</span></div>
+          <div class="res-row"><span class="res-k">l/h</span> <span class="res-v" id="h-lh">–</span></div>
+          <div class="res-row"><span class="res-k">m³/h</span><span class="res-v" id="h-m3h">–</span></div>
         </div>
       </div>
 
-      <!-- Formula -->
-      <div class="formula">
-        <span class="f" id="formel-text">ṁ = Q̇ × 3,6 / (c_p × ΔT)</span>
-        <span class="meta" id="formel-meta">c_p=4.182 · ρ=998</span>
+      <!-- Kälte -->
+      <div class="glass-card panel-cold">
+        <div class="p-title"><div class="dot dot-c"></div>Kälte</div>
+        <div class="inp-g">
+          <div class="inp-lbl">Kühllast</div>
+          <div class="inp-wrap">
+            <input class="gl-input" id="kl" type="number" min="0" step="50" placeholder="0" inputmode="decimal"/>
+            <span class="inp-unit">W</span>
+          </div>
+        </div>
+        <div class="inp-g">
+          <div class="inp-lbl">ΔT</div>
+          <div class="inp-wrap">
+            <input class="dt-input" id="dtk" type="number" min="0.5" step="0.5" value="6" inputmode="decimal"/>
+            <span class="inp-unit">K</span>
+          </div>
+        </div>
+        <div class="result-block">
+          <div class="res-main" id="k-main">–<span class="res-unit">kg/s</span></div>
+          <div class="res-row"><span class="res-k">kg/h</span><span class="res-v" id="k-kgh">–</span></div>
+          <div class="res-row"><span class="res-k">l/h</span> <span class="res-v" id="k-lh">–</span></div>
+          <div class="res-row"><span class="res-k">m³/h</span><span class="res-v" id="k-m3h">–</span></div>
+        </div>
       </div>
 
-      <!-- Results -->
-      <div id="result-area"></div>
+    </div><!-- twin -->
+
+    <div class="formula-strip">
+      ṁ = <span>Q</span> / (<span>c<sub>p</sub></span> × <span>ΔT</span>)
+      &nbsp;·&nbsp; Q in W &nbsp;·&nbsp; c<sub>p</sub> in kJ/(kg·K) &nbsp;·&nbsp; ΔT in K
     </div>
-  </div>
 
-  <script>
-    // Medien-Daten
-    const MEDIEN = {
-      wasser:     { name: "Wasser",              cp: 4.182, dichte: 998  },
-      glykol20:   { name: "Ethylenglykol 20%",   cp: 3.89,  dichte: 1025 },
-      glykol30:   { name: "Ethylenglykol 30%",   cp: 3.68,  dichte: 1038 },
-      glykol40:   { name: "Ethylenglykol 40%",   cp: 3.46,  dichte: 1052 },
-      propylen20: { name: "Propylenglykol 20%",  cp: 3.98,  dichte: 1018 },
-      propylen30: { name: "Propylenglykol 30%",  cp: 3.82,  dichte: 1028 },
-      propylen40: { name: "Propylenglykol 40%",  cp: 3.64,  dichte: 1038 },
-    };
+  </div><!-- tab-flow -->
 
-    const FORMELN = {
-      leistung:    "ṁ = Q̇ × 3,6 / (c_p × ΔT)",
-      m_leistung:  "Q̇ = ṁ × c_p × ΔT / 3,6",
-      m_spreizung: "ΔT = Q̇ × 3,6 / (ṁ × c_p)",
-    };
+  <!-- ═══════════════════════════════════════════════
+       TAB: ROHRDIMENSIONIERUNG
+  ═══════════════════════════════════════════════ -->
+  <div id="tab-pipe" class="content" style="display:none">
 
-    let modus = "leistung";
-
-    // Select-all on focus
-    document.querySelectorAll('input[type=number]').forEach(input => {
-      input.addEventListener('focus', () => input.select());
-    });
-
-    // Mode switching
-    document.querySelectorAll('.mode-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        modus = btn.dataset.mode;
-
-        document.getElementById('fields-leistung').classList.toggle('hidden', modus !== 'leistung');
-        document.getElementById('fields-m_leistung').classList.toggle('hidden', modus !== 'm_leistung');
-        document.getElementById('fields-m_spreizung').classList.toggle('hidden', modus !== 'm_spreizung');
-
-        berechne();
-      });
-    });
-
-    // Recalculate on any input change
-    document.querySelectorAll('input, select').forEach(el => {
-      el.addEventListener('input', berechne);
-      el.addEventListener('change', berechne);
-    });
-
-    function getMedium() {
-      return MEDIEN[document.getElementById('medium').value];
-    }
-
-    function val(id) {
-      return parseFloat(document.getElementById(id).value) || 0;
-    }
-
-    function berechne() {
-      const m = getMedium();
-      document.getElementById('formel-text').textContent = FORMELN[modus];
-      document.getElementById('formel-meta').textContent = `c_p=${m.cp} · ρ=${m.dichte}`;
-
-      let html = '';
-
-      if (modus === 'leistung') {
-        const q = val('leistung'), dt = val('deltaT');
-        if (q > 0 && dt > 0) {
-          const kgh = (q * 3.6) / (m.cp * dt);
-          const m3h = kgh / m.dichte;
-          html = ergebnisHTML([
-            { label: 'Massenstrom', value: kgh.toFixed(2), unit: 'kg/h', cls: 'result-blue' },
-            { label: 'Volumenstrom', value: m3h.toFixed(4), unit: 'm³/h', cls: 'result-green' },
-          ], m);
-        }
-      } else if (modus === 'm_leistung') {
-        const ms = val('massenstrom_ml'), dt = val('deltaT_ml');
-        if (ms > 0 && dt > 0) {
-          const q = (ms * m.cp * dt) / 3.6;
-          html = ergebnisHTML([
-            { label: 'Leistung', value: q.toFixed(1), unit: 'W', cls: 'result-orange' },
-          ], m);
-        }
-      } else if (modus === 'm_spreizung') {
-        const ms = val('massenstrom_ms'), q = val('leistung_ms');
-        if (ms > 0 && q > 0) {
-          const dt = (q * 3.6) / (ms * m.cp);
-          html = ergebnisHTML([
-            { label: 'Temperaturspreizung', value: dt.toFixed(2), unit: 'K', cls: 'result-orange' },
-          ], m);
-        }
-      }
-
-      if (!html) {
-        html = `<div class="card empty"><div class="icon">◎</div><div class="msg">Alle Eingabewerte müssen größer als 0 sein</div></div>`;
-      }
-
-      document.getElementById('result-area').innerHTML = html;
-    }
-
-    function ergebnisHTML(results, m) {
-      const cards = results.map(r => `
-        <div class="result-card ${r.cls}">
-          <div class="glow"></div>
-          <div class="rlabel">${r.label}</div>
-          <span class="rvalue">${r.value}</span><span class="runit">${r.unit}</span>
-        </div>
-      `).join('');
-
-      return `
-        <div class="results-wrap">
-          <div class="card" style="padding:20px">
-            <div class="section-label">Ergebnis</div>
-            <div class="grid-gap">${cards}</div>
-            <div class="stoffwerte">
-              <div><span class="sw-label">Medium: </span><span class="sw-val">${m.name}</span></div>
-              <div><span class="sw-label">c_p: </span><span class="sw-val">${m.cp} kJ/(kg·K)</span></div>
-              <div><span class="sw-label">ρ: </span><span class="sw-val">${m.dichte} kg/m³</span></div>
-            </div>
+    <div class="glass-card">
+      <div class="lbl">Eingabe Volumenstrom &amp; Geschwindigkeit</div>
+      <div class="vel-row">
+        <div class="inp-g">
+          <div class="inp-lbl">Volumenstrom</div>
+          <div class="inp-wrap">
+            <input class="gl-input" id="p-vol" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal" style="font-size:16px"/>
+            <span class="inp-unit">m³/h</span>
           </div>
         </div>
-      `;
-    }
+        <div class="inp-g">
+          <div class="inp-lbl">max. Geschwindigkeit</div>
+          <div class="inp-wrap">
+            <input class="dt-input" id="p-vel" type="number" min="0.1" step="0.1" value="1.0" inputmode="decimal" style="padding:10px 44px 10px 12px;font-size:14px;color:var(--t1)"/>
+            <span class="inp-unit">m/s</span>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:10px;color:var(--t3);margin-top:8px;line-height:1.5">
+        Empfehlung: Heizung 0.5–1.0 m/s · Kälte 0.8–1.5 m/s · Hauptleitungen max. 2.0 m/s
+      </p>
+    </div>
 
-    // Initial calculation
-    berechne();
-  </script>
+    <div class="glass-card">
+      <div class="lbl">Ergebnis — Stahl vs. Mapress Edelstahl</div>
+      <div class="pipe-results" id="pipe-results">
+        <p style="color:var(--t3);font-size:12px;text-align:center;padding:16px 0">
+          Volumenstrom eingeben →
+        </p>
+      </div>
+    </div>
+
+    <div class="glass-card" style="padding:14px 16px">
+      <div class="lbl">Normen</div>
+      <p style="font-size:11px;color:var(--t2);line-height:1.7">
+        <strong style="color:var(--t1)">Stahl ≤ DN50:</strong> Mittelsch. Gewinderohr DIN EN 10255 (Reihe M) &nbsp;·&nbsp;
+        <strong style="color:var(--t1)">Stahl ≥ DN65:</strong> Nahtloses Stahlrohr DIN EN 10220 &nbsp;·&nbsp;
+        <strong style="color:var(--accent)">Mapress:</strong> Edelstahl-Pressrohr 1.4401/1.4521 nach DIN EN 10312
+      </p>
+    </div>
+
+  </div><!-- tab-pipe -->
+
+</div><!-- app -->
+
+<!-- Install banner -->
+<div id="install-bar">
+  📲 App installieren
+  <button class="ib-install" id="ib-btn">Installieren</button>
+  <button class="ib-close"   id="ib-close">✕</button>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════════════════ */
+
+/** @type {Record<string,{cp:number,rho:number,frost:string|null}>} */
+const FLUIDS = {
+  water: { cp:4.180, rho:998,  frost:null },
+  g20:   { cp:3.930, rho:1028, frost:'bis −9 °C'  },
+  g25:   { cp:3.850, rho:1033, frost:'bis −12 °C' },
+  g30:   { cp:3.760, rho:1038, frost:'bis −16 °C' },
+  g35:   { cp:3.680, rho:1044, frost:'bis −20 °C' },
+  g40:   { cp:3.600, rho:1051, frost:'bis −25 °C' },
+};
+
+/**
+ * Pipe database.
+ * Steel ≤ DN50: DIN EN 10255 medium series (Reihe M)
+ * Steel ≥ DN65: DIN EN 10220 seamless
+ * Mapress: Geberit Mapress Edelstahl (1.4401), DIN EN 10312
+ *
+ * di_steel / di_mapress = inner diameter [mm]
+ * da_steel / da_mapress = outer diameter [mm]
+ * wall_steel / wall_mapress = wall thickness [mm]
+ */
+const PIPES = [
+  // DN,  di_steel, da_steel, wall_s, norm_steel,          di_mapress, da_mapress, wall_m
+  [  15,  16.10,  21.3, 2.60, 'DIN EN 10255',   15.8, 18.0, 1.0 ],
+  [  20,  21.60,  26.9, 2.65, 'DIN EN 10255',   21.8, 22.0, 1.0 ],  // Mapress 22
+  [  25,  27.20,  33.7, 3.25, 'DIN EN 10255',   27.8, 28.0, 1.0 ],  // Mapress 28
+  [  32,  35.90,  42.4, 3.25, 'DIN EN 10255',   34.9, 35.0, 1.2 ],  // Mapress 35
+  [  40,  41.80,  48.3, 3.25, 'DIN EN 10255',   41.0, 42.0, 1.2 ],  // Mapress 42
+  [  50,  53.00,  60.3, 3.65, 'DIN EN 10255',   53.0, 54.0, 1.2 ],  // Mapress 54
+  [  65,  69.60,  76.1, 3.25, 'DIN EN 10220',   66.7, 76.1, 1.5 ],  // Mapress 76.1
+  [  80,  82.50,  88.9, 3.20, 'DIN EN 10220',   82.5, 88.9, 1.5 ],
+  [ 100, 107.10, 114.3, 3.60, 'DIN EN 10220',  107.1,114.3, 1.5 ],
+  [ 125, 131.70, 139.7, 4.00, 'DIN EN 10220',  131.7,139.7, 2.0 ],
+  [ 150, 155.80, 168.3, 4.50, 'DIN EN 10220',  155.8,168.3, 2.0 ],
+];
+
+/* ═══════════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════════ */
+/** @param {string} id @returns {HTMLElement} */
+const g  = id => document.getElementById(id);
+/** @param {number} v @param {number} d @returns {string} */
+const loc = (v,d) => v.toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+/* ═══════════════════════════════════════════════════════════
+   MASS FLOW CALCULATION
+═══════════════════════════════════════════════════════════ */
+/** Update all mass flow result cells */
+function calcFlow() {
+  const f   = FLUIDS[g('medium').value];
+  const cp  = f.cp * 1000; // → J/(kg·K)
+  const rho = f.rho;
+
+  // Update fluid chips
+  g('cp-val').textContent  = f.cp.toFixed(3);
+  g('rho-val').textContent = f.rho;
+  const fc = g('frost-chip');
+  if (f.frost) { fc.style.display=''; g('frost-val').textContent=f.frost; }
+  else          { fc.style.display='none'; }
+
+  renderFlowResult('h', parseFloat(g('hl').value)||0,  parseFloat(g('dth').value)||10, cp, rho);
+  renderFlowResult('k', parseFloat(g('kl').value)||0,  parseFloat(g('dtk').value)||6,  cp, rho);
+}
+
+/**
+ * @param {string} pfx  'h' | 'k'
+ * @param {number} q    Power [W]
+ * @param {number} dt   Delta-T [K]
+ * @param {number} cp   Specific heat capacity [J/(kg·K)]
+ * @param {number} rho  Density [kg/m³]
+ */
+function renderFlowResult(pfx, q, dt, cp, rho) {
+  const on  = q > 0 && dt > 0;
+  const ms  = on ? q / (cp * dt) : 0;
+  const mh  = ms * 3600;
+  const lh  = mh / rho * 1000;
+  const m3h = lh / 1000;
+
+  const mainEl = g(pfx+'-main');
+  mainEl.innerHTML = (on ? loc(ms,4) : '–') + '<span class="res-unit">kg/s</span>';
+  mainEl.classList.toggle('on', on);
+
+  setResRow(pfx+'-kgh', on, loc(mh,1));
+  setResRow(pfx+'-lh',  on, loc(lh,1));
+  setResRow(pfx+'-m3h', on, loc(m3h,3));
+}
+
+/** @param {string} id @param {boolean} on @param {string} v */
+function setResRow(id, on, v) {
+  const el = g(id);
+  el.textContent = on ? v : '–';
+  el.classList.toggle('on', on);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PIPE SIZING
+═══════════════════════════════════════════════════════════ */
+/**
+ * Calculate flow velocity for a given inner diameter
+ * @param {number} volM3h  Volume flow [m³/h]
+ * @param {number} diMm    Inner diameter [mm]
+ * @returns {number} velocity [m/s]
+ */
+function velocity(volM3h, diMm) {
+  if (!volM3h || !diMm) return 0;
+  const A = Math.PI * Math.pow(diMm / 2000, 2); // m²
+  return (volM3h / 3600) / A;
+}
+
+/** @param {number} v velocity m/s @param {number} max max allowed m/s */
+function velClass(v, max) {
+  if (v <= max * 0.85) return 'vel-ok';
+  if (v <= max)        return 'vel-warn';
+  return 'vel-fast';
+}
+
+/** @param {number} v @param {number} max */
+function cardClass(v, max) {
+  if (!v)       return 'inactive';
+  if (v <= max) return 'recommended';
+  return 'too-fast';
+}
+
+function calcPipe() {
+  const volM3h  = parseFloat(g('p-vol').value) || 0;
+  const maxVel  = parseFloat(g('p-vel').value) || 1.0;
+  const container = g('pipe-results');
+
+  if (!volM3h) {
+    container.innerHTML = '<p style="color:var(--t3);font-size:12px;text-align:center;padding:16px 0">Volumenstrom eingeben →</p>';
+    return;
+  }
+
+  // Find recommended steel DN (first DN where v ≤ maxVel)
+  const recSteel  = PIPES.findIndex(p => velocity(volM3h, p[1]) <= maxVel);
+  const recMapress = PIPES.findIndex(p => velocity(volM3h, p[6]) <= maxVel);
+
+  const rows = PIPES.map((p, i) => {
+    const [dn, di_s, da_s, wall_s, norm_s, di_m, da_m, wall_m] = p;
+    const v_s = velocity(volM3h, di_s);
+    const v_m = velocity(volM3h, di_m);
+
+    // Only show pipes from 1 step below recommended up to 2 steps above, plus current
+    const relevant = (i >= Math.max(0, Math.min(recSteel, recMapress) - 1)) &&
+                     (i <= Math.min(PIPES.length-1, Math.max(recSteel, recMapress) + 1));
+    if (!relevant) return '';
+
+    const isRecS = i === recSteel;
+    const isRecM = i === recMapress;
+
+    return `
+    <div style="margin-bottom:6px">
+      <div class="pipe-pair-title">DN ${dn}</div>
+      <div class="pipe-pair-inner">
+
+        <!-- Steel -->
+        <div class="mini-pipe-card ${cardClass(v_s, maxVel)}">
+          <div class="mini-std">${norm_s}${isRecS ? ' ★' : ''}</div>
+          <div class="mini-dn">DN ${dn}</div>
+          <div class="mini-dim">Ø ${da_s} × ${wall_s} mm &nbsp;(dᵢ ${di_s.toFixed(1)})</div>
+          <div class="mini-vel ${velClass(v_s, maxVel)}">${loc(v_s,2)} m/s</div>
+        </div>
+
+        <!-- Mapress -->
+        <div class="mini-pipe-card ${cardClass(v_m, maxVel)}">
+          <div class="mini-std" style="color:var(--accent)">Mapress Edelstahl${isRecM ? ' ★' : ''}</div>
+          <div class="mini-dn">DN ${dn}</div>
+          <div class="mini-dim">Ø ${da_m} × ${wall_m} mm &nbsp;(dᵢ ${di_m.toFixed(1)})</div>
+          <div class="mini-vel ${velClass(v_m, maxVel)}">${loc(v_m,2)} m/s</div>
+        </div>
+
+      </div>
+    </div>`;
+  }).join('');
+
+  const legend = `
+  <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
+    <span style="font-size:10px;color:var(--ok)">● ≤ 85 % v<sub>max</sub> — optimal</span>
+    <span style="font-size:10px;color:var(--warn)">● ≤ v<sub>max</sub> — grenzwertig</span>
+    <span style="font-size:10px;color:#f87171">● > v<sub>max</sub> — zu schnell</span>
+    <span style="font-size:10px;color:var(--t2)">★ empfohlen</span>
+  </div>`;
+
+  container.innerHTML = rows + legend;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════════════════════ */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const t = btn.dataset.tab;
+    g('tab-flow').style.display = t === 'flow' ? 'flex' : 'none';
+    g('tab-pipe').style.display = t === 'pipe' ? 'flex' : 'none';
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════
+   EVENT LISTENERS
+═══════════════════════════════════════════════════════════ */
+['medium','hl','dth','kl','dtk'].forEach(id => g(id).addEventListener('input', calcFlow));
+['p-vol','p-vel'].forEach(id => g(id).addEventListener('input', calcPipe));
+
+// Initial render
+calcFlow();
+
+/* ═══════════════════════════════════════════════════════════
+   PWA — Service Worker + Install Prompt
+═══════════════════════════════════════════════════════════ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+let _deferred = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _deferred = e;
+  g('install-bar').style.display = 'flex';
+});
+g('ib-btn').addEventListener('click', () => {
+  _deferred?.prompt();
+  g('install-bar').style.display = 'none';
+});
+g('ib-close').addEventListener('click', () => {
+  g('install-bar').style.display = 'none';
+});
+window.addEventListener('appinstalled', () => {
+  g('install-bar').style.display = 'none';
+});
+</script>
 </body>
 </html>
