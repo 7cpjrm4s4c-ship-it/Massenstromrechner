@@ -538,7 +538,7 @@ body {
   <div id="tab-pipe" class="content" style="display:none">
 
     <div class="glass-card">
-      <div class="lbl">Eingabe Volumenstrom &amp; Geschwindigkeit</div>
+      <div class="lbl">Eingabe</div>
       <div class="vel-row">
         <div class="inp-g">
           <div class="inp-lbl">Volumenstrom</div>
@@ -548,20 +548,20 @@ body {
           </div>
         </div>
         <div class="inp-g">
-          <div class="inp-lbl">max. Geschwindigkeit</div>
+          <div class="inp-lbl">max. Druckverlust</div>
           <div class="inp-wrap">
-            <input class="dt-input" id="p-vel" type="number" min="0.1" step="0.1" value="1.0" inputmode="decimal" style="padding:10px 44px 10px 12px;font-size:14px;color:var(--t1)"/>
-            <span class="inp-unit">m/s</span>
+            <input class="dt-input" id="p-dp" type="number" min="10" step="10" value="100" inputmode="decimal" style="padding:10px 50px 10px 12px;font-size:14px;color:var(--t1)"/>
+            <span class="inp-unit">Pa/m</span>
           </div>
         </div>
       </div>
-      <p style="font-size:10px;color:var(--t3);margin-top:8px;line-height:1.5">
-        Empfehlung: Heizung 0.5–1.0 m/s · Kälte 0.8–1.5 m/s · Hauptleitungen max. 2.0 m/s
+      <p style="font-size:10px;color:var(--t3);margin-top:8px;line-height:1.6">
+        Richtwert 100 Pa/m (VDI 2073) &nbsp;·&nbsp; Wasser 60 °C: ν = 0,474·10⁻⁶ m²/s &nbsp;·&nbsp; Stahl ε = 0,046 mm &nbsp;·&nbsp; Edelstahl ε = 0,015 mm
       </p>
     </div>
 
     <div class="glass-card">
-      <div class="lbl">Ergebnis — Stahl vs. Mapress Edelstahl</div>
+      <div class="lbl">Rohrdimensionierung — Stahl · Mapress Edelstahl</div>
       <div class="pipe-results" id="pipe-results">
         <p style="color:var(--t3);font-size:12px;text-align:center;padding:16px 0">
           Volumenstrom eingeben →
@@ -570,11 +570,12 @@ body {
     </div>
 
     <div class="glass-card" style="padding:14px 16px">
-      <div class="lbl">Normen</div>
-      <p style="font-size:11px;color:var(--t2);line-height:1.7">
-        <strong style="color:var(--t1)">Stahl ≤ DN50:</strong> Mittelsch. Gewinderohr DIN EN 10255 (Reihe M) &nbsp;·&nbsp;
-        <strong style="color:var(--t1)">Stahl ≥ DN65:</strong> Nahtloses Stahlrohr DIN EN 10220 &nbsp;·&nbsp;
-        <strong style="color:var(--accent)">Mapress:</strong> Edelstahl-Pressrohr 1.4401/1.4521 nach DIN EN 10312
+      <div class="lbl">Normen &amp; Methode</div>
+      <p style="font-size:11px;color:var(--t2);line-height:1.8">
+        <strong style="color:var(--t1)">Stahl ≤ DN50:</strong> DIN EN 10255 Reihe M (Gewinderohr) &nbsp;·&nbsp;
+        <strong style="color:var(--t1)">Stahl ≥ DN65:</strong> DIN EN 10220 (nahtlos) &nbsp;·&nbsp;
+        <strong style="color:var(--accent)">Mapress:</strong> Edelstahl 1.4401, DIN EN 10312<br/>
+        <strong style="color:var(--t1)">Druckverlust:</strong> Darcy-Weisbach &nbsp;·&nbsp; λ nach Colebrook-White (iterativ)
       </p>
     </div>
 
@@ -688,37 +689,71 @@ function setResRow(id, on, v) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   PIPE SIZING
+   PIPE SIZING  —  Darcy-Weisbach + Colebrook-White
 ═══════════════════════════════════════════════════════════ */
+
 /**
- * Calculate flow velocity for a given inner diameter
+ * Friction factor λ via Colebrook-White (iterative, ~10 iterations converges to 1e-9)
+ * 1/√λ = −2·log₁₀( ε/(3.71·D) + 2.51/(Re·√λ) )
+ * @param {number} Re   Reynolds number
+ * @param {number} eps  Absolute roughness [m]
+ * @param {number} D    Inner diameter [m]
+ * @returns {number} Darcy friction factor λ
+ */
+function frictionFactor(Re, eps, D) {
+  if (Re < 2300) {
+    // Laminar flow — Hagen-Poiseuille
+    return 64 / Re;
+  }
+  // Initial guess: Swamee-Jain approximation
+  let lam = 0.25 / Math.pow(Math.log10(eps / (3.7 * D) + 5.74 / Math.pow(Re, 0.9)), 2);
+  for (let i = 0; i < 50; i++) {
+    const sqrtL = Math.sqrt(lam);
+    const lam_new = Math.pow(
+      -2 * Math.log10(eps / (3.71 * D) + 2.51 / (Re * sqrtL)), -2
+    );
+    if (Math.abs(lam_new - lam) < 1e-10) { lam = lam_new; break; }
+    lam = lam_new;
+  }
+  return lam;
+}
+
+/**
+ * Pressure drop per metre [Pa/m] via Darcy-Weisbach
+ * Δp/L = λ · (ρ·v²) / (2·D)
  * @param {number} volM3h  Volume flow [m³/h]
  * @param {number} diMm    Inner diameter [mm]
- * @returns {number} velocity [m/s]
+ * @param {number} eps     Roughness [m]
+ * @param {number} rho     Density [kg/m³]
+ * @param {number} nu      Kinematic viscosity [m²/s]
+ * @returns {{dp:number, v:number, Re:number, lam:number}}
  */
-function velocity(volM3h, diMm) {
-  if (!volM3h || !diMm) return 0;
-  const A = Math.PI * Math.pow(diMm / 2000, 2); // m²
-  return (volM3h / 3600) / A;
+function pressureDrop(volM3h, diMm, eps, rho, nu) {
+  if (!volM3h || !diMm) return { dp:0, v:0, Re:0, lam:0 };
+  const D  = diMm / 1000;                        // m
+  const A  = Math.PI * D * D / 4;                // m²
+  const v  = (volM3h / 3600) / A;                // m/s
+  const Re = v * D / nu;                         // Reynolds
+  const lam = frictionFactor(Re, eps, D);
+  const dp  = lam * (rho * v * v) / (2 * D);    // Pa/m
+  return { dp, v, Re, lam };
 }
 
-/** @param {number} v velocity m/s @param {number} max max allowed m/s */
-function velClass(v, max) {
-  if (v <= max * 0.85) return 'vel-ok';
-  if (v <= max)        return 'vel-warn';
-  return 'vel-fast';
+/** Colour class based on dp vs dpMax */
+function dpClass(dp, dpMax) {
+  if (!dp)          return 'inactive';
+  if (dp <= dpMax)  return 'dp-ok';
+  return 'dp-over';
 }
-
-/** @param {number} v @param {number} max */
-function cardClass(v, max) {
-  if (!v)       return 'inactive';
-  if (v <= max) return 'recommended';
-  return 'too-fast';
+function dpColour(dp, dpMax) {
+  if (dp <= dpMax * 0.75) return 'var(--ok)';
+  if (dp <= dpMax)        return 'var(--warn)';
+  return '#f87171';
 }
 
 function calcPipe() {
-  const volM3h  = parseFloat(g('p-vol').value) || 0;
-  const maxVel  = parseFloat(g('p-vel').value) || 1.0;
+  const volM3h = parseFloat(g('p-vol').value) || 0;
+  const dpMax  = parseFloat(g('p-dp').value)  || 100;
   const container = g('pipe-results');
 
   if (!volM3h) {
@@ -726,42 +761,89 @@ function calcPipe() {
     return;
   }
 
-  // Find recommended steel DN (first DN where v ≤ maxVel)
-  const recSteel  = PIPES.findIndex(p => velocity(volM3h, p[1]) <= maxVel);
-  const recMapress = PIPES.findIndex(p => velocity(volM3h, p[6]) <= maxVel);
+  // Physical constants — Wasser bei 60 °C (Auslegungstemperatur Heizung)
+  const RHO_W = 983.2;          // kg/m³
+  const NU_W  = 0.474e-6;       // m²/s  kinematische Viskosität
+  // Roughness
+  const EPS_STEEL   = 0.046e-3; // m  Stahl (DIN EN 10255 / 10220)
+  const EPS_MAPRESS = 0.015e-3; // m  Edelstahl (Mapress)
+
+  // Find recommended indices (first DN where dp ≤ dpMax)
+  const recS = PIPES.findIndex(p => pressureDrop(volM3h, p[1], EPS_STEEL,   RHO_W, NU_W).dp <= dpMax);
+  const recM = PIPES.findIndex(p => pressureDrop(volM3h, p[6], EPS_MAPRESS, RHO_W, NU_W).dp <= dpMax);
+
+  // Show from (min_rec - 1) to (max_rec + 1), always at least 3 rows
+  const lo = Math.max(0, Math.min(recS < 0 ? PIPES.length-1 : recS, recM < 0 ? PIPES.length-1 : recM) - 1);
+  const hi = Math.min(PIPES.length - 1, Math.max(recS < 0 ? PIPES.length-1 : recS, recM < 0 ? PIPES.length-1 : recM) + 1);
 
   const rows = PIPES.map((p, i) => {
+    if (i < lo || i > hi) return '';
     const [dn, di_s, da_s, wall_s, norm_s, di_m, da_m, wall_m] = p;
-    const v_s = velocity(volM3h, di_s);
-    const v_m = velocity(volM3h, di_m);
 
-    // Only show pipes from 1 step below recommended up to 2 steps above, plus current
-    const relevant = (i >= Math.max(0, Math.min(recSteel, recMapress) - 1)) &&
-                     (i <= Math.min(PIPES.length-1, Math.max(recSteel, recMapress) + 1));
-    if (!relevant) return '';
+    const rs = pressureDrop(volM3h, di_s, EPS_STEEL,   RHO_W, NU_W);
+    const rm = pressureDrop(volM3h, di_m, EPS_MAPRESS, RHO_W, NU_W);
 
-    const isRecS = i === recSteel;
-    const isRecM = i === recMapress;
+    const isRecS = i === recS;
+    const isRecM = i === recM;
+
+    const starS = isRecS ? '<span style="color:var(--accent);margin-left:4px">★ empfohlen</span>' : '';
+    const starM = isRecM ? '<span style="color:var(--accent);margin-left:4px">★ empfohlen</span>' : '';
+
+    // Card border highlight
+    const borderS = isRecS ? 'border-color:rgba(94,184,255,0.45);background:rgba(94,184,255,0.05)' : rs.dp > dpMax ? 'border-color:rgba(248,113,113,0.3)' : '';
+    const borderM = isRecM ? 'border-color:rgba(94,184,255,0.45);background:rgba(94,184,255,0.05)' : rm.dp > dpMax ? 'border-color:rgba(248,113,113,0.3)' : '';
 
     return `
-    <div style="margin-bottom:6px">
+    <div style="margin-bottom:10px">
       <div class="pipe-pair-title">DN ${dn}</div>
       <div class="pipe-pair-inner">
 
         <!-- Steel -->
-        <div class="mini-pipe-card ${cardClass(v_s, maxVel)}">
-          <div class="mini-std">${norm_s}${isRecS ? ' ★' : ''}</div>
+        <div class="mini-pipe-card" style="${borderS}">
+          <div class="mini-std">${norm_s}${starS}</div>
           <div class="mini-dn">DN ${dn}</div>
-          <div class="mini-dim">Ø ${da_s} × ${wall_s} mm &nbsp;(dᵢ ${di_s.toFixed(1)})</div>
-          <div class="mini-vel ${velClass(v_s, maxVel)}">${loc(v_s,2)} m/s</div>
+          <div class="mini-dim">Ø ${da_s} × ${wall_s} mm &nbsp;dᵢ ${di_s.toFixed(1)} mm</div>
+          <div style="margin-top:8px;display:flex;flex-direction:column;gap:3px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em">Δp/m</span>
+              <span style="font-family:var(--mono);font-size:15px;font-weight:600;color:${dpColour(rs.dp,dpMax)}">${rs.dp < 10 ? rs.dp.toFixed(1) : Math.round(rs.dp)} <span style="font-size:10px;color:var(--t3)">Pa/m</span></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em">v</span>
+              <span style="font-family:var(--mono);font-size:12px;color:var(--t2)">${rs.v.toFixed(2)} m/s</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em">Re</span>
+              <span style="font-family:var(--mono);font-size:11px;color:var(--t3)">${Math.round(rs.Re).toLocaleString('de-DE')}</span>
+            </div>
+          </div>
+          <div style="margin-top:8px;height:3px;border-radius:2px;background:var(--glass-border);overflow:hidden">
+            <div style="height:100%;width:${Math.min(100,rs.dp/dpMax*100).toFixed(1)}%;background:${dpColour(rs.dp,dpMax)};border-radius:2px;transition:width .3s"></div>
+          </div>
         </div>
 
         <!-- Mapress -->
-        <div class="mini-pipe-card ${cardClass(v_m, maxVel)}">
-          <div class="mini-std" style="color:var(--accent)">Mapress Edelstahl${isRecM ? ' ★' : ''}</div>
+        <div class="mini-pipe-card" style="${borderM}">
+          <div class="mini-std" style="color:var(--accent)">Mapress Edelstahl${starM}</div>
           <div class="mini-dn">DN ${dn}</div>
-          <div class="mini-dim">Ø ${da_m} × ${wall_m} mm &nbsp;(dᵢ ${di_m.toFixed(1)})</div>
-          <div class="mini-vel ${velClass(v_m, maxVel)}">${loc(v_m,2)} m/s</div>
+          <div class="mini-dim">Ø ${da_m} × ${wall_m} mm &nbsp;dᵢ ${di_m.toFixed(1)} mm</div>
+          <div style="margin-top:8px;display:flex;flex-direction:column;gap:3px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em">Δp/m</span>
+              <span style="font-family:var(--mono);font-size:15px;font-weight:600;color:${dpColour(rm.dp,dpMax)}">${rm.dp < 10 ? rm.dp.toFixed(1) : Math.round(rm.dp)} <span style="font-size:10px;color:var(--t3)">Pa/m</span></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em">v</span>
+              <span style="font-family:var(--mono);font-size:12px;color:var(--t2)">${rm.v.toFixed(2)} m/s</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em">Re</span>
+              <span style="font-family:var(--mono);font-size:11px;color:var(--t3)">${Math.round(rm.Re).toLocaleString('de-DE')}</span>
+            </div>
+          </div>
+          <div style="margin-top:8px;height:3px;border-radius:2px;background:var(--glass-border);overflow:hidden">
+            <div style="height:100%;width:${Math.min(100,rm.dp/dpMax*100).toFixed(1)}%;background:${dpColour(rm.dp,dpMax)};border-radius:2px;transition:width .3s"></div>
+          </div>
         </div>
 
       </div>
@@ -769,34 +851,18 @@ function calcPipe() {
   }).join('');
 
   const legend = `
-  <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
-    <span style="font-size:10px;color:var(--ok)">● ≤ 85 % v<sub>max</sub> — optimal</span>
-    <span style="font-size:10px;color:var(--warn)">● ≤ v<sub>max</sub> — grenzwertig</span>
-    <span style="font-size:10px;color:#f87171">● > v<sub>max</sub> — zu schnell</span>
-    <span style="font-size:10px;color:var(--t2)">★ empfohlen</span>
+  <div style="display:flex;gap:14px;margin-top:6px;flex-wrap:wrap;padding-top:8px;border-top:1px solid var(--glass-border)">
+    <span style="font-size:10px;color:var(--ok)">● ≤ 75% Δp<sub>max</sub> — optimal</span>
+    <span style="font-size:10px;color:var(--warn)">● ≤ Δp<sub>max</sub> — grenzwertig</span>
+    <span style="font-size:10px;color:#f87171">● > Δp<sub>max</sub> — zu hoch</span>
+    <span style="font-size:10px;color:var(--accent)">★ empfohlen</span>
   </div>`;
 
   container.innerHTML = rows + legend;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   TABS
-═══════════════════════════════════════════════════════════ */
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const t = btn.dataset.tab;
-    g('tab-flow').style.display = t === 'flow' ? 'flex' : 'none';
-    g('tab-pipe').style.display = t === 'pipe' ? 'flex' : 'none';
-  });
-});
-
-/* ═══════════════════════════════════════════════════════════
-   EVENT LISTENERS
-═══════════════════════════════════════════════════════════ */
 ['medium','hl','dth','kl','dtk'].forEach(id => g(id).addEventListener('input', calcFlow));
-['p-vol','p-vel'].forEach(id => g(id).addEventListener('input', calcPipe));
+['p-vol','p-dp'].forEach(id => g(id).addEventListener('input', calcPipe));
 
 // Initial render
 calcFlow();
