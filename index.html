@@ -2,360 +2,557 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<meta name="theme-color" content="#0d1b2a"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#000000"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Massenstrom"/>
-<meta name="description" content="Massenstrom- und Rohrdimensionierung fuer HLS-Anlagen"/>
 <link rel="manifest" href="manifest.json"/>
 <link rel="apple-touch-icon" href="icon-512.svg"/>
 <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
 <title>Massenstromrechner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
 <style>
+/* ── Tokens ── */
 :root{
-  --bg-deep:#070e16;--bg-mid:#0d1b2a;
-  --glass-1:rgba(255,255,255,.055);--glass-2:rgba(255,255,255,.038);--glass-3:rgba(255,255,255,.022);
-  --gb:rgba(255,255,255,.10);--gb2:rgba(255,255,255,.17);
-  --gshadow:0 8px 32px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.4);
-  --ginset:inset 0 1px 0 rgba(255,255,255,.12);
-  --heat:#ff6b35;--cold:#00c4e8;--accent:#5eb8ff;--accent-s:rgba(94,184,255,.14);
-  --ok:#34d399;--warn:#fbbf24;--danger:#f87171;
-  --t1:rgba(255,255,255,.92);--t2:rgba(255,255,255,.55);--t3:rgba(255,255,255,.28);--t4:rgba(255,255,255,.13);
-  --sans:'Inter',-apple-system,sans-serif;--mono:'JetBrains Mono','SF Mono',monospace;
-  --r1:10px;--r2:16px;--r3:22px;--r4:28px;
-  --safe-b:env(safe-area-inset-bottom,0px);
+  --bg:      #000000;
+  --s1:      #0a0a0a;
+  --s2:      #111111;
+  --s3:      #1a1a1a;
+  --s4:      #242424;
+  --b1:      rgba(255,255,255,.10);
+  --b2:      rgba(255,255,255,.18);
+  --b3:      rgba(255,255,255,.06);
+
+  --heat:    #ff6b35;
+  --heat-d:  rgba(255,107,53,.14);
+  --heat-b:  rgba(255,107,53,.35);
+  --cold:    #00c4e8;
+  --cold-d:  rgba(0,196,232,.12);
+  --cold-b:  rgba(0,196,232,.32);
+  --accent:  #4da8ff;
+  --acc-d:   rgba(77,168,255,.15);
+  --acc-b:   rgba(77,168,255,.38);
+  --ok:      #22c55e;
+  --warn:    #f59e0b;
+  --danger:  #ef4444;
+
+  /* Output text — bright white for contrast */
+  --out-heat: #ffb38a;
+  --out-cold: #7de8ff;
+  --out-txt:  #ffffff;
+
+  --t1: rgba(255,255,255,.95);
+  --t2: rgba(255,255,255,.60);
+  --t3: rgba(255,255,255,.32);
+  --t4: rgba(255,255,255,.14);
+
+  --sans: 'Inter',system-ui,sans-serif;
+  --mono: 'JetBrains Mono',monospace;
+
+  --r:  12px;
+  --rl: 18px;
+  --safe-t: env(safe-area-inset-top,    0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left,   0px);
+  --safe-r: env(safe-area-inset-right,  0px);
 }
+
+/* ── Reset ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{height:100%;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
 body{
-  min-height:100%;font-family:var(--sans);background:var(--bg-deep);color:var(--t1);overflow-x:hidden;
-  background-image:
-    radial-gradient(ellipse 80% 60% at 18% 8%,rgba(14,42,74,.65) 0%,transparent 60%),
-    radial-gradient(ellipse 60% 50% at 82% 92%,rgba(10,30,55,.55) 0%,transparent 60%),
-    radial-gradient(ellipse 40% 40% at 50% 50%,rgba(0,80,120,.06) 0%,transparent 70%);
-  background-attachment:fixed;
+  min-height:100%;font-family:var(--sans);background:var(--bg);color:var(--t1);
+  overflow-x:hidden;
 }
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
-#app{min-height:100dvh;display:flex;flex-direction:column;padding-bottom:calc(20px + var(--safe-b))}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--b1);border-radius:2px}
 
-/* Header */
+/* ── App shell ── */
+#app{
+  min-height:100dvh;
+  display:flex;flex-direction:column;
+  padding-left:var(--safe-l);padding-right:var(--safe-r);
+  padding-bottom:calc(24px + var(--safe-b));
+}
+
+/* ── Header ── */
 .hdr{
   position:sticky;top:0;z-index:100;
-  padding:calc(env(safe-area-inset-top,0px) + 13px) 18px 13px;
-  background:rgba(7,14,22,.75);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);
-  border-bottom:1px solid var(--gb);display:flex;align-items:center;gap:12px;
+  padding:calc(var(--safe-t) + 14px) 16px 14px;
+  background:rgba(0,0,0,.88);
+  backdrop-filter:blur(20px) saturate(160%);
+  -webkit-backdrop-filter:blur(20px) saturate(160%);
+  border-bottom:1px solid var(--b1);
+  display:flex;align-items:center;gap:10px;
 }
-.hdr-icon{width:34px;height:34px;background:var(--glass-1);border:1px solid var(--gb2);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;box-shadow:var(--ginset)}
-.hdr-title{font-size:16px;font-weight:600;letter-spacing:-.3px;color:var(--t1)}
-.hdr-sub{font-size:11px;color:var(--t3);font-weight:400}
-.tab-bar{display:flex;gap:5px;margin-left:auto}
+.hdr-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--s3);border:1px solid var(--b2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+}
+.hdr-text{flex:1;min-width:0}
+.hdr-title{font-size:15px;font-weight:600;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-sub{font-size:10px;color:var(--t3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tab-bar{display:flex;gap:4px;flex-shrink:0}
 .tab-btn{
-  background:var(--glass-2);border:1px solid var(--gb);color:var(--t2);font-family:var(--sans);font-size:12px;font-weight:500;
-  padding:6px 14px;border-radius:20px;cursor:pointer;transition:all .18s;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  background:var(--s3);border:1px solid var(--b1);color:var(--t3);
+  font-family:var(--sans);font-size:12px;font-weight:500;
+  padding:6px 12px;border-radius:20px;cursor:pointer;
+  transition:all .15s;white-space:nowrap;
 }
-.tab-btn:hover{color:var(--t1);border-color:var(--gb2)}
-.tab-btn.active{background:var(--accent-s);border-color:rgba(94,184,255,.35);color:var(--accent);box-shadow:0 0 14px rgba(94,184,255,.1)}
+.tab-btn.active{background:var(--acc-d);border-color:var(--acc-b);color:var(--accent)}
+.tab-btn:hover:not(.active){color:var(--t1);border-color:var(--b2)}
 
-/* Content */
-.content{flex:1;padding:14px;display:flex;flex-direction:column;gap:13px}
+/* ── Content ── */
+.content{flex:1;padding:12px 16px;display:flex;flex-direction:column;gap:10px;max-width:640px;width:100%;margin:0 auto}
 
-/* Glass card */
-.gc{
-  background:var(--glass-1);border:1px solid var(--gb);border-radius:var(--r4);
-  backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
-  box-shadow:var(--gshadow),var(--ginset);padding:20px;position:relative;overflow:hidden;
+/* ── Card ── */
+.card{
+  background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);
+  padding:16px;position:relative;overflow:hidden;
 }
-.gc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2) 30%,rgba(255,255,255,.28) 50%,rgba(255,255,255,.2) 70%,transparent)}
+.card::after{
+  content:'';position:absolute;inset:0;border-radius:var(--rl);pointer-events:none;
+  background:linear-gradient(160deg,rgba(255,255,255,.035) 0%,transparent 60%);
+}
 
-.lbl{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+/* ── Section label ── */
+.slbl{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
 
-/* Mode bar */
-.mode-bar{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:5px;
-  background:rgba(255,255,255,.04);border:1px solid var(--gb);border-radius:var(--r2);padding:4px;margin-bottom:16px;
+/* ── Mode switcher ── */
+.modes{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:3px;
+  background:var(--s3);border:1px solid var(--b1);border-radius:10px;padding:3px;
+  margin-bottom:14px;
 }
 .mode-btn{
-  background:transparent;border:1px solid transparent;color:var(--t2);font-family:var(--sans);font-size:11px;font-weight:500;
-  padding:7px 4px;border-radius:var(--r1);cursor:pointer;transition:all .18s;text-align:center;line-height:1.3;white-space:nowrap;
+  background:transparent;border:1px solid transparent;color:var(--t3);
+  font-family:var(--sans);font-size:11px;font-weight:500;
+  padding:8px 4px;border-radius:7px;cursor:pointer;
+  transition:all .15s;text-align:center;line-height:1.25;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.mode-btn:hover{color:var(--t1)}
-.mode-btn.active{background:var(--glass-2);border-color:var(--gb2);color:var(--t1);box-shadow:var(--ginset)}
+.mode-btn.active{
+  background:var(--s4);border-color:var(--b2);color:var(--t1);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 1px 3px rgba(0,0,0,.4);
+}
 
-/* Select */
+/* ── Select ── */
 .gl-sel{
-  width:100%;background:var(--glass-2);border:1px solid var(--gb);color:var(--t1);font-family:var(--mono);font-size:13px;
-  padding:11px 36px 11px 13px;border-radius:var(--r2);outline:none;appearance:none;cursor:pointer;
+  width:100%;background:var(--s3);border:1px solid var(--b1);color:var(--t1);
+  font-family:var(--mono);font-size:13px;padding:11px 36px 11px 12px;
+  border-radius:var(--r);outline:none;appearance:none;cursor:pointer;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,.35)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 13px center;transition:border-color .15s;
+  background-repeat:no-repeat;background-position:right 12px center;
+  transition:border-color .15s;
 }
-.gl-sel:focus{border-color:var(--accent)}
-.gl-sel option{background:#0d1b2a;color:#fff}
+.gl-sel:focus{border-color:var(--accent);outline:none}
+.gl-sel option{background:#111;color:#fff}
 
-/* Chips */
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.chip{background:var(--glass-3);border:1px solid var(--gb);border-radius:7px;padding:3px 10px;font-family:var(--mono);font-size:10px;color:var(--t2)}
-.chip strong{color:var(--accent)}
-
-/* Twin */
-.twin{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:420px){.twin{grid-template-columns:1fr}}
-
-.panel-h{border-color:rgba(255,107,53,.22)!important}
-.panel-h::before{background:linear-gradient(90deg,transparent,rgba(255,107,53,.28),transparent);opacity:.4}
-.panel-h:focus-within{border-color:rgba(255,107,53,.48)!important;box-shadow:var(--gshadow),0 0 22px rgba(255,107,53,.1)}
-.panel-c{border-color:rgba(0,196,232,.18)!important}
-.panel-c::before{background:linear-gradient(90deg,transparent,rgba(0,196,232,.25),transparent);opacity:.38}
-.panel-c:focus-within{border-color:rgba(0,196,232,.48)!important;box-shadow:var(--gshadow),0 0 22px rgba(0,196,232,.1)}
-
-.ptitle{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
-.dot{width:7px;height:7px;border-radius:50%}
-.dot-h{background:var(--heat);box-shadow:0 0 7px var(--heat)}
-.dot-c{background:var(--cold);box-shadow:0 0 7px var(--cold)}
-.panel-h .ptitle{color:#ff9a6a}
-.panel-c .ptitle{color:#5ee0f5}
-
-/* Input groups */
-.ig{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
-.ig-lbl{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
-.iw{position:relative}
-.gi{
-  width:100%;background:rgba(255,255,255,.05);border:1px solid var(--gb);color:var(--t1);
-  font-family:var(--mono);font-size:18px;font-weight:600;padding:10px 44px 10px 12px;
-  border-radius:var(--r1);outline:none;transition:border-color .15s,background .15s,box-shadow .15s;
+/* Fluid props */
+.fprops{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.fprop{
+  background:var(--s3);border:1px solid var(--b1);border-radius:6px;
+  padding:3px 9px;font-family:var(--mono);font-size:10px;color:var(--t2);
 }
-.gi::placeholder{color:var(--t4);font-weight:400}
-.gi:focus{background:rgba(255,255,255,.08)}
-.panel-h .gi:focus{border-color:var(--heat);box-shadow:0 0 0 3px rgba(255,107,53,.1)}
-.panel-c .gi:focus{border-color:var(--cold);box-shadow:0 0 0 3px rgba(0,196,232,.1)}
-.gi-sm{
-  width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--t2);
-  font-family:var(--mono);font-size:13px;padding:8px 44px 8px 12px;border-radius:var(--r1);outline:none;transition:border-color .15s;
+.fprop strong{color:var(--accent)}
+
+/* ── Input fields ── */
+.igrp{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.igrp:last-of-type{margin-bottom:0}
+.ilbl{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+.iwrap{position:relative}
+
+.inp{
+  width:100%;background:var(--s3);border:1px solid var(--b1);color:var(--t1);
+  font-family:var(--mono);font-size:20px;font-weight:600;
+  padding:11px 48px 11px 13px;border-radius:var(--r);outline:none;
+  transition:border-color .15s,background .15s;
+  -webkit-appearance:none;
 }
-.gi-sm:focus{color:var(--t1)}
-.panel-h .gi-sm:focus{border-color:rgba(255,107,53,.5)}
-.panel-c .gi-sm:focus{border-color:rgba(0,196,232,.5)}
-.gi-calc{
-  width:100%;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);
-  color:var(--accent);font-family:var(--mono);font-size:18px;font-weight:600;
-  padding:10px 44px 10px 12px;border-radius:var(--r1);pointer-events:none;transition:color .2s;
+.inp::placeholder{color:var(--t4);font-weight:400}
+.inp:focus{background:var(--s4)}
+.inp-sm{
+  width:100%;background:var(--s3);border:1px solid var(--b3);color:var(--t2);
+  font-family:var(--mono);font-size:14px;
+  padding:9px 48px 9px 13px;border-radius:var(--r);outline:none;
+  transition:border-color .15s;-webkit-appearance:none;
 }
-.gi-calc.empty{color:var(--t4)}
-.iu{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:10px;color:var(--t3);pointer-events:none}
+.inp-sm:focus{color:var(--t1);outline:none}
+.iunit{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  font-family:var(--mono);font-size:10px;color:var(--t3);pointer-events:none;
+}
 
-/* Result rows */
-.rblock{border-top:1px solid var(--gb);margin-top:13px;padding-top:13px}
-.rrow{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)}
-.rrow:last-child{border-bottom:none}
-.rk{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
-.rv{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--t3);transition:color .2s}
-.rv.on{color:var(--t1)}
+/* panel focus colours */
+.ph .inp:focus{border-color:var(--heat);box-shadow:0 0 0 3px rgba(255,107,53,.12)}
+.ph .inp-sm:focus{border-color:rgba(255,107,53,.45)}
+.pc .inp:focus{border-color:var(--cold);box-shadow:0 0 0 3px rgba(0,196,232,.10)}
+.pc .inp-sm:focus{border-color:rgba(0,196,232,.40)}
+.pa .inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(77,168,255,.10)}
 
-/* Formula strip */
-.fstrip{text-align:center;font-family:var(--mono);font-size:11px;color:var(--t3);padding:2px 0;line-height:1.8}
-.fstrip span{color:var(--t2)}
+/* panel tints */
+.ph{background:linear-gradient(160deg,rgba(255,107,53,.06) 0%,var(--s1) 50%)!important;border-color:rgba(255,107,53,.20)!important}
+.pc{background:linear-gradient(160deg,rgba(0,196,232,.05) 0%,var(--s1) 50%)!important;border-color:rgba(0,196,232,.16)!important}
 
-/* Pipe mini cards */
+/* ── Output card — high contrast ── */
+.out-card{
+  background:var(--s2);border:1px solid var(--b2);border-radius:var(--rl);
+  padding:16px;
+}
+.out-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.out-block{
+  background:var(--s3);border:1px solid var(--b1);border-radius:var(--r);
+  padding:12px 13px;
+  position:relative;overflow:hidden;
+}
+.out-block::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+}
+.out-block-h::before{background:linear-gradient(90deg,transparent,var(--heat-b),transparent)}
+.out-block-c::before{background:linear-gradient(90deg,transparent,var(--cold-b),transparent)}
+.ob-title{
+  display:flex;align-items:center;gap:6px;
+  font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  margin-bottom:12px;
+}
+.ob-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.ob-dot-h{background:var(--heat);box-shadow:0 0 6px var(--heat)}
+.ob-dot-c{background:var(--cold);box-shadow:0 0 6px var(--cold)}
+.ob-title-h{color:#ff9a6a}
+.ob-title-c{color:#5ee0f5}
+
+.out-row{margin-bottom:9px}
+.out-row:last-child{margin-bottom:0}
+.out-key{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
+.out-val{font-family:var(--mono);font-size:22px;font-weight:600;line-height:1;transition:color .2s}
+.out-val-h{color:var(--t4)}
+.out-val-h.has{color:var(--out-heat)}
+.out-val-c{color:var(--t4)}
+.out-val-c.has{color:var(--out-cold)}
+.out-unit{font-size:11px;font-weight:400;margin-left:3px;color:var(--t3)}
+
+/* Calc output (blue accent box) */
+.calc-out{
+  background:var(--s4);border:1px solid var(--acc-b);border-radius:var(--r);
+  padding:10px 13px;margin-bottom:10px;
+}
+.calc-val{font-family:var(--mono);font-size:20px;font-weight:600;color:var(--accent)}
+.calc-val.empty{color:var(--t4)}
+.calc-key{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
+
+/* ── Formula ── */
+.fml{text-align:center;font-family:var(--mono);font-size:10px;color:var(--t3);line-height:1.9}
+.fml em{color:var(--t2);font-style:normal}
+
+/* ── Pipe cards ── */
 .pipe-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-@media(max-width:400px){.pipe-pair{grid-template-columns:1fr}}
-.pipe-mini{
-  background:var(--glass-2);border:1px solid var(--gb);border-radius:var(--r2);padding:13px;
-  transition:border-color .2s,box-shadow .2s;position:relative;overflow:hidden;
+@media(max-width:380px){.pipe-pair{grid-template-columns:1fr}}
+.pm{
+  background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);
+  padding:12px;position:relative;overflow:hidden;
 }
-.pipe-mini::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.13) 50%,transparent)}
-.pipe-mini.best{border-color:rgba(94,184,255,.42);background:rgba(94,184,255,.05);box-shadow:0 0 16px rgba(94,184,255,.07)}
-.pipe-mini.over{border-color:rgba(248,113,113,.28);background:rgba(248,113,113,.03)}
-.pm-std{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:5px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
-.pm-std.mapress{color:var(--accent)}
-.star-badge{background:rgba(94,184,255,.18);border:1px solid rgba(94,184,255,.3);color:var(--accent);font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 5px;border-radius:4px}
-.pm-dn{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--t1)}
-.pm-dim{font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:1px;margin-bottom:8px}
-.pm-vals{display:flex;flex-direction:column;gap:3px}
-.pm-row{display:flex;justify-content:space-between;align-items:baseline}
-.pm-key{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3)}
-.pm-val{font-family:var(--mono);font-size:13px;font-weight:600}
-.dp-bar{height:3px;border-radius:2px;background:var(--gb);overflow:hidden;margin-top:8px}
-.dp-fill{height:100%;border-radius:2px;transition:width .4s ease}
+.pm.best{border-color:rgba(77,168,255,.4);background:rgba(77,168,255,.05)}
+.pm.over{border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.03)}
+.pm-std{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:4px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.pm-std.mp{color:var(--accent)}
+.star{background:rgba(77,168,255,.18);border:1px solid rgba(77,168,255,.3);color:var(--accent);font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px}
+.pm-dn{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--t1);margin-bottom:2px}
+.pm-dim{font-family:var(--mono);font-size:9px;color:var(--t3);margin-bottom:8px;line-height:1.5}
+.pm-r{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px}
+.pm-k{font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3)}
+.pm-v{font-family:var(--mono);font-size:13px;font-weight:600}
+.dpbar{height:3px;border-radius:2px;background:var(--b1);overflow:hidden;margin-top:7px}
+.dpfill{height:100%;border-radius:2px;transition:width .35s ease}
 
-/* Install banner */
-#install-bar{
-  position:fixed;bottom:calc(18px + var(--safe-b));left:50%;transform:translateX(-50%);
-  background:rgba(13,27,42,.92);border:1px solid var(--gb2);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border-radius:var(--r3);padding:11px 17px;display:none;align-items:center;gap:12px;
-  font-size:13px;color:var(--t1);white-space:nowrap;box-shadow:0 8px 40px rgba(0,0,0,.6);z-index:999;animation:fadeUp .3s ease both;
+/* ── Install ── */
+#ib{
+  position:fixed;bottom:calc(16px + var(--safe-b));left:50%;transform:translateX(-50%);
+  background:rgba(10,10,10,.95);border:1px solid var(--b2);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-radius:14px;padding:10px 16px;display:none;align-items:center;gap:10px;
+  font-size:13px;color:var(--t1);white-space:nowrap;
+  box-shadow:0 8px 32px rgba(0,0,0,.8);z-index:200;
 }
-#install-bar .ib-y{background:var(--accent);border:none;color:#04111e;font-family:var(--sans);font-size:12px;font-weight:700;padding:6px 15px;border-radius:9px;cursor:pointer}
-#install-bar .ib-n{background:none;border:none;color:var(--t3);font-size:18px;cursor:pointer;line-height:1;padding:0 2px}
-@keyframes fadeUp{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
-@keyframes slideUp{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:translateY(0)}}
-.gc{animation:slideUp .32s ease both}
-.twin>.gc:nth-child(2){animation-delay:.05s}
+#ib .yes{background:var(--accent);border:none;color:#000;font-family:var(--sans);font-size:12px;font-weight:700;padding:6px 14px;border-radius:8px;cursor:pointer}
+#ib .no{background:none;border:none;color:var(--t3);font-size:17px;cursor:pointer;line-height:1;padding:0 2px}
+
+/* ── Animations ── */
+@keyframes fadeUp{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.card,.out-card{animation:up .28s ease both}
+
+/* ── Mobile-first spacing ── */
+@media(max-width:480px){
+  .content{padding:10px 12px;gap:9px}
+  .card,.out-card{padding:14px}
+  .out-val{font-size:20px}
+  .tab-btn{font-size:11px;padding:5px 10px}
+  .hdr{padding-left:14px;padding-right:14px}
+  .hdr-title{font-size:14px}
+  .modes{margin-bottom:12px}
+  .mode-btn{font-size:10px;padding:7px 2px}
+}
+@media(min-width:640px){
+  .content{padding:16px 20px;gap:13px}
+  .card,.out-card{padding:20px}
+  .out-val{font-size:26px}
+  .inp{font-size:22px}
+}
 </style>
 </head>
 <body>
 <div id="app">
 
+<!-- Header -->
 <header class="hdr">
   <div class="hdr-icon">&#7745;</div>
-  <div><div class="hdr-title">Massenstromrechner</div><div class="hdr-sub">HLS-Anlagen &middot; Heizung &middot; K&auml;lte &middot; Rohr</div></div>
+  <div class="hdr-text">
+    <div class="hdr-title">Massenstromrechner</div>
+    <div class="hdr-sub">HLS &middot; Heizung &middot; K&auml;lte &middot; Rohr</div>
+  </div>
   <nav class="tab-bar">
-    <button class="tab-btn active" data-tab="flow">Massenstrom</button>
+    <button class="tab-btn active" data-tab="flow">Berechnung</button>
     <button class="tab-btn" data-tab="pipe">Rohr</button>
   </nav>
 </header>
 
-<!-- TAB MASSENSTROM -->
+<!-- ═══ TAB: BERECHNUNG ═══ -->
 <div id="tab-flow" class="content">
 
-  <div class="gc">
-    <div class="lbl">W&auml;rmetr&auml;ger</div>
+  <!-- Medium -->
+  <div class="card">
+    <div class="slbl">W&auml;rmetr&auml;ger</div>
     <select class="gl-sel" id="medium">
       <option value="water">Wasser</option>
-      <option value="g20">Wasser / Glykol 20 %</option>
-      <option value="g25">Wasser / Glykol 25 %</option>
-      <option value="g30">Wasser / Glykol 30 %</option>
-      <option value="g35">Wasser / Glykol 35 %</option>
-      <option value="g40">Wasser / Glykol 40 %</option>
+      <option value="g25">Wasser / Glykol 25&thinsp;%</option>
+      <option value="g30">Wasser / Glykol 30&thinsp;%</option>
+      <option value="g35">Wasser / Glykol 35&thinsp;%</option>
     </select>
-    <div class="chips">
-      <div class="chip">c<sub>p</sub> = <strong id="cp-val">4.180</strong> kJ/(kg&middot;K)</div>
-      <div class="chip">&rho; = <strong id="rho-val">998</strong> kg/m&sup3;</div>
-      <div class="chip" id="frost-chip" style="display:none">Frostschutz <strong id="frost-val"></strong></div>
+    <div class="fprops">
+      <div class="fprop">c<sub>p</sub> = <strong id="cp-val">4.180</strong>&thinsp;kJ/(kg&middot;K)</div>
+      <div class="fprop">&rho; = <strong id="rho-val">998</strong>&thinsp;kg/m&sup3;</div>
+      <div class="fprop" id="frost-chip" style="display:none">Frost <strong id="frost-val"></strong></div>
     </div>
   </div>
 
-  <div class="twin">
-
-    <!-- Heizung -->
-    <div class="gc panel-h">
-      <div class="ptitle"><div class="dot dot-h"></div>Heizung</div>
-      <div class="mode-bar">
-        <button class="mode-btn active" data-mode="h" data-val="ms">&#7745; Massenstrom</button>
-        <button class="mode-btn" data-mode="h" data-val="q">Q Leistung</button>
-        <button class="mode-btn" data-mode="h" data-val="dt">&Delta;T Temperatur</button>
-      </div>
-      <div class="ig" id="h-ig-q"><div class="ig-lbl">Heizlast [W]</div><div class="iw"><input class="gi" id="h-q" type="number" min="0" step="50" placeholder="0" inputmode="decimal"/><span class="iu">W</span></div></div>
-      <div class="ig" id="h-ig-ms" style="display:none"><div class="ig-lbl">Massenstrom [kg/s]</div><div class="iw"><input class="gi" id="h-ms-in" type="number" min="0" step="0.001" placeholder="0.000" inputmode="decimal"/><span class="iu">kg/s</span></div></div>
-      <div class="ig" id="h-ig-dt"><div class="ig-lbl">&Delta;T [K]</div><div class="iw"><input class="gi-sm" id="h-dt" type="number" min="0.5" step="0.5" value="10" inputmode="decimal"/><span class="iu">K</span></div></div>
-      <div class="rblock">
-        <div class="ig" id="h-out-ms"><div class="ig-lbl">Massenstrom</div><div class="iw"><div class="gi-calc empty" id="h-calc-ms">&#8211;</div><span class="iu">kg/s</span></div></div>
-        <div class="ig" id="h-out-q" style="display:none"><div class="ig-lbl">Heizlast</div><div class="iw"><div class="gi-calc empty" id="h-calc-q">&#8211;</div><span class="iu">W</span></div></div>
-        <div class="ig" id="h-out-dt" style="display:none"><div class="ig-lbl">Temperaturdifferenz</div><div class="iw"><div class="gi-calc empty" id="h-calc-dt">&#8211;</div><span class="iu">K</span></div></div>
-        <div class="rrow"><span class="rk">kg/h</span><span class="rv" id="h-kgh">&#8211;</span></div>
-        <div class="rrow"><span class="rk">l/h</span><span class="rv" id="h-lh">&#8211;</span></div>
-        <div class="rrow"><span class="rk">m&sup3;/h</span><span class="rv" id="h-m3h">&#8211;</span></div>
-      </div>
+  <!-- Heizung input -->
+  <div class="card ph">
+    <div class="slbl">Heizung</div>
+    <div class="modes" id="mb-h">
+      <button class="mode-btn active" data-mode="h" data-val="ms">&#7745;&thinsp;Massenstrom</button>
+      <button class="mode-btn"        data-mode="h" data-val="q">Q&thinsp;Leistung</button>
+      <button class="mode-btn"        data-mode="h" data-val="dt">&Delta;T&thinsp;Temperatur</button>
     </div>
-
-    <!-- Kaelte -->
-    <div class="gc panel-c">
-      <div class="ptitle"><div class="dot dot-c"></div>K&auml;lte</div>
-      <div class="mode-bar">
-        <button class="mode-btn active" data-mode="k" data-val="ms">&#7745; Massenstrom</button>
-        <button class="mode-btn" data-mode="k" data-val="q">Q Leistung</button>
-        <button class="mode-btn" data-mode="k" data-val="dt">&Delta;T Temperatur</button>
-      </div>
-      <div class="ig" id="k-ig-q"><div class="ig-lbl">K&uuml;hllast [W]</div><div class="iw"><input class="gi" id="k-q" type="number" min="0" step="50" placeholder="0" inputmode="decimal"/><span class="iu">W</span></div></div>
-      <div class="ig" id="k-ig-ms" style="display:none"><div class="ig-lbl">Massenstrom [kg/s]</div><div class="iw"><input class="gi" id="k-ms-in" type="number" min="0" step="0.001" placeholder="0.000" inputmode="decimal"/><span class="iu">kg/s</span></div></div>
-      <div class="ig" id="k-ig-dt"><div class="ig-lbl">&Delta;T [K]</div><div class="iw"><input class="gi-sm" id="k-dt" type="number" min="0.5" step="0.5" value="6" inputmode="decimal"/><span class="iu">K</span></div></div>
-      <div class="rblock">
-        <div class="ig" id="k-out-ms"><div class="ig-lbl">Massenstrom</div><div class="iw"><div class="gi-calc empty" id="k-calc-ms">&#8211;</div><span class="iu">kg/s</span></div></div>
-        <div class="ig" id="k-out-q" style="display:none"><div class="ig-lbl">K&uuml;hllast</div><div class="iw"><div class="gi-calc empty" id="k-calc-q">&#8211;</div><span class="iu">W</span></div></div>
-        <div class="ig" id="k-out-dt" style="display:none"><div class="ig-lbl">Temperaturdifferenz</div><div class="iw"><div class="gi-calc empty" id="k-calc-dt">&#8211;</div><span class="iu">K</span></div></div>
-        <div class="rrow"><span class="rk">kg/h</span><span class="rv" id="k-kgh">&#8211;</span></div>
-        <div class="rrow"><span class="rk">l/h</span><span class="rv" id="k-lh">&#8211;</span></div>
-        <div class="rrow"><span class="rk">m&sup3;/h</span><span class="rv" id="k-m3h">&#8211;</span></div>
-      </div>
+    <div id="h-ig-q" class="igrp">
+      <div class="ilbl">Heizlast [W]</div>
+      <div class="iwrap"><input class="inp ph" id="h-q" type="number" min="0" step="50" placeholder="0" inputmode="decimal"/><span class="iunit">W</span></div>
     </div>
-
+    <div id="h-ig-ms" class="igrp" style="display:none">
+      <div class="ilbl">Massenstrom [kg/s]</div>
+      <div class="iwrap"><input class="inp ph" id="h-ms-in" type="number" min="0" step="0.001" placeholder="0.000" inputmode="decimal"/><span class="iunit">kg/s</span></div>
+    </div>
+    <div id="h-ig-dt" class="igrp">
+      <div class="ilbl">&Delta;T [K]</div>
+      <div class="iwrap"><input class="inp-sm" id="h-dt" type="number" min="0.5" step="0.5" value="10" inputmode="decimal"/><span class="iunit">K</span></div>
+    </div>
+    <!-- Calc result inline -->
+    <div id="h-calc-wrap" style="display:none">
+      <div class="calc-key" id="h-calc-key">Ergebnis</div>
+      <div class="calc-out"><div class="calc-val empty" id="h-calc-val">&#8211;</div></div>
+    </div>
   </div>
 
-  <div class="fstrip">
-    &#7745; = <span>Q</span> / (<span>c<sub>p</sub></span> &times; <span>&Delta;T</span>)
-    &nbsp;&middot;&nbsp; Q = <span>&#7745;</span> &times; <span>c<sub>p</sub></span> &times; <span>&Delta;T</span>
-    &nbsp;&middot;&nbsp; &Delta;T = <span>Q</span> / (<span>&#7745;</span> &times; <span>c<sub>p</sub></span>)
+  <!-- Kaelte input -->
+  <div class="card pc">
+    <div class="slbl">K&auml;lte</div>
+    <div class="modes" id="mb-k">
+      <button class="mode-btn active" data-mode="k" data-val="ms">&#7745;&thinsp;Massenstrom</button>
+      <button class="mode-btn"        data-mode="k" data-val="q">Q&thinsp;Leistung</button>
+      <button class="mode-btn"        data-mode="k" data-val="dt">&Delta;T&thinsp;Temperatur</button>
+    </div>
+    <div id="k-ig-q" class="igrp">
+      <div class="ilbl">K&uuml;hllast [W]</div>
+      <div class="iwrap"><input class="inp pc" id="k-q" type="number" min="0" step="50" placeholder="0" inputmode="decimal"/><span class="iunit">W</span></div>
+    </div>
+    <div id="k-ig-ms" class="igrp" style="display:none">
+      <div class="ilbl">Massenstrom [kg/s]</div>
+      <div class="iwrap"><input class="inp pc" id="k-ms-in" type="number" min="0" step="0.001" placeholder="0.000" inputmode="decimal"/><span class="iunit">kg/s</span></div>
+    </div>
+    <div id="k-ig-dt" class="igrp">
+      <div class="ilbl">&Delta;T [K]</div>
+      <div class="iwrap"><input class="inp-sm" id="k-dt" type="number" min="0.5" step="0.5" value="6" inputmode="decimal"/><span class="iunit">K</span></div>
+    </div>
+    <div id="k-calc-wrap" style="display:none">
+      <div class="calc-key" id="k-calc-key">Ergebnis</div>
+      <div class="calc-out"><div class="calc-val empty" id="k-calc-val">&#8211;</div></div>
+    </div>
+  </div>
+
+  <!-- Output: shared result -->
+  <div class="out-card" id="out-card">
+    <div class="slbl">Ergebnis &mdash; Massenstrom</div>
+    <div class="out-grid">
+      <!-- Heizung -->
+      <div class="out-block out-block-h">
+        <div class="ob-title ob-title-h"><div class="ob-dot ob-dot-h"></div>Heizung</div>
+        <div class="out-row">
+          <div class="out-key">kg/h</div>
+          <div class="out-val out-val-h" id="h-kgh">&#8211;<span class="out-unit">kg/h</span></div>
+        </div>
+        <div class="out-row">
+          <div class="out-key">m&sup3;/h</div>
+          <div class="out-val out-val-h" id="h-m3h">&#8211;<span class="out-unit">m&sup3;/h</span></div>
+        </div>
+      </div>
+      <!-- Kaelte -->
+      <div class="out-block out-block-c">
+        <div class="ob-title ob-title-c"><div class="ob-dot ob-dot-c"></div>K&auml;lte</div>
+        <div class="out-row">
+          <div class="out-key">kg/h</div>
+          <div class="out-val out-val-c" id="k-kgh">&#8211;<span class="out-unit">kg/h</span></div>
+        </div>
+        <div class="out-row">
+          <div class="out-key">m&sup3;/h</div>
+          <div class="out-val out-val-c" id="k-m3h">&#8211;<span class="out-unit">m&sup3;/h</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formula -->
+  <div class="fml">
+    &#7745;&nbsp;=&nbsp;<em>Q</em>&nbsp;/&nbsp;(<em>c<sub>p</sub></em>&nbsp;&times;&nbsp;<em>&Delta;T</em>)
+    &ensp;&middot;&ensp;
+    Q&nbsp;=&nbsp;<em>&#7745;</em>&nbsp;&times;&nbsp;<em>c<sub>p</sub></em>&nbsp;&times;&nbsp;<em>&Delta;T</em>
+    &ensp;&middot;&ensp;
+    &Delta;T&nbsp;=&nbsp;<em>Q</em>&nbsp;/&nbsp;(<em>&#7745;</em>&nbsp;&times;&nbsp;<em>c<sub>p</sub></em>)
   </div>
 
   <!-- Inline pipe recommendation -->
-  <div class="gc" id="pipe-inline-card" style="display:none">
-    <div class="lbl">Rohrdimensionsempfehlung</div>
-    <p style="font-size:10px;color:var(--t3);margin-bottom:14px;line-height:1.6">
-      Auslegung nach max. <strong style="color:var(--t2)">100 Pa/m</strong> &middot; Darcy-Weisbach &middot; Colebrook-White &middot; Wasser 60 &deg;C
-    </p>
-    <div id="pipe-inline-h" style="display:none;margin-bottom:14px">
-      <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px">
-        <div class="dot dot-h"></div>
-        <span style="font-size:11px;font-weight:600;color:#ff9a6a;letter-spacing:.08em;text-transform:uppercase">Heizung</span>
-        <span style="font-family:var(--mono);font-size:11px;color:var(--t3)" id="pipe-h-vol"></span>
+  <div class="out-card" id="pipe-inline" style="display:none">
+    <div class="slbl">Rohrdimensionsempfehlung &mdash; 100 Pa/m</div>
+    <p style="font-size:10px;color:var(--t3);margin-bottom:12px;line-height:1.6">Darcy-Weisbach &middot; Colebrook-White &middot; Wasser 60&thinsp;&deg;C &middot; Stahl &epsilon;&nbsp;=&nbsp;0,046&thinsp;mm &middot; Edelstahl &epsilon;&nbsp;=&nbsp;0,015&thinsp;mm</p>
+    <div id="pi-h-wrap" style="display:none">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px">
+        <div class="ob-dot ob-dot-h"></div>
+        <span style="font-size:10px;font-weight:600;color:#ff9a6a;text-transform:uppercase;letter-spacing:.08em">Heizung</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--t3)" id="pi-h-vol"></span>
       </div>
-      <div class="pipe-pair" id="pipe-h-pair"></div>
+      <div class="pipe-pair" id="pi-h-pair" style="margin-bottom:12px"></div>
     </div>
-    <div id="pipe-inline-k" style="display:none">
-      <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px">
-        <div class="dot dot-c"></div>
-        <span style="font-size:11px;font-weight:600;color:#5ee0f5;letter-spacing:.08em;text-transform:uppercase">K&auml;lte</span>
-        <span style="font-family:var(--mono);font-size:11px;color:var(--t3)" id="pipe-k-vol"></span>
+    <div id="pi-k-wrap" style="display:none">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px">
+        <div class="ob-dot ob-dot-c"></div>
+        <span style="font-size:10px;font-weight:600;color:#5ee0f5;text-transform:uppercase;letter-spacing:.08em">K&auml;lte</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--t3)" id="pi-k-vol"></span>
       </div>
-      <div class="pipe-pair" id="pipe-k-pair"></div>
+      <div class="pipe-pair" id="pi-k-pair"></div>
     </div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--gb)">
-      <span style="font-size:10px;color:var(--ok)">&#9679; &le; 75% &Delta;p &mdash; optimal</span>
-      <span style="font-size:10px;color:var(--warn)">&#9679; &le; 100 Pa/m &mdash; grenzwertig</span>
-      <span style="font-size:10px;color:var(--danger)">&#9679; &gt; 100 Pa/m &mdash; zu hoch</span>
-      <span style="font-size:10px;color:var(--accent)">&#9733; empfohlen</span>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--b1)">
+      <span style="font-size:9px;color:var(--ok)">&#9679; &le;&thinsp;75&thinsp;% &mdash; optimal</span>
+      <span style="font-size:9px;color:var(--warn)">&#9679; &le;&thinsp;100&thinsp;Pa/m</span>
+      <span style="font-size:9px;color:var(--danger)">&#9679; &gt;&thinsp;100&thinsp;Pa/m &mdash; zu hoch</span>
+      <span style="font-size:9px;color:var(--accent)">&#9733; empfohlen</span>
     </div>
   </div>
 
-</div>
+</div><!-- tab-flow -->
 
-<!-- TAB ROHR -->
+<!-- ═══ TAB: ROHR ═══ -->
 <div id="tab-pipe" class="content" style="display:none">
-  <div class="gc">
-    <div class="lbl">Eingabe</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-      <div class="ig" style="margin-bottom:0"><div class="ig-lbl">Volumenstrom</div><div class="iw"><input class="gi" id="p-vol" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal" style="font-size:16px"/><span class="iu">m&sup3;/h</span></div></div>
-      <div class="ig" style="margin-bottom:0"><div class="ig-lbl">max. Druckverlust</div><div class="iw"><input class="gi-sm" id="p-dp" type="number" min="10" step="10" value="100" inputmode="decimal" style="padding:10px 50px 10px 12px;font-size:14px;color:var(--t1)"/><span class="iu">Pa/m</span></div></div>
+
+  <div class="card">
+    <div class="slbl">Eingabe</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="igrp" style="margin-bottom:0">
+        <div class="ilbl">Volumenstrom</div>
+        <div class="iwrap"><input class="inp pa" id="p-vol" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal" style="font-size:17px;padding:10px 46px 10px 12px"/><span class="iunit">m&sup3;/h</span></div>
+      </div>
+      <div class="igrp" style="margin-bottom:0">
+        <div class="ilbl">max. Druckverlust</div>
+        <div class="iwrap"><input class="inp-sm" id="p-dp" type="number" min="10" step="10" value="100" inputmode="decimal"/><span class="iunit">Pa/m</span></div>
+      </div>
     </div>
-    <p style="font-size:10px;color:var(--t3);line-height:1.6">Richtwert 100 Pa/m (VDI 2073) &middot; Wasser 60&deg;C: &nu; = 0,474&middot;10&sup2; m&sup2;/s &middot; Stahl &epsilon; = 0,046 mm &middot; Edelstahl &epsilon; = 0,015 mm</p>
   </div>
-  <div class="gc"><div class="lbl">Rohrdimensionierung &mdash; Stahl &middot; Mapress Edelstahl</div><div id="pipe-results"><p style="color:var(--t3);font-size:12px;text-align:center;padding:14px 0">Volumenstrom eingeben &rarr;</p></div></div>
-  <div class="gc" style="padding:14px 16px">
-    <div class="lbl">Normen &amp; Methode</div>
+
+  <div class="out-card">
+    <div class="slbl">Stahl &middot; Mapress Edelstahl</div>
+    <div id="pipe-results">
+      <p style="color:var(--t3);font-size:12px;text-align:center;padding:16px 0">Volumenstrom eingeben &rarr;</p>
+    </div>
+  </div>
+
+  <div class="card" style="padding:13px 15px">
+    <div class="slbl">Normen &amp; Methode</div>
     <p style="font-size:11px;color:var(--t2);line-height:1.8">
       <strong style="color:var(--t1)">Stahl &le; DN50:</strong> DIN EN 10255 Reihe M &nbsp;&middot;&nbsp;
       <strong style="color:var(--t1)">Stahl &ge; DN65:</strong> DIN EN 10220 nahtlos &nbsp;&middot;&nbsp;
-      <strong style="color:var(--accent)">Mapress:</strong> Edelstahl 1.4401, DIN EN 10312 &nbsp;&middot;&nbsp;
-      <strong style="color:var(--t1)">&lambda;</strong> nach Colebrook-White
+      <strong style="color:var(--accent)">Mapress:</strong> Edelstahl 1.4401 &nbsp;&middot;&nbsp;
+      <strong style="color:var(--t1)">&lambda;</strong> Colebrook-White
     </p>
   </div>
-</div>
 
-</div>
+</div><!-- tab-pipe -->
 
-<div id="install-bar">
+</div><!-- app -->
+
+<div id="ib">
   &#128242; App installieren
-  <button class="ib-y" id="ib-btn">Installieren</button>
-  <button class="ib-n" id="ib-close">&#10005;</button>
+  <button class="yes" id="ib-y">Installieren</button>
+  <button class="no"  id="ib-n">&#10005;</button>
 </div>
 
 <script>
 'use strict';
-const FLUIDS={water:{cp:4.180,rho:998,frost:null},g20:{cp:3.930,rho:1028,frost:'bis \u221209 \u00b0C'},g25:{cp:3.850,rho:1033,frost:'bis \u221212 \u00b0C'},g30:{cp:3.760,rho:1038,frost:'bis \u221216 \u00b0C'},g35:{cp:3.680,rho:1044,frost:'bis \u221220 \u00b0C'},g40:{cp:3.600,rho:1051,frost:'bis \u221225 \u00b0C'}};
-const PIPES=[[15,16.10,21.3,2.60,'DIN EN 10255',15.8,18.0,1.0],[20,21.60,26.9,2.65,'DIN EN 10255',21.8,22.0,1.0],[25,27.20,33.7,3.25,'DIN EN 10255',27.8,28.0,1.0],[32,35.90,42.4,3.25,'DIN EN 10255',34.9,35.0,1.2],[40,41.80,48.3,3.25,'DIN EN 10255',41.0,42.0,1.2],[50,53.00,60.3,3.65,'DIN EN 10255',53.0,54.0,1.2],[65,69.60,76.1,3.25,'DIN EN 10220',66.7,76.1,1.5],[80,82.50,88.9,3.20,'DIN EN 10220',82.5,88.9,1.5],[100,107.10,114.3,3.60,'DIN EN 10220',107.1,114.3,1.5],[125,131.70,139.7,4.00,'DIN EN 10220',131.7,139.7,2.0],[150,155.80,168.3,4.50,'DIN EN 10220',155.8,168.3,2.0]];
-const RHO=983.2,NU=0.474e-6,ES=0.046e-3,EM=0.015e-3,DP_DEF=100;
-const g=id=>document.getElementById(id);
-const loc=(v,d)=>v.toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});
-const show=(el,v)=>{if(el)el.style.display=v?'':'none'};
+/* ── Data ── */
+const F={
+  water:{cp:4.180,rho:998, frost:null},
+  g25:  {cp:3.850,rho:1033,frost:'bis −12 °C'},
+  g30:  {cp:3.760,rho:1038,frost:'bis −16 °C'},
+  g35:  {cp:3.680,rho:1044,frost:'bis −20 °C'},
+};
+const PIPES=[
+  [15, 16.10,21.3,2.60,'DIN EN 10255',15.8,18.0,1.0],
+  [20, 21.60,26.9,2.65,'DIN EN 10255',21.8,22.0,1.0],
+  [25, 27.20,33.7,3.25,'DIN EN 10255',27.8,28.0,1.0],
+  [32, 35.90,42.4,3.25,'DIN EN 10255',34.9,35.0,1.2],
+  [40, 41.80,48.3,3.25,'DIN EN 10255',41.0,42.0,1.2],
+  [50, 53.00,60.3,3.65,'DIN EN 10255',53.0,54.0,1.2],
+  [65, 69.60,76.1,3.25,'DIN EN 10220',66.7,76.1,1.5],
+  [80, 82.50,88.9,3.20,'DIN EN 10220',82.5,88.9,1.5],
+  [100,107.10,114.3,3.60,'DIN EN 10220',107.1,114.3,1.5],
+  [125,131.70,139.7,4.00,'DIN EN 10220',131.7,139.7,2.0],
+  [150,155.80,168.3,4.50,'DIN EN 10220',155.8,168.3,2.0],
+];
+const RHO=983.2,NU=0.474e-6,ES=0.046e-3,EM=0.015e-3,DP0=100;
 
+/* ── Utils ── */
+const $=id=>document.getElementById(id);
+const show=(e,v)=>{if(e)e.style.display=v?'':'none'};
+const loc=(v,d)=>v.toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+/* ── Physics ── */
 function lam(Re,eps,D){
   if(Re<1e-9)return 0;
   if(Re<2300)return 64/Re;
   let l=0.25/Math.pow(Math.log10(eps/(3.7*D)+5.74/Math.pow(Re,0.9)),2);
-  for(let i=0;i<60;i++){const n=Math.pow(-2*Math.log10(eps/(3.71*D)+2.51/(Re*Math.sqrt(l))),-2);if(Math.abs(n-l)<1e-11){l=n;break;}l=n;}
+  for(let i=0;i<60;i++){
+    const n=Math.pow(-2*Math.log10(eps/(3.71*D)+2.51/(Re*Math.sqrt(l))),-2);
+    if(Math.abs(n-l)<1e-11){l=n;break}l=n;
+  }
   return l;
 }
 function pdrop(vol,diMm,eps){
@@ -363,114 +560,157 @@ function pdrop(vol,diMm,eps){
   const D=diMm/1e3,A=Math.PI*D*D/4,v=(vol/3600)/A,Re=v*D/NU;
   return{dp:lam(Re,eps,D)*RHO*v*v/(2*D),v,Re};
 }
-function dpCol(dp,mx){return dp<=mx*0.75?'var(--ok)':dp<=mx?'var(--warn)':'var(--danger)'}
+function dpCol(dp,mx){return dp<=mx*.75?'var(--ok)':dp<=mx?'var(--warn)':'var(--danger)'}
 
-function pipeCardHTML(p,isM,vol,mx,isBest){
-  const di=isM?p[6]:p[1],da=isM?p[7]:p[2],wall=isM?p[8]:p[3],norm=isM?'Mapress Edelstahl':p[4];
-  const eps=isM?EM:ES;
-  const{dp,v}=pdrop(vol,di,eps);
-  const col=dpCol(dp,mx),pct=Math.min(100,dp/mx*100).toFixed(1);
-  const cls=isBest?'best':dp>mx?'over':'';
-  const star=isBest?'<span class="star-badge">\u2605 empfohlen</span>':'';
-  return`<div class="pipe-mini ${cls}"><div class="pm-std ${isM?'mapress':''}">${norm} ${star}</div><div class="pm-dn">DN ${p[0]}</div><div class="pm-dim">\u00d8 ${da} \u00d7 ${wall} mm \u00b7 d\u1d62 ${di.toFixed(1)} mm</div><div class="pm-vals"><div class="pm-row"><span class="pm-key">\u0394p/m</span><span class="pm-val" style="color:${col}">${dp<10?dp.toFixed(1):Math.round(dp)} <span style="font-size:9px;color:var(--t3)">Pa/m</span></span></div><div class="pm-row"><span class="pm-key">v</span><span class="pm-val" style="font-size:12px;color:var(--t2)">${v.toFixed(2)} m/s</span></div></div><div class="dp-bar"><div class="dp-fill" style="width:${pct}%;background:${col}"></div></div></div>`;
-}
-
-function renderPair(containerId,vol,mx){
-  const el=g(containerId);if(!el)return;
-  if(!vol){el.innerHTML='';return;}
-  const bS=PIPES.findIndex(p=>pdrop(vol,p[1],ES).dp<=mx);
-  const bM=PIPES.findIndex(p=>pdrop(vol,p[6],EM).dp<=mx);
-  const iS=bS<0?PIPES.length-1:bS,iM=bM<0?PIPES.length-1:bM;
-  el.innerHTML=pipeCardHTML(PIPES[iS],false,vol,mx,bS>=0)+pipeCardHTML(PIPES[iM],true,vol,mx,bM>=0);
-}
-
+/* ── State ── */
 const state={h:{mode:'ms'},k:{mode:'ms'}};
 
-function updateLayout(pfx){
-  const m=state[pfx].mode;
-  show(g(`${pfx}-ig-q`),m!=='q');show(g(`${pfx}-ig-ms`),m!=='ms');show(g(`${pfx}-ig-dt`),m!=='dt');
-  show(g(`${pfx}-out-ms`),m==='ms');show(g(`${pfx}-out-q`),m==='q');show(g(`${pfx}-out-dt`),m==='dt');
+function updateLayout(p){
+  const m=state[p].mode;
+  show($(p+'-ig-q'), m!=='q');
+  show($(p+'-ig-ms'),m!=='ms');
+  show($(p+'-ig-dt'),m!=='dt');
+  // calc wrap: show when mode is q or dt (we show inline result)
+  const showCalc=m==='q'||m==='dt';
+  show($(p+'-calc-wrap'),showCalc);
+  if(showCalc){
+    const keys={q:'Leistung [W]',dt:'ΔT [K]'};
+    $(p+'-calc-key').textContent=keys[m]||'Ergebnis';
+  }
 }
 
-function calcPanel(pfx){
-  const f=FLUIDS[g('medium').value],cp=f.cp*1000,rho=f.rho,m=state[pfx].mode;
-  const qv=parseFloat(g(`${pfx}-q`)?.value)||0;
-  const msv=parseFloat(g(`${pfx}-ms-in`)?.value)||0;
-  const dtv=parseFloat(g(`${pfx}-dt`)?.value)||0;
+/* ── Calc ── */
+function calcPanel(p){
+  const f=F[$('medium').value],cp=f.cp*1e3,rho=f.rho,m=state[p].mode;
+  const qv=parseFloat($(p+'-q')?.value)||0;
+  const mv=parseFloat($(p+'-ms-in')?.value)||0;
+  const dv=parseFloat($(p+'-dt')?.value)||0;
   let ms=0,q=0,dt=0,ok=false;
-  if(m==='ms'&&qv>0&&dtv>0){ms=qv/(cp*dtv);q=qv;dt=dtv;ok=true;}
-  else if(m==='q'&&msv>0&&dtv>0){q=msv*cp*dtv;ms=msv;dt=dtv;ok=true;}
-  else if(m==='dt'&&qv>0&&msv>0){dt=qv/(msv*cp);q=qv;ms=msv;ok=true;}
-  const mh=ms*3600,lh=mh/rho*1000,m3h=lh/1000;
-  function sc(id,on,v){const e=g(id);if(!e)return;e.textContent=on?v:'\u2013';e.classList.toggle('empty',!on);}
-  function sr(id,on,v){const e=g(id);if(!e)return;e.textContent=on?v:'\u2013';e.classList.toggle('on',on);}
-  if(m==='ms')sc(`${pfx}-calc-ms`,ok,loc(ms,4));
-  if(m==='q') sc(`${pfx}-calc-q`, ok,loc(q,0));
-  if(m==='dt')sc(`${pfx}-calc-dt`,ok,loc(dt,2));
-  sr(`${pfx}-kgh`,ok,loc(mh,1));sr(`${pfx}-lh`,ok,loc(lh,1));sr(`${pfx}-m3h`,ok,loc(m3h,3));
-  return{ok,m3h};
+  if(m==='ms'&&qv>0&&dv>0){ms=qv/(cp*dv);q=qv;dt=dv;ok=true}
+  else if(m==='q'&&mv>0&&dv>0){q=mv*cp*dv;ms=mv;dt=dv;ok=true}
+  else if(m==='dt'&&qv>0&&mv>0){dt=qv/(mv*cp);q=qv;ms=mv;ok=true}
+  const mh=ms*3600,m3h=mh/rho/1e3;
+  // inline calc result
+  const cv=$(p+'-calc-val');
+  if(cv){
+    const v=m==='q'?loc(q,0):m==='dt'?loc(dt,2):null;
+    if(v!==null){cv.textContent=ok?v:'–';cv.classList.toggle('empty',!ok)}
+  }
+  return{ok,ms,mh,m3h};
+}
+
+function setOut(id,on,v,cls){
+  const el=$(id);if(!el)return;
+  // preserve unit span
+  const unit=el.querySelector('.out-unit');
+  el.childNodes[0].textContent=on?v:'–';
+  el.classList.toggle(cls+'.has',on); // won't work directly
+  el.classList.toggle('has',on);
 }
 
 function calcAll(){
-  const f=FLUIDS[g('medium').value];
-  g('cp-val').textContent=f.cp.toFixed(3);g('rho-val').textContent=f.rho;
-  const fc=g('frost-chip');
-  if(f.frost){fc.style.display='';g('frost-val').textContent=f.frost;}else fc.style.display='none';
+  const f=F[$('medium').value];
+  $('cp-val').textContent=f.cp.toFixed(3);
+  $('rho-val').textContent=f.rho;
+  const fc=$('frost-chip');
+  if(f.frost){fc.style.display='';$('frost-val').textContent=f.frost}else fc.style.display='none';
+
   const rH=calcPanel('h'),rK=calcPanel('k');
+
+  // Output block
+  function setVal(el,on,txt,cssClass){
+    if(!el)return;
+    const span=el.querySelector('span');
+    const node=el.firstChild;
+    if(node&&node.nodeType===3)node.textContent=on?txt:'–';
+    else{const t=document.createTextNode(on?txt:'–');el.insertBefore(t,el.firstChild)}
+    el.classList.toggle(cssClass,on);
+  }
+  setVal($('h-kgh'),rH.ok,loc(rH.mh,1),'has');
+  setVal($('h-m3h'),rH.ok,loc(rH.m3h,3),'has');
+  setVal($('k-kgh'),rK.ok,loc(rK.mh,1),'has');
+  setVal($('k-m3h'),rK.ok,loc(rK.m3h,3),'has');
+
+  // Pipe inline
   const any=rH.ok||rK.ok;
-  show(g('pipe-inline-card'),any);
-  if(rH.ok){show(g('pipe-inline-h'),true);g('pipe-h-vol').textContent=`(${loc(rH.m3h,3)} m\u00b3/h)`;renderPair('pipe-h-pair',rH.m3h,DP_DEF);}
-  else show(g('pipe-inline-h'),false);
-  if(rK.ok){show(g('pipe-inline-k'),true);g('pipe-k-vol').textContent=`(${loc(rK.m3h,3)} m\u00b3/h)`;renderPair('pipe-k-pair',rK.m3h,DP_DEF);}
-  else show(g('pipe-inline-k'),false);
+  show($('pipe-inline'),any);
+  if(rH.ok){show($('pi-h-wrap'),true);$('pi-h-vol').textContent='('+loc(rH.m3h,3)+' m³/h)';renderPair('pi-h-pair',rH.m3h,DP0)}
+  else show($('pi-h-wrap'),false);
+  if(rK.ok){show($('pi-k-wrap'),true);$('pi-k-vol').textContent='('+loc(rK.m3h,3)+' m³/h)';renderPair('pi-k-pair',rK.m3h,DP0)}
+  else show($('pi-k-wrap'),false);
 }
 
+/* ── Pipe card HTML ── */
+function pCard(p,isM,vol,mx,isBest){
+  const di=isM?p[6]:p[1],da=isM?p[7]:p[2],wall=isM?p[8]:p[3],eps=isM?EM:ES;
+  const norm=isM?'Mapress Edelstahl':p[4];
+  const{dp,v}=pdrop(vol,di,eps);
+  const col=dpCol(dp,mx),pct=Math.min(100,dp/mx*100).toFixed(1);
+  const cls=isBest?'best':dp>mx?'over':'';
+  const star=isBest?'<span class="star">★</span>':'';
+  return`<div class="pm ${cls}">
+    <div class="pm-std ${isM?'mp':''}">${norm} ${star}</div>
+    <div class="pm-dn">DN&thinsp;${p[0]}</div>
+    <div class="pm-dim">Ø ${da} × ${wall} mm<br>dᵢ ${di.toFixed(1)} mm</div>
+    <div class="pm-r"><span class="pm-k">Δp/m</span><span class="pm-v" style="color:${col}">${dp<10?dp.toFixed(1):Math.round(dp)} <span style="font-size:9px;color:var(--t3)">Pa/m</span></span></div>
+    <div class="pm-r"><span class="pm-k">v</span><span class="pm-v" style="font-size:11px;color:var(--t2)">${v.toFixed(2)} m/s</span></div>
+    <div class="dpbar"><div class="dpfill" style="width:${pct}%;background:${col}"></div></div>
+  </div>`;
+}
+function renderPair(cid,vol,mx){
+  const el=$(cid);if(!el)return;
+  if(!vol){el.innerHTML='';return}
+  const bS=PIPES.findIndex(p=>pdrop(vol,p[1],ES).dp<=mx);
+  const bM=PIPES.findIndex(p=>pdrop(vol,p[6],EM).dp<=mx);
+  const iS=bS<0?PIPES.length-1:bS,iM=bM<0?PIPES.length-1:bM;
+  el.innerHTML=pCard(PIPES[iS],false,vol,mx,bS>=0)+pCard(PIPES[iM],true,vol,mx,bM>=0);
+}
+
+/* ── Pipe tab ── */
 function calcPipeTab(){
-  const vol=parseFloat(g('p-vol').value)||0,mx=parseFloat(g('p-dp').value)||100,el=g('pipe-results');
-  if(!vol){el.innerHTML='<p style="color:var(--t3);font-size:12px;text-align:center;padding:14px 0">Volumenstrom eingeben \u2192</p>';return;}
-  const bS=PIPES.findIndex(p=>pdrop(vol,p[1],ES).dp<=mx),bM=PIPES.findIndex(p=>pdrop(vol,p[6],EM).dp<=mx);
+  const vol=parseFloat($('p-vol').value)||0,mx=parseFloat($('p-dp').value)||100;
+  const el=$('pipe-results');
+  if(!vol){el.innerHTML='<p style="color:var(--t3);font-size:12px;text-align:center;padding:16px 0">Volumenstrom eingeben →</p>';return}
+  const bS=PIPES.findIndex(p=>pdrop(vol,p[1],ES).dp<=mx);
+  const bM=PIPES.findIndex(p=>pdrop(vol,p[6],EM).dp<=mx);
   const lo=Math.max(0,Math.min(bS<0?PIPES.length-1:bS,bM<0?PIPES.length-1:bM)-1);
   const hi=Math.min(PIPES.length-1,Math.max(bS<0?PIPES.length-1:bS,bM<0?PIPES.length-1:bM)+1);
-  let html='';
+  let h='';
   for(let i=lo;i<=hi;i++){
     const p=PIPES[i];
-    const row=(isM,isBest)=>{
-      const di=isM?p[6]:p[1],da=isM?p[7]:p[2],wall=isM?p[8]:p[3],eps=isM?EM:ES,norm=isM?'Mapress Edelstahl':p[4];
-      const{dp,v,Re}=pdrop(vol,di,eps);
-      const col=dpCol(dp,mx),pct=Math.min(100,dp/mx*100).toFixed(1);
-      const bs=isBest?'border-color:rgba(94,184,255,.42);background:rgba(94,184,255,.05)':dp>mx?'border-color:rgba(248,113,113,.25)':'';
-      const star=isBest?'<span class="star-badge">\u2605</span>':'';
-      return`<div class="pipe-mini" style="${bs}"><div class="pm-std ${isM?'mapress':''}">${norm} ${star}</div><div class="pm-dn">DN ${p[0]}</div><div class="pm-dim">\u00d8 ${da} \u00d7 ${wall} mm \u00b7 d\u1d62 ${di.toFixed(1)} mm</div><div class="pm-vals"><div class="pm-row"><span class="pm-key">\u0394p/m</span><span class="pm-val" style="color:${col}">${dp<10?dp.toFixed(1):Math.round(dp)} <span style="font-size:9px;color:var(--t3)">Pa/m</span></span></div><div class="pm-row"><span class="pm-key">v</span><span class="pm-val" style="font-size:12px;color:var(--t2)">${v.toFixed(2)} m/s</span></div><div class="pm-row"><span class="pm-key">Re</span><span class="pm-val" style="font-size:10px;color:var(--t3)">${Math.round(Re).toLocaleString('de-DE')}</span></div></div><div class="dp-bar"><div class="dp-fill" style="width:${pct}%;background:${col}"></div></div></div>`;
-    };
-    html+=`<div style="margin-bottom:10px"><div style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:6px">DN ${p[0]}</div><div class="pipe-pair">${row(false,i===bS)}${row(true,i===bM)}</div></div>`;
+    h+=`<div style="margin-bottom:10px"><div style="font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:6px">DN ${p[0]}</div><div class="pipe-pair">${pCard(p,false,vol,mx,i===bS)}${pCard(p,true,vol,mx,i===bM)}</div></div>`;
   }
-  html+=`<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--gb)"><span style="font-size:10px;color:var(--ok)">\u25cf \u2264 75% \u2014 optimal</span><span style="font-size:10px;color:var(--warn)">\u25cf \u2264 \u0394p\u2098\u2090\u2093 \u2014 grenzwertig</span><span style="font-size:10px;color:var(--danger)">\u25cf &gt; \u0394p\u2098\u2090\u2093 \u2014 zu hoch</span><span style="font-size:10px;color:var(--accent)">\u2605 empfohlen</span></div>`;
-  el.innerHTML=html;
+  h+=`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--b1)"><span style="font-size:9px;color:var(--ok)">● ≤75% — optimal</span><span style="font-size:9px;color:var(--warn)">● ≤Δp</span><span style="font-size:9px;color:var(--danger)">● >Δp — zu hoch</span><span style="font-size:9px;color:var(--accent)">★ empfohlen</span></div>`;
+  el.innerHTML=h;
 }
 
-document.querySelectorAll('.mode-btn').forEach(btn=>btn.addEventListener('click',()=>{
-  const pfx=btn.dataset.mode,val=btn.dataset.val;
+/* ── Events ── */
+document.querySelectorAll('.mode-btn').forEach(b=>b.addEventListener('click',()=>{
+  const pfx=b.dataset.mode,val=b.dataset.val;
   state[pfx].mode=val;
-  document.querySelectorAll(`.mode-btn[data-mode="${pfx}"]`).forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  document.querySelectorAll(`.mode-btn[data-mode="${pfx}"]`).forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
   updateLayout(pfx);calcAll();
 }));
-['medium','h-q','h-ms-in','h-dt','k-q','k-ms-in','k-dt'].forEach(id=>g(id)?.addEventListener('input',calcAll));
-['p-vol','p-dp'].forEach(id=>g(id)?.addEventListener('input',calcPipeTab));
-document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>{
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');const t=btn.dataset.tab;
-  show(g('tab-flow'),t==='flow');show(g('tab-pipe'),t==='pipe');
+['medium','h-q','h-ms-in','h-dt','k-q','k-ms-in','k-dt'].forEach(id=>$(id)?.addEventListener('input',calcAll));
+['p-vol','p-dp'].forEach(id=>$(id)?.addEventListener('input',calcPipeTab));
+document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  const t=b.dataset.tab;
+  show($('tab-flow'),t==='flow');show($('tab-pipe'),t==='pipe');
 }));
 
+/* ── Init ── */
 updateLayout('h');updateLayout('k');calcAll();
 
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+/* ── PWA ── */
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 let _p=null;
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_p=e;g('install-bar').style.display='flex';});
-g('ib-btn').addEventListener('click',()=>{_p?.prompt();g('install-bar').style.display='none';});
-g('ib-close').addEventListener('click',()=>{g('install-bar').style.display='none';});
-window.addEventListener('appinstalled',()=>{g('install-bar').style.display='none';});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_p=e;$('ib').style.display='flex'});
+$('ib-y').addEventListener('click',()=>{_p?.prompt();$('ib').style.display='none'});
+$('ib-n').addEventListener('click',()=>$('ib').style.display='none');
+window.addEventListener('appinstalled',()=>$('ib').style.display='none');
 </script>
 </body>
 </html>
