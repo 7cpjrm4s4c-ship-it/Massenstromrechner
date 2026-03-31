@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
 <meta name="theme-color" content="#000000"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -90,7 +90,7 @@
    RESET
 ═══════════════════════════════════════════════════════ */
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-html { height:100%; -webkit-tap-highlight-color:transparent; -webkit-text-size-adjust:100%; }
+html { height:100%; -webkit-tap-highlight-color:transparent; -webkit-text-size-adjust:100%; overflow-x:hidden; }
 body {
   min-height:100%; font-family:var(--f); background:var(--bg); color:var(--t1);
   overflow-x:hidden;
@@ -352,7 +352,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
   background:var(--glass-low);
   border:1px solid var(--gb-mid);
   color:var(--t1);
-  font-family:var(--fm); font-size:15px; font-weight:600;
+  font-family:var(--fm); font-size:16px; font-weight:600;
   padding:11px 52px 11px 14px;
   border-radius:var(--r-m); outline:none;
   box-shadow:inset 0 1px 3px rgba(0,0,0,0.30);
@@ -527,6 +527,11 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .hk-btn{display:flex;align-items:center;justify-content:center;gap:7px;font-family:var(--f);font-size:12px;font-weight:600;padding:10px 8px;border-radius:var(--r-m);border:1px solid transparent;cursor:pointer;background:transparent;color:var(--t3);transition:all .18s}
 .hk-btn.on-h{background:rgba(255,107,53,.15);border-color:rgba(255,107,53,.35);color:var(--heat-t);box-shadow:inset 0 1px 0 rgba(255,107,53,.12),0 2px 6px rgba(0,0,0,.35)}
 .hk-btn.on-k{background:rgba(0,196,232,.12);border-color:rgba(0,196,232,.30);color:var(--cold-t);box-shadow:inset 0 1px 0 rgba(0,196,232,.10),0 2px 6px rgba(0,0,0,.35)}
+
+/* Prevent grid blowout on iOS */
+* { min-width: 0; }
+.gc, .out-card, .gc-h, .gc-c, .gc-a { overflow: hidden; }
+#tab-flow, #tab-luft, #tab-pipe { overflow-x: hidden; max-width: 100%; }
 </style>
 </head>
 <body>
@@ -578,7 +583,17 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
       </div>
     </div>
 
-    <!-- Heizung + Kälte -->
+    <!-- Heiz/Kühl Switch -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:rgba(0,0,0,.40);border:1px solid var(--gb-soft);border-radius:var(--r-l);padding:4px">
+      <button class="hk-btn on-h" id="flow-btn-h" onclick="flowSwitch('h')">
+        <div class="dot dot-h"></div>Heizung
+      </button>
+      <button class="hk-btn" id="flow-btn-k" onclick="flowSwitch('k')">
+        <div class="dot dot-c"></div>Kühlkreis
+      </button>
+    </div>
+
+        <!-- Heizung + Kälte -->
     <div class="twin">
 
       <!-- ── Heizung ── -->
@@ -753,7 +768,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
   <div style="padding:12px;padding-left:calc(12px + var(--sal));padding-right:calc(12px + var(--sar));padding-bottom:calc(32px + var(--sab));display:flex;flex-direction:column;gap:var(--gap);max-width:640px;width:100%;margin:0 auto">
 
     <!-- Heiz/Kühl Switch -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:rgba(0,0,0,.40);border:1px solid var(--gb-s);border-radius:var(--r-l);padding:4px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:rgba(0,0,0,.40);border:1px solid var(--gb-soft);border-radius:var(--r-l);padding:4px">
       <button class="hk-btn" id="luft-btn-h" onclick="luftSwitch('h')"><div class="dot dot-h"></div>Heizleistung</button>
       <button class="hk-btn" id="luft-btn-k" onclick="luftSwitch('k')"><div class="dot dot-c"></div>Kühlleistung</button>
     </div>
@@ -780,8 +795,8 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 
       <!-- Temperatures -->
       <div id="luft-temp-block">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap-s)">
-          <div class="igrp" style="margin-bottom:0">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap-s);min-width:0;width:100%">
+          <div class="igrp" style="margin-bottom:0;min-width:0;overflow:hidden">
             <div class="ilbl" id="luft-lbl-tzl">Zuluft t<sub>ZL</sub></div>
             <div class="iwrap"><input class="inp-sm" id="luft-tzl" type="number" step="0.5" placeholder="z.B. 40" inputmode="decimal"/><span class="iunit">&deg;C</span></div>
           </div>
