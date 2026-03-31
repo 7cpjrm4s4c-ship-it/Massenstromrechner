@@ -526,6 +526,11 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 ═══════════════════════════════════════════════════════ */
 @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 .gc, .out-card { animation:fadeUp .30s ease both; }
+
+/* Heiz/Kühl Switch Button */
+.hk-btn{display:flex;align-items:center;justify-content:center;gap:7px;font-family:var(--f);font-size:12px;font-weight:600;padding:10px 8px;border-radius:var(--r-m);border:1px solid transparent;cursor:pointer;background:transparent;color:var(--t3);transition:all .18s}
+.hk-btn.on-h{background:rgba(255,107,53,.15);border-color:rgba(255,107,53,.35);color:var(--heat-t);box-shadow:inset 0 1px 0 rgba(255,107,53,.12),0 2px 6px rgba(0,0,0,.35)}
+.hk-btn.on-k{background:rgba(0,196,232,.12);border-color:rgba(0,196,232,.30);color:var(--cold-t);box-shadow:inset 0 1px 0 rgba(0,196,232,.10),0 2px 6px rgba(0,0,0,.35)}
 </style>
 </head>
 <body>
@@ -538,7 +543,8 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
     <div class="hdr-sub">HLS-Anlagen &middot; Heizung &middot; K&auml;lte &middot; Rohr</div>
   </div>
   <nav class="tab-bar">
-    <button class="tab-btn active" data-tab="flow">Massenstrom</button>
+    <button class="tab-btn active" data-tab="flow">Heizung/K&auml;lte</button>
+    <button class="tab-btn"        data-tab="luft">Luft</button>
     <button class="tab-btn"        data-tab="pipe">Rohr</button>
   </nav>
 </header>
@@ -556,9 +562,16 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
       <div class="slbl">W&auml;rmetr&auml;ger</div>
       <select class="gl-sel" id="medium">
         <option value="water">Wasser</option>
-        <option value="g25">Wasser / Glykol 25&thinsp;%</option>
-        <option value="g30">Wasser / Glykol 30&thinsp;%</option>
-        <option value="g35">Wasser / Glykol 35&thinsp;%</option>
+        <optgroup label="Ethylenglykol">
+          <option value="eg25">Ethylenglykol 25&thinsp;%</option>
+          <option value="eg30">Ethylenglykol 30&thinsp;%</option>
+          <option value="eg35">Ethylenglykol 35&thinsp;%</option>
+        </optgroup>
+        <optgroup label="Propylenglykol">
+          <option value="pg25">Propylenglykol 25&thinsp;%</option>
+          <option value="pg30">Propylenglykol 30&thinsp;%</option>
+          <option value="pg35">Propylenglykol 35&thinsp;%</option>
+        </optgroup>
       </select>
       <div class="chips">
         <div class="chip">c<sub>p</sub>&nbsp;=&nbsp;<strong id="cp-val">4.180</strong>&thinsp;kJ/(kg&middot;K)</div>
@@ -732,6 +745,115 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 <!-- ══════════════════════════════════════════════════════
      TAB: ROHR
 ══════════════════════════════════════════════════════ -->
+
+<!-- ══ TAB: LUFT ══ -->
+<div id="tab-luft" style="display:none">
+  <div style="padding:12px;padding-left:calc(12px + var(--sal));padding-right:calc(12px + var(--sar));padding-bottom:calc(32px + var(--sab));display:flex;flex-direction:column;gap:var(--gap);max-width:640px;width:100%;margin:0 auto">
+
+    <!-- Heiz/Kühl Switch -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:rgba(0,0,0,.40);border:1px solid var(--gb-s);border-radius:var(--r-l);padding:4px">
+      <button class="hk-btn" id="luft-btn-h" onclick="luftSwitch('h')"><div class="dot dot-h"></div>Heizleistung</button>
+      <button class="hk-btn" id="luft-btn-k" onclick="luftSwitch('k')"><div class="dot dot-c"></div>Kühlleistung</button>
+    </div>
+
+    <!-- Calc modes -->
+    <div class="modes" style="grid-template-columns:repeat(3,1fr);margin-bottom:0">
+      <button class="mbtn active" data-lm="q">Q Leistung</button>
+      <button class="mbtn"        data-lm="v">V&#x307; Volumenstrom</button>
+      <button class="mbtn"        data-lm="dt">Δt Temperatur</button>
+    </div>
+
+    <!-- Input card -->
+    <div class="gc gc-h" id="luft-in-card">
+      <div class="ptitle" id="luft-ptitle">
+        <div class="dot dot-h"></div>
+        <span class="ptitle-lbl">Heizleistung — Eingaben</span>
+      </div>
+
+      <!-- V-dot (shown in modes q + dt) -->
+      <div class="igrp" id="luft-ig-v">
+        <div class="ilbl">Luftvolumenstrom V&#x307;</div>
+        <div class="iwrap"><input class="inp" id="luft-v" type="number" min="0" step="100" placeholder="0" inputmode="decimal"/><span class="iunit">m&sup3;/h</span></div>
+      </div>
+
+      <!-- Temperatures -->
+      <div id="luft-temp-block">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap-s)">
+          <div class="igrp" style="margin-bottom:0">
+            <div class="ilbl" id="luft-lbl-tzl">Zuluft t<sub>ZL</sub></div>
+            <div class="iwrap"><input class="inp-sm" id="luft-tzl" type="number" step="0.5" placeholder="z.B. 40" inputmode="decimal"/><span class="iunit">&deg;C</span></div>
+          </div>
+          <div class="igrp" style="margin-bottom:0">
+            <div class="ilbl">Raum t<sub>R</sub></div>
+            <div class="iwrap"><input class="inp-sm" id="luft-tr" type="number" step="0.5" value="20" inputmode="decimal"/><span class="iunit">&deg;C</span></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin:10px 0">
+          <div style="flex:1;height:1px;background:var(--gb-s)"></div>
+          <span style="font-size:9px;color:var(--t3);font-family:var(--f)">Temperaturdifferenz</span>
+          <div style="flex:1;height:1px;background:var(--gb-s)"></div>
+        </div>
+        <div class="igrp" style="margin-bottom:0">
+          <div class="ilbl" id="luft-dt-auto-lbl">Δt = t<sub>ZL</sub> − t<sub>R</sub></div>
+          <div class="iwrap">
+            <div class="inp-ro empty" id="luft-dt-auto-val" style="font-size:18px;padding:11px 52px 11px 14px">–</div>
+            <span class="iunit">K</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Direct dt input (dt mode only) -->
+      <div class="igrp" id="luft-ig-dt" style="display:none">
+        <div class="ilbl" id="luft-dt-lbl">Δt direkt eingeben</div>
+        <div class="iwrap"><input class="inp" id="luft-dt-in" type="number" min="0" step="0.5" placeholder="0" inputmode="decimal"/><span class="iunit">K</span></div>
+      </div>
+
+      <!-- Q input (modes v + dt) -->
+      <div class="igrp" id="luft-ig-q" style="display:none;margin-top:var(--gap)">
+        <div class="ilbl">Leistung Q</div>
+        <div class="iwrap"><input class="inp" id="luft-q-in" type="number" min="0" step="100" placeholder="0" inputmode="decimal"/><span class="iunit">W</span></div>
+      </div>
+    </div>
+
+    <!-- Result card -->
+    <div class="out-card">
+      <div class="slbl" id="luft-out-title">Ergebnis — Heizleistung Luft</div>
+      <div style="margin-bottom:14px">
+        <div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--t3);margin-bottom:4px" id="luft-main-lbl">Leistung Q</div>
+        <div style="font-family:var(--fm);font-size:34px;font-weight:700;line-height:1;transition:color .2s;color:var(--t4)" id="luft-main-val">–<span style="font-size:16px;font-weight:400;color:var(--t3)"> W</span></div>
+        <div style="font-family:var(--fm);font-size:14px;margin-top:3px;color:var(--t4)" id="luft-main-sub"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding-top:12px;border-top:1px solid var(--gb-s)">
+        <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">kW</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--t4)" id="luft-kw">–</div></div>
+        <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">V&#x307; m&sup3;/h</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--t4)" id="luft-v-out">–</div></div>
+        <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">Δt K</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--t4)" id="luft-dt-out">–</div></div>
+        <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">&#7745; kg/h</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--air-t)" id="luft-ms">–</div></div>
+      </div>
+    </div>
+
+    <!-- Formula -->
+    <div style="text-align:center;font-family:var(--fm);font-size:10px;color:var(--t3);line-height:1.9">
+      Q = <span style="color:var(--t2)">V&#x307;</span> × <span style="color:var(--t2)">&rho;<sub>L</sub>(t<sub>ZL</sub>)</span> × <span style="color:var(--t2)">c<sub>p,L</sub></span> × <span style="color:var(--t2)">Δt</span>
+      &ensp;&middot;&ensp;
+      &rho;<sub>L</sub>(t) = <span style="color:var(--t2)">353,05 / (t + 273,15)</span> kg/m&sup3;
+    </div>
+
+    <!-- Air constants -->
+    <div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.20);border-radius:var(--r-l);padding:12px 14px">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--air-t);margin-bottom:9px;font-family:var(--f)">Luftkennwerte (aktuell)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+        <div style="font-size:10px;color:var(--t2)">&rho;<sub>L</sub> bei t<sub>ZL</sub></div>
+        <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)" id="luft-rho-display">– kg/m³</div>
+        <div style="font-size:10px;color:var(--t2)">c<sub>p,L</sub></div>
+        <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)">1.005 J/(kg·K)</div>
+        <div style="font-size:10px;color:var(--t2)">&rho; × c<sub>p</sub> / 3600</div>
+        <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)" id="luft-factor-display">– Wh/(m³·K)</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <div id="tab-pipe" style="display:none">
 
   <div class="pipe-params">
@@ -786,26 +908,32 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
    DATA
 ═══════════════════════════════════════ */
 const FL = {
-  water: { cp:4.180, rho:998,  frost:null },
-  g25:   { cp:3.850, rho:1033, frost:'bis \u221212\u202f\u00b0C' },
-  g30:   { cp:3.760, rho:1038, frost:'bis \u221216\u202f\u00b0C' },
-  g35:   { cp:3.680, rho:1044, frost:'bis \u221220\u202f\u00b0C' },
+  water: { cp:4.180, rho:998,  frost:null,   label:'Wasser' },
+  // Ethylenglykol (bei 40\u00b0C Mitteltemp.)
+  eg25:  { cp:3.870, rho:1032, frost:'bis \u221212\u202f\u00b0C', label:'Ethylenglykol 25\u202f%' },
+  eg30:  { cp:3.740, rho:1038, frost:'bis \u221216\u202f\u00b0C', label:'Ethylenglykol 30\u202f%' },
+  eg35:  { cp:3.620, rho:1044, frost:'bis \u221221\u202f\u00b0C', label:'Ethylenglykol 35\u202f%' },
+  // Propylenglykol (bei 40\u00b0C Mitteltemp.)
+  pg25:  { cp:3.870, rho:1024, frost:'bis \u221210\u202f\u00b0C', label:'Propylenglykol 25\u202f%' },
+  pg30:  { cp:3.740, rho:1030, frost:'bis \u221213\u202f\u00b0C', label:'Propylenglykol 30\u202f%' },
+  pg35:  { cp:3.610, rho:1037, frost:'bis \u221218\u202f\u00b0C', label:'Propylenglykol 35\u202f%' },
 };
 
 /* [DN, di_s,da_s,wall_s,norm_s, di_m,da_m,wall_m]
    Mapress: max DN100 (Geberit specification)
    DN > 100: di_m = null → "Nicht verfügbar" */
 const PIPES = [
-  [ 15,  16.1, 21.3,2.60,'DIN EN 10255',  15.8, 18.0,1.0],
-  [ 20,  21.6, 26.9,2.65,'DIN EN 10255',  21.8, 22.0,1.0],
-  [ 25,  27.2, 33.7,3.25,'DIN EN 10255',  27.8, 28.0,1.0],
-  [ 32,  35.9, 42.4,3.25,'DIN EN 10255',  34.9, 35.0,1.2],
-  [ 40,  41.8, 48.3,3.25,'DIN EN 10255',  41.0, 42.0,1.2],
-  [ 50,  53.0, 60.3,3.65,'DIN EN 10255',  53.0, 54.0,1.2],
-  [ 65,  69.6, 76.1,3.25,'DIN EN 10220',  66.7, 76.1,1.5],
-  [ 80,  82.5, 88.9,3.20,'DIN EN 10220',  82.5, 88.9,1.5],
-  [100, 107.1,114.3,3.60,'DIN EN 10220', 107.1,114.3,1.5],
-  [125, 131.7,139.7,4.00,'DIN EN 10220',  null, null,null],  // Mapress N/A
+  // [DN, di_s,da_s,wall_s,norm_s,  di_m,da_m,wall_m]  Mapress from Geberit PDF
+  [ 15,  16.1, 21.3,2.60,'DIN EN 10255',  16.0, 18.0,1.0],
+  [ 20,  21.6, 26.9,2.65,'DIN EN 10255',  19.6, 22.0,1.2],
+  [ 25,  27.2, 33.7,3.25,'DIN EN 10255',  25.6, 28.0,1.2],
+  [ 32,  35.9, 42.4,3.25,'DIN EN 10255',  32.0, 35.0,1.5],
+  [ 40,  41.8, 48.3,3.25,'DIN EN 10255',  39.0, 42.0,1.5],
+  [ 50,  53.0, 60.3,3.65,'DIN EN 10255',  51.0, 54.0,1.5],
+  [ 65,  69.6, 76.1,3.25,'DIN EN 10220',  72.1, 76.1,2.0],
+  [ 80,  82.5, 88.9,3.20,'DIN EN 10220',  84.9, 88.9,2.0],
+  [100, 107.1,114.3,3.60,'DIN EN 10220', 104.0,108.0,2.0],
+  [125, 131.7,139.7,4.00,'DIN EN 10220',  null, null,null],
   [150, 155.8,168.3,4.50,'DIN EN 10220',  null, null,null],
   [200, 203.1,219.1,8.00,'DIN EN 10220',  null, null,null],
   [250, 254.5,273.0,8.80,'DIN EN 10220',  null, null,null],
@@ -1056,6 +1184,7 @@ document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', (
   b.classList.add('active');
   const t = b.dataset.tab;
   show($('tab-flow'), t==='flow');
+  show($('tab-luft'), t==='luft');
   show($('tab-pipe'), t==='pipe');
 }));
 
@@ -1076,6 +1205,102 @@ window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); _p=e; 
 $('ib-y').addEventListener('click', () => { _p?.prompt(); $('ib').style.display='none'; });
 $('ib-n').addEventListener('click', () => { $('ib').style.display='none'; });
 window.addEventListener('appinstalled', () => { $('ib').style.display='none'; });
+
+/* ═══ LUFT ═══ */
+const CP_AIR=1005;
+const LST={hk:'h',mode:'q'};
+
+function rhoAir(t){return 353.05/(t+273.15)}
+
+function luftSwitch(hk){
+  LST.hk=hk;
+  $('luft-btn-h').className='hk-btn'+(hk==='h'?' on-h':'');
+  $('luft-btn-k').className='hk-btn'+(hk==='k'?' on-k':'');
+  const card=$('luft-in-card');
+  card.className='gc '+(hk==='h'?'gc-h':'gc-c');
+  $('luft-ptitle').innerHTML=hk==='h'
+    ?'<div class="dot dot-h"></div><span class="ptitle-lbl">Heizleistung \u2014 Eingaben</span>'
+    :'<div class="dot dot-c"></div><span class="ptitle-lbl" style="color:var(--cold-t)">K\u00fchlleistung \u2014 Eingaben</span>';
+  const dtl=$('luft-dt-auto-lbl');
+  if(dtl)dtl.innerHTML=hk==='h'?'\u0394t = t<sub>ZL</sub> \u2212 t<sub>R</sub>':'\u0394t = t<sub>R</sub> \u2212 t<sub>ZL</sub>';
+  const tl=$('luft-lbl-tzl');
+  if(tl)tl.textContent=hk==='h'?'Zuluft t_ZL (w\u00e4rmer)':'Zuluft t_ZL (k\u00e4lter)';
+  $('luft-out-title').textContent=hk==='h'?'Ergebnis \u2014 Heizleistung Luft':'Ergebnis \u2014 K\u00fchlleistung Luft';
+  calcLuft();
+}
+
+function luftMode(m){
+  LST.mode=m;
+  document.querySelectorAll('.mbtn[data-lm]').forEach(b=>b.classList.toggle('active',b.dataset.lm===m));
+  show($('luft-ig-v'),    m!=='v');
+  show($('luft-temp-block'),m!=='dt');
+  show($('luft-ig-dt'),   m==='dt');
+  show($('luft-ig-q'),    m!=='q');
+  calcLuft();
+}
+
+function calcLuft(){
+  const hk=LST.hk,m=LST.mode;
+  const vv=parseFloat($('luft-v')?.value)||0;
+  const tzl=parseFloat($('luft-tzl')?.value);
+  const tr=parseFloat($('luft-tr')?.value)||20;
+  const dtDir=parseFloat($('luft-dt-in')?.value)||0;
+  const qIn=parseFloat($('luft-q-in')?.value)||0;
+
+  let dtAuto=NaN;
+  if(!isNaN(tzl)){dtAuto=hk==='h'?tzl-tr:tr-tzl;}
+
+  const dtAutoEl=$('luft-dt-auto-val');
+  if(dtAutoEl){
+    const valid=!isNaN(dtAuto)&&dtAuto>0;
+    dtAutoEl.textContent=valid?loc(dtAuto,1):'\u2013';
+    dtAutoEl.className='inp-ro'+(valid?'':' empty');
+    const bc=hk==='h'?'rgba(255,107,53,.10)':'rgba(0,196,232,.10)';
+    const bc2=hk==='h'?'rgba(255,107,53,.40)':'rgba(0,196,232,.40)';
+    const tc=hk==='h'?'var(--heat-t)':'var(--cold-t)';
+    dtAutoEl.style.cssText=`font-size:18px;padding:11px 52px 11px 14px;`+(valid?`background:${bc};border:1.5px solid ${bc2};color:${tc}`:'');
+  }
+
+  const dt=m==='dt'?dtDir:(!isNaN(dtAuto)?dtAuto:0);
+  const tRef=!isNaN(tzl)&&tzl>-273?tzl:20;
+  const rho=rhoAir(tRef);
+  const fac=rho*CP_AIR/3600;
+
+  const rd=$('luft-rho-display');if(rd)rd.textContent=rho.toFixed(3)+'\u202fkg/m\u00b3';
+  const fd=$('luft-factor-display');if(fd)fd.textContent=(fac).toFixed(4)+'\u202fWh/(m\u00b3\u00b7K)';
+
+  let Q=0,V=0,dT=0,ok=false;
+  if(m==='q' &&vv>0&&dt>0){Q=vv*fac*dt;   V=vv;  dT=dt;  ok=true;}
+  if(m==='v' &&qIn>0&&dt>0){V=qIn/fac/dt;  Q=qIn; dT=dt;  ok=true;}
+  if(m==='dt'&&vv>0&&qIn>0){dT=qIn/(vv*fac);Q=qIn;V=vv;   ok=true;}
+
+  const ms=ok?V*rho:0;
+  const col=hk==='h'?'var(--heat-t)':'var(--cold-t)';
+  const sub2=hk==='h'?'rgba(255,170,122,.6)':'rgba(102,223,255,.6)';
+  const lbl={'q':'Leistung Q','v':'Volumenstrom V\u0307','dt':'\u0394t'}[m];
+  const val=ok?(m==='q'?loc(Q,0):m==='v'?loc(V,1):loc(dT,2)):'\u2013';
+  const unit={'q':'W','v':'m\u00b3/h','dt':'K'}[m];
+  const sub=ok?(m==='q'?loc(Q/1000,2)+'\u202fkW':m==='v'?loc(V*rho,1)+'\u202fkg/h':''):'';
+
+  $('luft-main-lbl').textContent=lbl;
+  const mv=$('luft-main-val');
+  mv.style.color=ok?col:'var(--t4)';
+  mv.innerHTML=val+'<span style="font-size:16px;font-weight:400;color:var(--t3)"> '+unit+'</span>';
+  const ms2=$('luft-main-sub');
+  ms2.style.color=sub2;ms2.textContent=sub;
+
+  function sv(id,ok,v){const e=$(id);if(e){e.textContent=ok?v:'\u2013';e.style.color=ok?'var(--t1)':'var(--t4)';}}
+  sv('luft-kw',   ok&&m!=='dt',loc(Q/1000,2)+'\u202fkW');
+  sv('luft-v-out',ok,loc(V,1));
+  sv('luft-dt-out',ok,loc(dT,2));
+  const msel=$('luft-ms');
+  if(msel){msel.textContent=ok?loc(ms,1):'\u2013';msel.style.color=ok?'var(--air-t)':'var(--t4)';}
+}
+
+document.querySelectorAll('.mbtn[data-lm]').forEach(b=>b.addEventListener('click',()=>luftMode(b.dataset.lm)));
+['luft-v','luft-tzl','luft-tr','luft-dt-in','luft-q-in'].forEach(id=>$(id)?.addEventListener('input',calcLuft));
+luftSwitch('h');luftMode('q');
+
 </script>
 </body>
 </html>
