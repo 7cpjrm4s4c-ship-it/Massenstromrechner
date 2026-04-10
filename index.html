@@ -1322,8 +1322,33 @@ calcAll();
 /* ═══════════════════════════════════════
    PWA
 ═══════════════════════════════════════ */
-if ('serviceWorker' in navigator)
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => {
+        // Pruefe beim Start ob ein neuer SW wartet
+        if (reg.waiting) {
+          reg.waiting.postMessage('SKIP_WAITING');
+        }
+        // Neuer SW installiert sich -> sofort aktivieren
+        reg.addEventListener('updatefound', () => {
+          const nw = reg.installing;
+          nw.addEventListener('statechange', () => {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+              nw.postMessage('SKIP_WAITING');
+            }
+          });
+        });
+      })
+      .catch(() => {});
+
+    // Wenn SW gewechselt hat -> Seite einmalig neu laden
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) { refreshing = true; window.location.reload(); }
+    });
+  });
+}
 let _p = null;
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); _p=e; $('ib').style.display='flex'; });
 $('ib-y').addEventListener('click', () => { _p?.prompt(); $('ib').style.display='none'; });
@@ -1446,7 +1471,7 @@ const UNITS = {
     units: [
       { key:'bar',  label:'bar',  factor:1e5 },
       { key:'mbar', label:'mbar', factor:1e2 },
-      { key:'mWs',  label:'mWs',  factor:9.80665 },
+      { key:'mWs',  label:'mWs',  factor:9806.65 },
       { key:'Pa',   label:'Pa',   factor:1 },
       { key:'hPa',  label:'hPa',  factor:1e2 },
       { key:'kPa',  label:'kPa',  factor:1e3 },
