@@ -48,6 +48,9 @@
   --blue:    #4fa8ff;
   --blue-t:  rgba(79,168,255,0.14);
   --blue-b:  rgba(79,168,255,0.36);
+  --grn:     #34d399;
+  --grn-t:   rgba(52,211,153,0.14);
+  --grn-b:   rgba(52,211,153,0.36);
   --ok:      #30d158;
   --warn:    #ffd60a;
   --danger:  #ff453a;
@@ -141,6 +144,11 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
   color:var(--blue);
   border-bottom-color:var(--blue);
   background:rgba(79,168,255,0.06);
+}
+.tab-btn.active-unit {
+  color:var(--grn);
+  border-bottom-color:var(--grn);
+  background:rgba(52,211,153,0.06);
 }
 .tab-btn:hover:not(.active) { color:var(--t1); background:rgba(255,255,255,0.04); }
 
@@ -531,7 +539,31 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 /* Prevent grid blowout on iOS */
 * { min-width: 0; }
 .gc, .out-card, .gc-h, .gc-c, .gc-a { overflow: hidden; }
-#tab-flow, #tab-luft, #tab-pipe { overflow-x: hidden; max-width: 100%; }
+#tab-flow, #tab-luft, #tab-pipe, #tab-unit { overflow-x: hidden; max-width: 100%; }
+
+/* Unit converter */
+.cat-pill {
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+  border-radius:var(--r-m); padding:10px 4px; text-align:center;
+  cursor:pointer; transition:all .18s; font-family:var(--f);
+}
+.cat-pill.active {
+  background:var(--grn-t); border-color:var(--grn-b);
+  box-shadow:0 0 12px rgba(52,211,153,.08);
+}
+.cat-icon { font-size:18px; margin-bottom:4px; }
+.cat-name { font-size:10px; font-weight:700; color:var(--t2); line-height:1.2; }
+.cat-pill.active .cat-name { color:var(--grn); }
+.unit-row {
+  display:flex; justify-content:space-between; align-items:baseline;
+  padding:8px 11px; border-radius:var(--r-s);
+  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+}
+.unit-row.uh { background:rgba(52,211,153,.07); border-color:rgba(52,211,153,.22); }
+.unit-row.uh .unit-k, .unit-row.uh .unit-v { color:var(--grn); }
+.unit-k { font-family:var(--f); font-size:11px; font-weight:600; color:var(--t2); }
+.unit-v { font-family:var(--fm); font-size:13px; font-weight:700; color:var(--t1); }
+
 </style>
 </head>
 <body>
@@ -549,6 +581,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
     <button class="tab-btn active" data-tab="flow">Heizung/K&auml;lte</button>
     <button class="tab-btn"        data-tab="luft">Luft</button>
     <button class="tab-btn"        data-tab="pipe">Rohr</button>
+    <button class="tab-btn"        data-tab="unit">Einheiten</button>
   </nav>
 </header>
 
@@ -912,6 +945,79 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
   </div>
 
 </div><!-- tab-pipe -->
+<!-- ══════════════════════════════════════════════════════
+     TAB: EINHEITENRECHNER
+══════════════════════════════════════════════════════ -->
+<div id="tab-unit" style="display:none">
+  <div style="padding:12px;padding-left:calc(12px + var(--sal));padding-right:calc(12px + var(--sar));padding-bottom:calc(32px + var(--sab));display:flex;flex-direction:column;gap:var(--gap);max-width:640px;width:100%;margin:0 auto">
+
+    <!-- Category grid -->
+    <div class="gc">
+      <div class="slbl">Kategorie w&auml;hlen</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        <button class="cat-pill active" data-cat="pressure"  onclick="unitCat('pressure')">  <div class="cat-icon">&#x1F535;</div><div class="cat-name">Druck</div></button>
+        <button class="cat-pill"        data-cat="power"     onclick="unitCat('power')">     <div class="cat-icon">&#x26A1;</div> <div class="cat-name">Leistung</div></button>
+        <button class="cat-pill"        data-cat="energy"    onclick="unitCat('energy')">    <div class="cat-icon">&#x1F50B;</div><div class="cat-name">Energie</div></button>
+        <button class="cat-pill"        data-cat="flow"      onclick="unitCat('flow')">      <div class="cat-icon">&#x1F4A7;</div><div class="cat-name">Volumenstrom</div></button>
+        <button class="cat-pill"        data-cat="mass"      onclick="unitCat('mass')">      <div class="cat-icon">&#x2696;&#xFE0F;</div><div class="cat-name">Gewicht</div></button>
+        <button class="cat-pill"        data-cat="volume"    onclick="unitCat('volume')">    <div class="cat-icon">&#x1F9CA;</div><div class="cat-name">Volumen</div></button>
+        <button class="cat-pill"        data-cat="area"      onclick="unitCat('area')">      <div class="cat-icon">&#x1F4D0;</div><div class="cat-name">Fl&auml;che</div></button>
+      </div>
+    </div>
+
+    <!-- Converter card -->
+    <div class="gc" id="unit-conv-card">
+      <div class="slbl" id="unit-card-title">Druck &mdash; Umrechnung</div>
+
+      <!-- From -->
+      <div class="igrp">
+        <div class="ilbl">Eingabe</div>
+        <div style="display:flex;gap:8px;align-items:stretch">
+          <div class="iw" style="flex:1">
+            <input class="inp" id="unit-from-val" type="number" placeholder="0" inputmode="decimal"
+              style="font-size:22px;padding:12px 14px;border-radius:var(--r-m)"
+              oninput="unitCalc()"/>
+          </div>
+          <select class="gl-sel" id="unit-from-sel" style="width:auto;flex-shrink:0;min-width:100px;padding:11px 32px 11px 12px;font-size:13px" onchange="unitCalc()"></select>
+        </div>
+      </div>
+
+      <!-- Swap -->
+      <div style="display:flex;align-items:center;gap:10px;margin:4px 0 12px">
+        <div style="flex:1;height:1px;background:var(--gb-soft)"></div>
+        <button onclick="unitSwap()"
+          style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;flex-shrink:0;font-family:var(--fm);color:var(--t2)">
+          &#8645;
+        </button>
+        <div style="flex:1;height:1px;background:var(--gb-soft)"></div>
+      </div>
+
+      <!-- To -->
+      <div class="igrp" style="margin-bottom:0">
+        <div class="ilbl">Ergebnis</div>
+        <div style="display:flex;gap:8px;align-items:stretch">
+          <div class="iw" style="flex:1">
+            <div id="unit-to-val"
+              style="width:100%;background:rgba(52,211,153,.08);border:1.5px solid rgba(52,211,153,.38);color:var(--grn);font-family:var(--fm);font-size:22px;font-weight:700;padding:12px 14px;border-radius:var(--r-m);min-height:52px;transition:color .2s"
+              class="unit-ro">&ndash;</div>
+          </div>
+          <select class="gl-sel" id="unit-to-sel" style="width:auto;flex-shrink:0;min-width:100px;padding:11px 32px 11px 12px;font-size:13px;border-color:rgba(52,211,153,.35)" onchange="unitCalc()"></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- All values list -->
+    <div class="gc" id="unit-all-card">
+      <div class="slbl">Alle Werte</div>
+      <div id="unit-all-list" style="display:flex;flex-direction:column;gap:5px">
+        <p style="color:var(--t3);font-size:12px;text-align:center;padding:12px 0">Wert eingeben &rarr;</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
 
 <div id="ib">
   &#128242; App installieren
@@ -1203,6 +1309,7 @@ document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', (
   show($('tab-flow'), t==='flow');
   show($('tab-luft'), t==='luft');
   show($('tab-pipe'), t==='pipe');
+  show($('tab-unit'), t==='unit');
 }));
 
 /* ═══════════════════════════════════════
@@ -1327,6 +1434,198 @@ function flowSwitch(hk){
   $('flow-btn-k').className='hk-btn'+(hk==='k'?' on-k':'');
 }
 flowSwitch('h');
+
+
+/* ═══════════════════════════════════════════════════════
+   EINHEITENRECHNER
+═══════════════════════════════════════════════════════ */
+const UNITS = {
+  pressure: {
+    title: 'Druck \u2014 Umrechnung',
+    base: 'Pa',  // base unit: Pascal
+    units: [
+      { key:'bar',  label:'bar',  factor:1e5 },
+      { key:'mbar', label:'mbar', factor:1e2 },
+      { key:'mWs',  label:'mWs',  factor:9.80665 },
+      { key:'Pa',   label:'Pa',   factor:1 },
+      { key:'hPa',  label:'hPa',  factor:1e2 },
+      { key:'kPa',  label:'kPa',  factor:1e3 },
+    ],
+    defFrom:'mbar', defTo:'kPa',
+  },
+  power: {
+    title: 'Leistung \u2014 Umrechnung',
+    base: 'W',
+    units: [
+      { key:'W',    label:'W',    factor:1 },
+      { key:'kW',   label:'kW',   factor:1e3 },
+      { key:'MW',   label:'MW',   factor:1e6 },
+      { key:'Js',   label:'J/s',  factor:1 },
+      { key:'kJs',  label:'kJ/s', factor:1e3 },
+    ],
+    defFrom:'W', defTo:'kW',
+  },
+  energy: {
+    title: 'Energie \u2014 Umrechnung',
+    base: 'J',
+    units: [
+      { key:'J',    label:'J',    factor:1 },
+      { key:'kJ',   label:'kJ',   factor:1e3 },
+      { key:'Ws',   label:'Ws',   factor:1 },
+      { key:'Wh',   label:'Wh',   factor:3600 },
+      { key:'kWh',  label:'kWh',  factor:3.6e6 },
+    ],
+    defFrom:'kWh', defTo:'kJ',
+  },
+  flow: {
+    title: 'Volumenstrom \u2014 Umrechnung',
+    base: 'm3h',  // m³/h as base
+    units: [
+      { key:'m3h',  label:'m\u00b3/h',   factor:1 },
+      { key:'m3min',label:'m\u00b3/min', factor:60 },
+      { key:'m3s',  label:'m\u00b3/s',   factor:3600 },
+      { key:'ls',   label:'l/s',   factor:3.6 },
+      { key:'lmin', label:'l/min', factor:0.06 },
+      { key:'lh',   label:'l/h',   factor:0.001 },
+    ],
+    defFrom:'m3h', defTo:'ls',
+  },
+  mass: {
+    title: 'Gewicht \u2014 Umrechnung',
+    base: 'kg',
+    units: [
+      { key:'mg',  label:'mg',  factor:1e-6 },
+      { key:'g',   label:'g',   factor:1e-3 },
+      { key:'kg',  label:'kg',  factor:1 },
+      { key:'t',   label:'t',   factor:1e3 },
+    ],
+    defFrom:'kg', defTo:'g',
+  },
+  volume: {
+    title: 'Volumen \u2014 Umrechnung',
+    base: 'm3',
+    units: [
+      { key:'mm3', label:'mm\u00b3',  factor:1e-9 },
+      { key:'cm3', label:'cm\u00b3',  factor:1e-6 },
+      { key:'dm3', label:'dm\u00b3',  factor:1e-3 },
+      { key:'l',   label:'Liter',factor:1e-3 },
+      { key:'m3',  label:'m\u00b3',   factor:1 },
+    ],
+    defFrom:'m3', defTo:'l',
+  },
+  area: {
+    title: 'Fl\u00e4che \u2014 Umrechnung',
+    base: 'm2',
+    units: [
+      { key:'mm2', label:'mm\u00b2',  factor:1e-6 },
+      { key:'cm2', label:'cm\u00b2',  factor:1e-4 },
+      { key:'dm2', label:'dm\u00b2',  factor:1e-2 },
+      { key:'m2',  label:'m\u00b2',   factor:1 },
+      { key:'ha',  label:'ha',   factor:1e4 },
+      { key:'km2', label:'km\u00b2',  factor:1e6 },
+    ],
+    defFrom:'m2', defTo:'cm2',
+  },
+};
+
+let UCurrent = 'pressure';
+
+/**
+ * Format number cleanly — avoid scientific notation, show up to 8 sig figs
+ */
+function ufmt(v) {
+  if (v === 0) return '0';
+  const abs = Math.abs(v);
+  if (abs >= 1e9)  return v.toLocaleString('de-DE', {maximumFractionDigits:0});
+  if (abs >= 1)    return v.toLocaleString('de-DE', {maximumFractionDigits:6, maximumSignificantDigits:8});
+  // Small numbers: use up to 8 significant figures
+  const sig = parseFloat(v.toPrecision(8));
+  return sig.toLocaleString('de-DE', {maximumFractionDigits:10});
+}
+
+function buildSelects(cat) {
+  const d = UNITS[cat];
+  const fs = $('unit-from-sel');
+  const ts = $('unit-to-sel');
+  fs.innerHTML = '';
+  ts.innerHTML = '';
+  d.units.forEach(u => {
+    fs.innerHTML += `<option value="${u.key}"${u.key===d.defFrom?' selected':''}>${u.label}</option>`;
+    ts.innerHTML += `<option value="${u.key}"${u.key===d.defTo  ?' selected':''}>${u.label}</option>`;
+  });
+}
+
+function unitCat(cat) {
+  UCurrent = cat;
+  // Update pill highlight
+  document.querySelectorAll('.cat-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.cat === cat);
+  });
+  $('unit-card-title').textContent = UNITS[cat].title;
+  buildSelects(cat);
+  $('unit-from-val').value = '';
+  $('unit-to-val').textContent = '\u2013';
+  $('unit-to-val').style.color = 'var(--t4)';
+  $('unit-all-list').innerHTML = '<p style="color:var(--t3);font-size:12px;text-align:center;padding:12px 0">Wert eingeben \u2192</p>';
+}
+
+function unitCalc() {
+  const d    = UNITS[UCurrent];
+  const raw  = parseFloat($('unit-from-val').value);
+  const fKey = $('unit-from-sel').value;
+  const tKey = $('unit-to-sel').value;
+
+  if (isNaN(raw)) {
+    $('unit-to-val').textContent = '\u2013';
+    $('unit-to-val').style.color = 'var(--t4)';
+    $('unit-all-list').innerHTML = '<p style="color:var(--t3);font-size:12px;text-align:center;padding:12px 0">Wert eingeben \u2192</p>';
+    return;
+  }
+
+  const fUnit = d.units.find(u => u.key === fKey);
+  const tUnit = d.units.find(u => u.key === tKey);
+
+  // Convert: raw → base → target
+  const base   = raw * fUnit.factor;
+  const result = base / tUnit.factor;
+
+  $('unit-to-val').textContent = ufmt(result);
+  $('unit-to-val').style.color = 'var(--grn)';
+
+  // All units list
+  let html = '';
+  d.units.forEach(u => {
+    const v = base / u.factor;
+    const isFrom = u.key === fKey;
+    const isTo   = u.key === tKey;
+    const cls    = (isFrom || isTo) ? 'unit-row uh' : 'unit-row';
+    const marker = isFrom ? ' \u2190' : isTo ? ' \u2192' : '';
+    html += `<div class="${cls}">
+      <span class="unit-k">${u.label}${marker}</span>
+      <span class="unit-v">${ufmt(v)}</span>
+    </div>`;
+  });
+  $('unit-all-list').innerHTML = html;
+}
+
+function unitSwap() {
+  const fs = $('unit-from-sel');
+  const ts = $('unit-to-sel');
+  const tmp = fs.value;
+  fs.value = ts.value;
+  ts.value = tmp;
+  // Also move result value to input
+  const resText = $('unit-to-val').textContent;
+  if (resText !== '\u2013') {
+    const cleaned = resText.replace(/\./g,'').replace(',','.');
+    const n = parseFloat(cleaned);
+    if (!isNaN(n)) $('unit-from-val').value = n;
+  }
+  unitCalc();
+}
+
+// Init unit tab
+unitCat('pressure');
 
 </script>
 </body>
