@@ -542,18 +542,22 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 #tab-flow, #tab-luft, #tab-pipe, #tab-unit { overflow-x: hidden; max-width: 100%; }
 
 /* Unit converter */
-.cat-pill {
-  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
-  border-radius:var(--r-m); padding:10px 4px; text-align:center;
-  cursor:pointer; transition:all .18s; font-family:var(--f);
+/* Category select styled like gl-sel but green accent */
+.cat-sel {
+  width:100%;
+  background:var(--glass-mid);
+  border:1px solid var(--grn-b);
+  color:var(--t1);
+  font-family:var(--f); font-size:15px; font-weight:600;
+  padding:13px 38px 13px 14px;
+  border-radius:var(--r-m); outline:none; appearance:none; cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(52,211,153,.7)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 13px center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 0 0 1px rgba(52,211,153,.12);
+  transition:border-color .15s;
 }
-.cat-pill.active {
-  background:var(--grn-t); border-color:var(--grn-b);
-  box-shadow:0 0 12px rgba(52,211,153,.08);
-}
-.cat-icon { font-size:18px; margin-bottom:4px; }
-.cat-name { font-size:10px; font-weight:700; color:var(--t2); line-height:1.2; }
-.cat-pill.active .cat-name { color:var(--grn); }
+.cat-sel:focus { border-color:var(--grn); box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 3px rgba(52,211,153,.12); outline:none; }
+.cat-sel option { background:#1c1c1e; color:#fff; font-family:var(--f); }
 .unit-row {
   display:flex; justify-content:space-between; align-items:baseline;
   padding:8px 11px; border-radius:var(--r-s);
@@ -954,15 +958,15 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
     <!-- Category grid -->
     <div class="gc">
       <div class="slbl">Kategorie w&auml;hlen</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-        <button class="cat-pill active" data-cat="pressure"  onclick="unitCat('pressure')">  <div class="cat-icon">&#x1F535;</div><div class="cat-name">Druck</div></button>
-        <button class="cat-pill"        data-cat="power"     onclick="unitCat('power')">     <div class="cat-icon">&#x26A1;</div> <div class="cat-name">Leistung</div></button>
-        <button class="cat-pill"        data-cat="energy"    onclick="unitCat('energy')">    <div class="cat-icon">&#x1F50B;</div><div class="cat-name">Energie</div></button>
-        <button class="cat-pill"        data-cat="flow"      onclick="unitCat('flow')">      <div class="cat-icon">&#x1F4A7;</div><div class="cat-name">Volumenstrom</div></button>
-        <button class="cat-pill"        data-cat="mass"      onclick="unitCat('mass')">      <div class="cat-icon">&#x2696;&#xFE0F;</div><div class="cat-name">Gewicht</div></button>
-        <button class="cat-pill"        data-cat="volume"    onclick="unitCat('volume')">    <div class="cat-icon">&#x1F9CA;</div><div class="cat-name">Volumen</div></button>
-        <button class="cat-pill"        data-cat="area"      onclick="unitCat('area')">      <div class="cat-icon">&#x1F4D0;</div><div class="cat-name">Fl&auml;che</div></button>
-      </div>
+      <select class="cat-sel" id="unit-cat-sel" onchange="unitCat(this.value)">
+        <option value="pressure">&#x1F535;&#xFE0F;&ensp;Druck</option>
+        <option value="power">&#x26A1;&ensp;Leistung</option>
+        <option value="energy">&#x1F50B;&ensp;Energie</option>
+        <option value="flow">&#x1F4A7;&ensp;Volumenstrom</option>
+        <option value="mass">&#x2696;&#xFE0F;&ensp;Gewicht</option>
+        <option value="volume">&#x1F9CA;&ensp;Volumen</option>
+        <option value="area">&#x1F4D0;&ensp;Fl&auml;che</option>
+      </select>
     </div>
 
     <!-- Converter card -->
@@ -1471,7 +1475,7 @@ const UNITS = {
     units: [
       { key:'bar',  label:'bar',  factor:1e5 },
       { key:'mbar', label:'mbar', factor:1e2 },
-      { key:'mWs',  label:'mWs',  factor:9806.65 },
+      { key:'mWs',  label:'mWs',  factor:9806.65, decimals:2 },
       { key:'Pa',   label:'Pa',   factor:1 },
       { key:'hPa',  label:'hPa',  factor:1e2 },
       { key:'kPa',  label:'kPa',  factor:1e3 },
@@ -1558,8 +1562,12 @@ let UCurrent = 'pressure';
 /**
  * Format number cleanly — avoid scientific notation, show up to 8 sig figs
  */
-function ufmt(v) {
+function ufmt(v, decimals) {
   if (v === 0) return '0';
+  // Fixed decimals override (e.g. mWs always 2 dp)
+  if (decimals !== undefined) {
+    return v.toLocaleString('de-DE', {minimumFractionDigits:0, maximumFractionDigits:decimals});
+  }
   const abs = Math.abs(v);
   if (abs >= 1e9)  return v.toLocaleString('de-DE', {maximumFractionDigits:0});
   if (abs >= 1)    return v.toLocaleString('de-DE', {maximumFractionDigits:6, maximumSignificantDigits:8});
@@ -1582,10 +1590,9 @@ function buildSelects(cat) {
 
 function unitCat(cat) {
   UCurrent = cat;
-  // Update pill highlight
-  document.querySelectorAll('.cat-pill').forEach(p => {
-    p.classList.toggle('active', p.dataset.cat === cat);
-  });
+  // Sync dropdown if called programmatically
+  const sel = $('unit-cat-sel');
+  if (sel && sel.value !== cat) sel.value = cat;
   $('unit-card-title').textContent = UNITS[cat].title;
   buildSelects(cat);
   $('unit-from-val').value = '';
@@ -1614,7 +1621,7 @@ function unitCalc() {
   const base   = raw * fUnit.factor;
   const result = base / tUnit.factor;
 
-  $('unit-to-val').textContent = ufmt(result);
+  $('unit-to-val').textContent = ufmt(result, tUnit.decimals);
   $('unit-to-val').style.color = 'var(--grn)';
 
   // All units list
@@ -1627,7 +1634,7 @@ function unitCalc() {
     const marker = isFrom ? ' \u2190' : isTo ? ' \u2192' : '';
     html += `<div class="${cls}">
       <span class="unit-k">${u.label}${marker}</span>
-      <span class="unit-v">${ufmt(v)}</span>
+      <span class="unit-v">${ufmt(v, u.decimals)}</span>
     </div>`;
   });
   $('unit-all-list').innerHTML = html;
