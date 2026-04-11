@@ -3,157 +3,112 @@
 
 ---
 
-## Übersicht
+## Zwei Fehler aus dem Build-Log — beide einfach zu lösen
 
-Der Worker läuft kostenlos auf Cloudflare und zählt:
-- **Unique Visitors** pro Tag (anonyme UUID, kein Personenbezug)
-- **Gesamtbesucher** kumuliert
-- **Seitenaufrufe** pro Tag
-
----
-
-## Schritt 1 — Cloudflare Account
-
-1. Gehe zu **https://dash.cloudflare.com**
-2. Falls noch kein Account: kostenlos registrieren
-3. Im Dashboard links auf **«Workers & Pages»** klicken
+| Fehler | Ursache | Fix |
+|---|---|---|
+| Worker name mismatch | wrangler.toml hatte falschen Namen | Bereits korrigiert auf "massenstromrechner" |
+| KV namespace not valid | Platzhalter-ID noch nicht ersetzt | Schritt 1 unten |
 
 ---
 
-## Schritt 2 — KV Namespace anlegen (Datenspeicher)
+## Schritt 1 — KV Namespace ID herausfinden
 
-1. Im linken Menü: **Workers & Pages → KV**
-2. Klick auf **«Create a Namespace»**
-3. Name eingeben: `massenstrom-visits`
-4. Auf **«Add»** klicken
-5. Die angezeigte **Namespace-ID kopieren** (langer Hex-String)
-   → Wird später gebraucht!
-
----
-
-## Schritt 3 — Worker erstellen
-
-### Option A: Über das Dashboard (empfohlen, kein Terminal nötig)
-
-1. **Workers & Pages → Create Application → Create Worker**
-2. Worker-Name eingeben: `massenstrom-analytics`
-3. Klick auf **«Deploy»** (leerer Beispiel-Worker wird erstellt)
-4. Klick auf **«Edit code»**
-5. Den kompletten Inhalt der Datei **`worker.js`** in den Editor kopieren
-6. Klick auf **«Save and Deploy»**
-
-### Option B: Über Wrangler CLI (für Entwickler)
-
-```bash
-npm install -g wrangler
-wrangler login
-
-# In den Projektordner wechseln (wo worker.js + wrangler.toml liegen)
-wrangler deploy
-```
+1. Gehe zu https://dash.cloudflare.com
+2. Links: Workers & Pages → KV
+3. Klick auf den Namespace "massenstrom-visits"
+4. Oben auf der Seite steht die Namespace ID (32-stelliger Hex-String):
+   Beispiel: a1b2c3d4e5f6789012345678901234ab
+   Diese ID kopieren.
 
 ---
 
-## Schritt 4 — KV Namespace mit Worker verbinden
+## Schritt 2 — wrangler.toml im GitHub-Repo anpassen
 
-1. Im Worker-Dashboard: **«Settings» → «Variables»**
-2. Unter **«KV Namespace Bindings»** klick auf **«Add binding»**
+Datei pwa3/wrangler.toml auf GitHub öffnen (Edit-Button):
+
+Zeile ändern:
+  id = "HIER_KV_NAMESPACE_ID_EINTRAGEN"
+
+Ersetzen durch die echte ID:
+  id = "a1b2c3d4e5f6789012345678901234ab"
+
+Datei speichern → Commit → GitHub loest automatisch neues Deployment aus.
+
+---
+
+## Schritt 3 — KV Namespace im Dashboard verknuepfen
+
+1. Workers & Pages → massenstromrechner → Settings → Variables
+2. Abschnitt "KV Namespace Bindings" → "Add binding"
 3. Eintragen:
-   - **Variable name:** `VISITS`
-   - **KV Namespace:** `massenstrom-visits` (aus Schritt 2)
-4. Klick auf **«Save»**
+   Variable name: VISITS
+   KV Namespace:  massenstrom-visits
+4. "Save" klicken
 
 ---
 
-## Schritt 5 — Worker-URL notieren
+## Schritt 4 — Worker-URL in index.html eintragen
 
-Nach dem Deploy erscheint die URL:
-```
-https://massenstrom-analytics.DEIN-SUBDOMAIN.workers.dev
-```
+Nach erfolgreichem Deploy diese Zeile in index.html suchen:
+  const WORKER_URL = 'https://DEIN-WORKER.massenstrom.workers.dev';
 
-Diese URL in der Datei **`index.html`** eintragen:
+Ersetzen durch die echte URL (aus dem Cloudflare Dashboard):
+  const WORKER_URL = 'https://massenstromrechner.DEIN-SUBDOMAIN.workers.dev';
 
-```javascript
-// Zeile suchen:
-const WORKER_URL = 'https://DEIN-WORKER.massenstrom.workers.dev';
-
-// Ersetzen durch eigene URL, z.B.:
-const WORKER_URL = 'https://massenstrom-analytics.stefan.workers.dev';
-```
+Dann index.html auf GitHub hochladen.
 
 ---
 
-## Schritt 6 — index.html auf GitHub Pages aktualisieren
+## Schritt 5 — Testen
 
-1. `index.html` (mit eingetragener Worker-URL) auf GitHub hochladen
-2. GitHub Pages baut automatisch neu
-3. Nach ca. 1 Minute ist die neue Version live
+Worker direkt im Browser aufrufen:
+  https://massenstromrechner.DEIN-SUBDOMAIN.workers.dev?uid=test&page=/
 
----
+Erwartete Antwort:
+  {
+    "date": "2026-04-11",
+    "unique_visits_today": 1,
+    "total_visits_all": 1,
+    "page_views_today": 1,
+    "page": "/",
+    "counted": true
+  }
 
-## Schritt 7 — Testen
-
-Browser-Konsole öffnen (F12 → Console):
-```
-[Analytics] Unique Visitors heute: 1
-```
-
-Oder direkt die Worker-URL aufrufen:
-```
-https://massenstrom-analytics.DEIN-SUBDOMAIN.workers.dev?uid=test&page=/
-```
-
-Antwort:
-```json
-{
-  "date": "2026-04-11",
-  "unique_visits_today": 1,
-  "total_visits_all": 1,
-  "page_views_today": 1,
-  "page": "/",
-  "counted": true
-}
-```
+In der Browser-Konsole der App (F12):
+  [Analytics] Unique Visitors heute: 1
 
 ---
 
-## Daten einsehen (KV Storage)
+## Daten einsehen
 
-1. **Workers & Pages → KV → massenstrom-visits**
-2. Klick auf **«View»**
-3. Gespeicherte Schlüssel sichtbar, z.B.:
-   - `count:2026-04-11` → Unique Visitors heute
-   - `total:all` → Gesamtbesucher
-   - `page:2026-04-11:/` → Seitenaufrufe heute
+Cloudflare Dashboard → Workers & Pages → KV → massenstrom-visits → View
 
----
-
-## Kosten
-
-Der **Cloudflare Free Plan** enthält:
-- **100.000 Worker-Requests/Tag** kostenlos
-- **1 GB KV Storage** kostenlos
-- **10 Millionen KV-Operationen/Monat** kostenlos
-
-Für eine normale HLS-Planungs-App völlig ausreichend.
+Schluessel          | Inhalt
+--------------------|------------------------------------------
+count:2026-04-11    | Unique Visitors heute
+total:all           | Gesamtbesucher aller Zeiten
+page:2026-04-11:/   | Seitenaufrufe heute
+visit:2026-04-11:uuid | Einzelbesuch (laeuft nach 90 Tagen ab)
 
 ---
 
-## Datenschutz / DSGVO
+## Kosten (Free Plan)
 
-- Gespeichert wird nur eine **zufällige UUID** (kein Name, keine IP, keine E-Mail)
-- Die UUID liegt nur im **localStorage des Browsers** des Nutzers
-- Kein Cookie, kein Session-Tracking
-- Nach 90 Tagen automatische Löschung der täglichen Einträge
+Ressource         | Limit Free     | Erwarteter Verbrauch
+------------------|----------------|---------------------
+Worker Requests   | 100.000 / Tag  | ~50-500 / Tag
+KV Reads          | 10 Mio. / Mon. | ~500 / Tag
+KV Writes         | 1 Mio. / Mon.  | ~200 / Tag
+KV Storage        | 1 GB           | < 1 MB
+
+Voellig kostenlos fuer eine interne HLS-Planungsapp.
 
 ---
 
-## Dateien im ZIP
+## Datenschutz
 
-| Datei | Zweck |
-|---|---|
-| `index.html` | App mit Tracking-Script (WORKER_URL anpassen!) |
-| `worker.js` | Cloudflare Worker Code → in Dashboard einfügen |
-| `wrangler.toml` | Konfiguration für Wrangler CLI (optional) |
-| `sw.js` | Service Worker (Offline-Support) |
+- Nur anonyme UUID gespeichert (kein Personenbezug)
+- Kein Cookie, keine IP-Adresse, kein Name
+- Automatische Loeschung nach 90 Tagen
+- DSGVO-konform
