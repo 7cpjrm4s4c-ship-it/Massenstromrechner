@@ -1654,5 +1654,51 @@ function unitSwap() {
 unitCat('pressure');
 
 </script>
+
+<script>
+/* ── Cloudflare Worker Analytics ── */
+(function() {
+  'use strict';
+
+  /** Persistente anonyme User-ID (kein persoenlicher Bezug) */
+  function getUid() {
+    let id = localStorage.getItem('msr_uid');
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem('msr_uid', id);
+    }
+    return id;
+  }
+
+  /** Seiten-Tracking an Cloudflare Worker senden */
+  function track() {
+    /* WORKER_URL: hier eigene Worker-URL eintragen (siehe Anleitung) */
+    const WORKER_URL = 'https://DEIN-WORKER.massenstrom.workers.dev';
+
+    const params = new URLSearchParams({
+      uid:  getUid(),
+      page: location.pathname,
+      ref:  document.referrer || 'direct',
+    });
+
+    fetch(WORKER_URL + '?' + params.toString(), { method: 'GET' })
+      .then(r => r.json())
+      .then(d => {
+        /* Optional: Besucherzahl in Konsole — fuer Debugging */
+        if (typeof d.unique_visits_today === 'number') {
+          console.debug('[Analytics] Unique Visitors heute:', d.unique_visits_today);
+        }
+      })
+      .catch(() => { /* Tracking-Fehler still ignorieren */ });
+  }
+
+  /* Erst nach vollstaendigem Laden tracken (kein Einfluss auf Performance) */
+  if (document.readyState === 'complete') {
+    track();
+  } else {
+    window.addEventListener('load', track, { once: true });
+  }
+})();
+</script>
 </body>
 </html>

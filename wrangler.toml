@@ -1,0 +1,7 @@
+name            = "massenstrom-analytics"
+main            = "worker.js"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding  = "VISITS"
+id       = "HIER_KV_NAMESPACE_ID_EINTRAGEN"
