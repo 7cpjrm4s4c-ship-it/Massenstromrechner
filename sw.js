@@ -1,10 +1,18 @@
-/* Massenstromrechner – Service Worker v3
-   Network-first fuer index.html → immer aktuell beim Neustart
-   Assets gecacht fuer Offline-Betrieb.
+/* Massenstromrechner – Service Worker v4
+   - Network-first fuer index.html
+   - Worker/Analytics URLs werden NIE gecacht → immer direkter Netzwerkaufruf
+   - Assets gecacht fuer Offline-Betrieb
 */
-const CACHE = 'massenstrom-v3';
+const CACHE = 'massenstrom-v4';
 const CACHE_ASSETS = [
   './manifest.json','./icon-192.svg','./icon-512.svg','./favicon.svg',
+];
+
+/* URLs die NIEMALS gecacht werden sollen (Analytics, externe APIs) */
+const NEVER_CACHE = [
+  'workers.dev',
+  'cloudflare',
+  'analytics',
 ];
 
 self.addEventListener('install', e => {
@@ -28,7 +36,13 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = e.request.url;
 
-  // Google Fonts: Cache-first
+  /* Analytics / Worker URLs: immer direkt ans Netz, nie cachen */
+  if (NEVER_CACHE.some(pattern => url.includes(pattern))) {
+    e.respondWith(fetch(e.request));
+    return;
+  }
+
+  /* Google Fonts: Cache-first */
   if (url.includes('fonts.googleapis') || url.includes('fonts.gstatic')) {
     e.respondWith(
       caches.open(CACHE).then(c =>
@@ -42,7 +56,7 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // index.html: Network-first → frische Version, Offline-Fallback
+  /* index.html: Network-first → frische Version, Offline-Fallback */
   if (e.request.mode === 'navigate' ||
       url.endsWith('/') || url.endsWith('index.html')) {
     e.respondWith(
@@ -58,7 +72,7 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Alle anderen: Cache-first mit Network-Fallback
+  /* Alle anderen: Cache-first mit Network-Fallback */
   e.respondWith(
     caches.match(e.request).then(cached =>
       cached || fetch(e.request).then(res => {
