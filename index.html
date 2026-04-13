@@ -578,6 +578,28 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
   border-color:rgba(255,107,53,.40);
   color:var(--heat-t);
 }
+
+/* Einheiten-Toggle neben Eingabefeld */
+.unit-toggle {
+  position:absolute; right:6px; top:50%; transform:translateY(-50%);
+  display:flex; border-radius:8px; overflow:hidden;
+  border:1px solid var(--gb-mid);
+  background:var(--glass-mid);
+  z-index:2; flex-shrink:0;
+}
+.ut-btn {
+  font-family:var(--f); font-size:11px; font-weight:700;
+  padding:5px 9px; border:none; background:transparent;
+  color:var(--t3); cursor:pointer; transition:all .15s;
+  white-space:nowrap;
+}
+.ut-btn.active {
+  background:rgba(255,255,255,.18);
+  color:var(--t1);
+}
+/* Angepasstes Padding für inp mit Toggle rechts */
+.inp.has-toggle { padding-right:90px; }
+.inp-sm.has-toggle { padding-right:90px; }
 </style>
 </head>
 <body>
@@ -654,18 +676,24 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
         </div>
         <!-- Q input -->
         <div class="igrp" id="h-ig-q">
-          <div class="ilbl">Heizlast [W]</div>
+          <div class="ilbl" id="h-q-lbl">Heizlast [W]</div>
           <div class="iwrap">
-            <input class="inp" id="h-q" type="text" inputmode="decimal" placeholder="0"/>
-            <span class="iunit">W</span>
+            <input class="inp has-toggle" id="h-q" type="text" inputmode="decimal" placeholder="0"/>
+            <div class="unit-toggle">
+              <button class="ut-btn active" id="h-q-W"  onclick="setQUnit('h','W')">W</button>
+              <button class="ut-btn"        id="h-q-kW" onclick="setQUnit('h','kW')">kW</button>
+            </div>
           </div>
         </div>
-        <!-- ṁ input [kg/h] -->
+        <!-- ṁ input [kg/h or m³/h] -->
         <div class="igrp" id="h-ig-ms" style="display:none">
-          <div class="ilbl">Massenstrom [kg/h]</div>
+          <div class="ilbl" id="h-ms-lbl">Massenstrom [kg/h]</div>
           <div class="iwrap">
-            <input class="inp" id="h-ms-in" type="text" inputmode="decimal" placeholder="0"/>
-            <span class="iunit">kg/h</span>
+            <input class="inp has-toggle" id="h-ms-in" type="text" inputmode="decimal" placeholder="0"/>
+            <div class="unit-toggle">
+              <button class="ut-btn active" id="h-ms-kgh" onclick="setMsUnit('h','kgh')">kg/h</button>
+              <button class="ut-btn"        id="h-ms-m3h" onclick="setMsUnit('h','m3h')">m³/h</button>
+            </div>
           </div>
         </div>
         <!-- ΔT input -->
@@ -697,17 +725,23 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
           <button class="mbtn"        data-p="k" data-v="dt">&Delta;T&nbsp;Temperatur</button>
         </div>
         <div class="igrp" id="k-ig-q">
-          <div class="ilbl">K&uuml;hllast [W]</div>
+          <div class="ilbl" id="k-q-lbl">K&uuml;hllast [W]</div>
           <div class="iwrap">
-            <input class="inp" id="k-q" type="text" inputmode="decimal" placeholder="0"/>
-            <span class="iunit">W</span>
+            <input class="inp has-toggle" id="k-q" type="text" inputmode="decimal" placeholder="0"/>
+            <div class="unit-toggle">
+              <button class="ut-btn active" id="k-q-W"  onclick="setQUnit('k','W')">W</button>
+              <button class="ut-btn"        id="k-q-kW" onclick="setQUnit('k','kW')">kW</button>
+            </div>
           </div>
         </div>
         <div class="igrp" id="k-ig-ms" style="display:none">
-          <div class="ilbl">Massenstrom [kg/h]</div>
+          <div class="ilbl" id="k-ms-lbl">Massenstrom [kg/h]</div>
           <div class="iwrap">
-            <input class="inp" id="k-ms-in" type="text" inputmode="decimal" placeholder="0"/>
-            <span class="iunit">kg/h</span>
+            <input class="inp has-toggle" id="k-ms-in" type="text" inputmode="decimal" placeholder="0"/>
+            <div class="unit-toggle">
+              <button class="ut-btn active" id="k-ms-kgh" onclick="setMsUnit('k','kgh')">kg/h</button>
+              <button class="ut-btn"        id="k-ms-m3h" onclick="setMsUnit('k','m3h')">m³/h</button>
+            </div>
           </div>
         </div>
         <div class="igrp" id="k-ig-dt">
@@ -850,8 +884,14 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 
       <!-- Q input (modes v + dt) -->
       <div class="igrp" id="luft-ig-q" style="display:none;margin-top:var(--gap)">
-        <div class="ilbl">Leistung Q</div>
-        <div class="iwrap"><input class="inp" id="luft-q-in" type="text" inputmode="decimal" placeholder="0"/><span class="iunit">W</span></div>
+        <div class="ilbl" id="luft-q-lbl">Leistung Q [W]</div>
+        <div class="iwrap">
+          <input class="inp has-toggle" id="luft-q-in" type="text" inputmode="decimal" placeholder="0"/>
+          <div class="unit-toggle">
+            <button class="ut-btn active" id="luft-q-W"  onclick="setQUnit('luft','W')">W</button>
+            <button class="ut-btn"        id="luft-q-kW" onclick="setQUnit('luft','kW')">kW</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1205,9 +1245,9 @@ function calcPanel(p) {
   const rho = f.rho;
   const m   = ST[p].mode;
 
-  const qv    = parseDE($(p+'-q')?.value)         || 0;
-  const msh   = parseDE($(p+'-ms-in')?.value)    || 0;  // kg/h input
-  const ms_in = msh / 3600;                              // → kg/s
+  const qv    = getQWatt(p);                      // W (mit Einheit-Toggle)
+  const msh   = getMsKgh(p);                      // kg/h (mit Einheit-Toggle)
+  const ms_in = msh / 3600;                       // → kg/s
   const dtv   = parseFloat($(p+'-dt')?.value)    || 0;
 
   let ms=0, q=0, dt=0, ok=false;
@@ -1412,7 +1452,7 @@ function calcLuft(){
   const hk=LST.hk,m=LST.mode;
   const vv=parseDE($('luft-v')?.value)||0;
   const dtDirect=parseFloat($('luft-dt-direct')?.value)||0;
-  const qIn=parseDE($('luft-q-in')?.value)||0;
+  const qIn=getLuftQWatt();  // W (mit Einheit-Toggle)
 
   // Einzelnes Δt-Feld für alle Modi
   const dt = dtDirect;
@@ -1781,6 +1821,90 @@ document.addEventListener('focusout', function(e) {
     applyThousands(e.target);
   }
 });
+
+
+/* ═══════════════════════════════════════════════════════
+   EINHEITEN-TOGGLE STATE
+   qUnit[p]  = 'W' | 'kW'
+   msUnit[p] = 'kgh' | 'm3h'
+   luftQUnit = 'W' | 'kW'
+═══════════════════════════════════════════════════════ */
+const qUnit   = { h:'W',   k:'W'   };
+const msUnit  = { h:'kgh', k:'kgh' };
+let   luftQUnit = 'W';
+
+function setQUnit(p, u) {
+  if (p === 'luft') {
+    luftQUnit = u;
+    $('luft-q-W') .classList.toggle('active', u === 'W');
+    $('luft-q-kW').classList.toggle('active', u === 'kW');
+    $('luft-q-lbl').textContent = 'Leistung Q [' + u + ']';
+    // Wert umrechnen
+    const el = $('luft-q-in');
+    const v = parseDE(el.value);
+    if (!isNaN(v) && el.value.trim() !== '') {
+      el.value = u === 'kW'
+        ? fmtInput(v / 1000, 3)
+        : fmtInput(v * 1000, 0);
+    }
+    calcLuft();
+  } else {
+    qUnit[p] = u;
+    $(p + '-q-W') .classList.toggle('active', u === 'W');
+    $(p + '-q-kW').classList.toggle('active', u === 'kW');
+    const lbl = $(p + '-q-lbl');
+    if (lbl) lbl.textContent = (p === 'h' ? 'Heizlast' : 'Kühllast') + ' [' + u + ']';
+    // Wert umrechnen
+    const el = $(p + '-q');
+    const v = parseDE(el.value);
+    if (!isNaN(v) && el.value.trim() !== '') {
+      el.value = u === 'kW'
+        ? fmtInput(v / 1000, 3)
+        : fmtInput(v * 1000, 0);
+    }
+    calcAll();
+  }
+}
+
+function setMsUnit(p, u) {
+  const f = FL[$('medium').value];
+  const oldU = msUnit[p];
+  msUnit[p] = u;
+  $(p + '-ms-kgh').classList.toggle('active', u === 'kgh');
+  $(p + '-ms-m3h').classList.toggle('active', u === 'm3h');
+  const lbl = $(p + '-ms-lbl');
+  if (lbl) lbl.textContent = 'Massenstrom [' + (u === 'kgh' ? 'kg/h' : 'm\u00b3/h') + ']';
+  // Wert umrechnen
+  const el = $(p + '-ms-in');
+  const v = parseDE(el.value);
+  if (!isNaN(v) && el.value.trim() !== '') {
+    if (oldU === 'kgh' && u === 'm3h') {
+      el.value = fmtInput(v / f.rho, 4);
+    } else if (oldU === 'm3h' && u === 'kgh') {
+      el.value = fmtInput(v * f.rho, 1);
+    }
+  }
+  calcAll();
+}
+
+/** Gibt Leistung in Watt zurück, unabhängig von der gewählten Einheit */
+function getQWatt(p) {
+  const raw = parseDE($(p + '-q')?.value) || 0;
+  return qUnit[p] === 'kW' ? raw * 1000 : raw;
+}
+
+/** Gibt Massenstrom in kg/h zurück, unabhängig von der gewählten Einheit */
+function getMsKgh(p) {
+  const raw = parseDE($(p + '-ms-in')?.value) || 0;
+  const f   = FL[$('medium').value];
+  return msUnit[p] === 'm3h' ? raw * f.rho : raw;
+}
+
+/** Gibt Luft-Leistung in Watt zurück */
+function getLuftQWatt() {
+  const raw = parseDE($('luft-q-in')?.value) || 0;
+  return luftQUnit === 'kW' ? raw * 1000 : raw;
+}
 
 </script>
 </body>
