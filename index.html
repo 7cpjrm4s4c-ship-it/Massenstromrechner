@@ -789,12 +789,6 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
         </div>
         <div class="pipe-pair" id="pi-k-pair"></div>
       </div>
-      <div class="legend" style="margin-top:12px">
-        <span style="color:var(--ok)">&#9679;&thinsp;&le;&thinsp;75&thinsp;% &mdash; optimal</span>
-        <span style="color:var(--warn)">&#9679;&thinsp;&le;&thinsp;100&thinsp;Pa/m</span>
-        <span style="color:var(--danger)">&#9679;&thinsp;&gt;&thinsp;100&thinsp;Pa/m</span>
-        <span style="color:var(--blue)">&#9733;&thinsp;empfohlen</span>
-      </div>
     </div>
 
     <div id="pi-placeholder" class="placeholder">
@@ -888,7 +882,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
     <div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.20);border-radius:var(--r-l);padding:12px 14px">
       <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--air-t);margin-bottom:9px;font-family:var(--f)">Luftkennwerte (aktuell)</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
-        <div style="font-size:10px;color:var(--t2)">&rho;<sub>L</sub> bei t<sub>ZL</sub></div>
+        <div style="font-size:10px;color:var(--t2)">&rho;<sub>L</sub> bei 20&thinsp;&deg;C</div>
         <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)" id="luft-rho-display">– kg/m³</div>
         <div style="font-size:10px;color:var(--t2)">c<sub>p,L</sub></div>
         <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)">1.005 J/(kg·K)</div>
@@ -997,7 +991,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
               style="width:100%;background:rgba(52,211,153,.08);border:1.5px solid rgba(52,211,153,.38);color:var(--grn);font-family:var(--fm);font-size:22px;font-weight:700;padding:12px 14px;border-radius:var(--r-m);min-height:52px;transition:color .2s"
               class="unit-ro">&ndash;</div>
           </div>
-          <select class="gl-sel" id="unit-to-sel" style="width:auto;flex-shrink:0;min-width:100px;padding:11px 32px 11px 12px;font-size:13px;border-color:rgba(52,211,153,.35)" onchange="unitCalc()"></select>
+          <select class="gl-sel" id="unit-to-sel" style="width:auto;flex-shrink:0;min-width:100px;padding:11px 32px 11px 12px;font-size:13px;border-color:rgba(52,211,153,.35);background-color:rgba(52,211,153,.08)" onchange="unitCalc()"></select>
         </div>
       </div>
     </div>
@@ -1304,6 +1298,7 @@ document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', (
   show($('tab-luft'), t==='luft');
   show($('tab-pipe'), t==='pipe');
   show($('tab-unit'), t==='unit');
+  if(t==='unit'){buildSelects(UCurrent);}
 }));
 
 /* ═══════════════════════════════════════
@@ -1366,7 +1361,9 @@ function luftSwitch(hk){
     ?'<div class="dot dot-h"></div><span class="ptitle-lbl">Heizleistung \u2014 Eingaben</span>'
     :'<div class="dot dot-c"></div><span class="ptitle-lbl" style="color:var(--cold-t)">K\u00fchlleistung \u2014 Eingaben</span>';
   const dtl=$('luft-dt-auto-lbl');
-  if(dtl)dtl.innerHTML=hk==='h'?'&Delta;t = t<sub>Zuluft</sub> &minus; t<sub>Raum</sub> (Heizung)':'&Delta;t = t<sub>Raum</sub> &minus; t<sub>Zuluft</sub> (K&uuml;hlung)';
+  if(dtl)dtl.innerHTML=hk==='h'
+    ?'&Delta;t Temperaturspreizung &mdash; Heizung (Zuluft &gt; Raum)'
+    :'&Delta;t Temperaturspreizung &mdash; Kühlung (Raum &gt; Zuluft)';
 
   $('luft-out-title').textContent=hk==='h'?'Ergebnis \u2014 Heizleistung Luft':'Ergebnis \u2014 K\u00fchlleistung Luft';
   calcLuft();
@@ -1390,12 +1387,12 @@ function calcLuft(){
   const qIn=parseFloat($('luft-q-in')?.value)||0;
 
   // Einzelnes Δt-Feld für alle Modi
-  const dt=m==='dt'?dtDirect:dtDirect;
-  const tRef=!isNaN(tzl)&&tzl>-273?tzl:20;
+  const dt = dtDirect;
+  const tRef = 20;  // Normluft 20°C (keine Temperatureingabe mehr)
   const rho=rhoAir(tRef);
   const fac=rho*CP_AIR/3600;
 
-  const rd=$('luft-rho-display');if(rd)rd.textContent=rho.toFixed(3)+'\u202fkg/m\u00b3';
+  const rd=$('luft-rho-display');if(rd)rd.textContent=rho.toFixed(3)+'\u202fkg/m\u00b3 (20\u00b0C)';
   const fd=$('luft-factor-display');if(fd)fd.textContent=(fac).toFixed(4)+'\u202fWh/(m\u00b3\u00b7K)';
 
   let Q=0,V=0,dT=0,ok=false;
