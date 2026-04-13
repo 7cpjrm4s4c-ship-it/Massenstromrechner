@@ -1735,11 +1735,50 @@ unitCat('pressure');
 })();
 
 /* Select-all-on-focus für alle Eingabefelder */
+/* Tausendertrennzeichen: Formatierung beim Verlassen, klare Anzeige beim Eingeben */
+const FMT_INPUTS = {
+  'h-q':0,'k-q':0,'h-ms-in':1,'k-ms-in':1,
+  'luft-v':0,'luft-q-in':0,'p-vol':3
+};
+
+function applyThousands(el) {
+  const dec = FMT_INPUTS[el.id];
+  if (dec === undefined) return;
+  const v = parseDE(el.value);
+  if (!isNaN(v) && el.value.trim() !== '') {
+    el.value = v.toLocaleString('de-DE', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: dec
+    });
+  }
+}
+
+function stripForEditing(el) {
+  // Beim Antippen: Tausenderpunkte entfernen damit man normal tippen kann
+  const dec = FMT_INPUTS[el.id];
+  if (dec === undefined) return;
+  const v = parseDE(el.value);
+  if (!isNaN(v) && el.value.trim() !== '') {
+    // Zeige Rohzahl mit Komma als Dezimaltrennzeichen
+    el.value = dec > 0
+      ? v.toLocaleString('de-DE', {minimumFractionDigits:0, maximumFractionDigits:dec})
+          .replace(/\./g, '')   // Tausenderpunkte raus
+      : String(Math.round(v));
+  }
+  setTimeout(() => el.select(), 0);
+}
+
 document.addEventListener('focusin', function(e) {
-  if (e.target && (e.target.tagName === 'INPUT') &&
-      (e.target.type === 'text' || e.target.type === 'number') &&
-      !e.target.readOnly) {
-    setTimeout(() => e.target.select(), 0);
+  if (e.target && e.target.tagName === 'INPUT' &&
+      e.target.type === 'text' && !e.target.readOnly) {
+    stripForEditing(e.target);
+  }
+});
+
+document.addEventListener('focusout', function(e) {
+  if (e.target && e.target.tagName === 'INPUT' &&
+      e.target.type === 'text' && !e.target.readOnly) {
+    applyThousands(e.target);
   }
 });
 
