@@ -243,9 +243,9 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 
 /* Section label */
 .slbl {
-  font-family:var(--f); font-size:9px; font-weight:700;
-  letter-spacing:.15em; text-transform:uppercase;
-  color:var(--t3); margin-bottom:14px;
+  font-family:var(--f); font-size:10px; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase;
+  color:var(--t2); margin-bottom:14px;
 }
 
 /* Panel title row */
@@ -253,7 +253,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 .dot-h { background:var(--heat); box-shadow:0 0 7px var(--heat); }
 .dot-c { background:var(--cold); box-shadow:0 0 7px var(--cold); }
-.ptitle-lbl { font-family:var(--f); font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+.ptitle-lbl { font-family:var(--f); font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:none; }
 .gc-h .ptitle-lbl { color:var(--heat-t); }
 .gc-c .ptitle-lbl { color:var(--cold-t); }
 
@@ -321,8 +321,8 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .igrp:last-of-type { margin-bottom:0; }
 
 .ilbl {
-  font-family:var(--f); font-size:9px; font-weight:700;
-  letter-spacing:.13em; text-transform:uppercase; color:var(--t3);
+  font-family:var(--f); font-size:11px; font-weight:600;
+  letter-spacing:.02em; text-transform:none; color:var(--t2);
 }
 .iwrap { position:relative; }
 
@@ -430,13 +430,13 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .ob-c::before { background:linear-gradient(90deg,transparent,rgba(0,196,232,0.55),transparent); }
 
 .ob-title { display:flex; align-items:center; gap:7px; margin-bottom:14px; }
-.ob-title-lbl { font-family:var(--f); font-size:9px; font-weight:700; letter-spacing:.13em; text-transform:uppercase; }
+.ob-title-lbl { font-family:var(--f); font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:none; }
 .ob-h .ob-title-lbl { color:var(--heat-t); }
 .ob-c .ob-title-lbl { color:var(--cold-t); }
 
 .out-row { margin-bottom:10px; }
 .out-row:last-child { margin-bottom:0; }
-.out-key { font-family:var(--f); font-size:9px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--t3); margin-bottom:4px; }
+.out-key { font-family:var(--f); font-size:10px; font-weight:600; letter-spacing:.03em; text-transform:none; color:var(--t2); margin-bottom:4px; }
 .out-val { font-family:var(--fm); font-weight:700; line-height:1; font-size:clamp(18px,3.8vw,26px); transition:color .22s; }
 .out-val .u { font-size:11px; font-weight:400; margin-left:3px; color:var(--t3); }
 
@@ -479,13 +479,13 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .pm.over { border-color:rgba(255,69,58,0.30); background:rgba(255,69,58,0.04); }
 .pm.na   { opacity:0.5; }
 
-.pm-std { font-family:var(--f); font-size:8px; font-weight:700; letter-spacing:.10em; text-transform:uppercase; color:var(--t3); margin-bottom:5px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+.pm-std { font-family:var(--f); font-size:9px; font-weight:600; letter-spacing:.03em; text-transform:none; color:var(--t2); margin-bottom:5px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
 .pm-std.mp { color:var(--blue); }
 .star { background:rgba(79,168,255,0.18); border:1px solid rgba(79,168,255,0.35); color:var(--blue); font-family:var(--f); font-size:8px; font-weight:700; padding:1px 5px; border-radius:4px; }
 .pm-dn { font-family:var(--fm); font-size:17px; font-weight:700; color:var(--t1); margin-bottom:2px; }
 .pm-dim { font-family:var(--fm); font-size:9px; color:var(--t3); margin-bottom:9px; line-height:1.5; }
 .pm-r { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:3px; }
-.pm-k { font-family:var(--f); font-size:8px; text-transform:uppercase; letter-spacing:.08em; color:var(--t3); }
+.pm-k { font-family:var(--f); font-size:9px; text-transform:none; letter-spacing:.03em; color:var(--t3); }
 .pm-v { font-family:var(--fm); font-size:13px; font-weight:700; }
 .dpbar { height:3px; border-radius:2px; background:rgba(255,255,255,0.08); overflow:hidden; margin-top:8px; }
 .dpfill { height:100%; border-radius:2px; transition:width .38s ease; }
@@ -566,6 +566,18 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .unit-k { font-family:var(--f); font-size:11px; font-weight:600; color:var(--t2); }
 .unit-v { font-family:var(--fm); font-size:13px; font-weight:700; color:var(--t1); }
 
+
+/* Rohrdimension Heizung: kräftige orange Umrandung */
+.pipe-sec-heat .pm.best {
+  border-color:rgba(255,107,53,.60)!important;
+  background:rgba(255,107,53,.09)!important;
+  box-shadow:inset 0 1px 0 rgba(255,107,53,.15),0 0 20px rgba(255,107,53,.12)!important;
+}
+.pipe-sec-heat .pm.best .star {
+  background:rgba(255,107,53,.20);
+  border-color:rgba(255,107,53,.40);
+  color:var(--heat-t);
+}
 </style>
 </head>
 <body>
@@ -576,13 +588,13 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
     <div class="hdr-icon">&#7745;</div>
     <div>
       <div class="hdr-title">Massenstromrechner</div>
-      <div class="hdr-sub">HLS-Anlagen &middot; Heizung &middot; K&auml;lte &middot; Rohr</div>
+      <div class="hdr-sub">HLS-Anlagen &middot; Heizung &middot; K&auml;lte &middot; L&uuml;ftung</div>
     </div>
   </div>
   <nav class="tab-bar">
     <button class="tab-btn active" data-tab="flow">Heizung/K&auml;lte</button>
-    <button class="tab-btn"        data-tab="luft">Luft</button>
-    <button class="tab-btn"        data-tab="pipe">Rohr</button>
+    <button class="tab-btn"        data-tab="luft">L&uuml;ftung</button>
+    <button class="tab-btn"        data-tab="pipe">Rohrdimensionierung</button>
     <button class="tab-btn"        data-tab="unit">Einheiten</button>
   </nav>
 </header>
@@ -624,7 +636,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
         <div class="dot dot-h"></div>Heizung
       </button>
       <button class="hk-btn" id="flow-btn-k" onclick="flowSwitch('k')">
-        <div class="dot dot-c"></div>Kühlkreis
+        <div class="dot dot-c"></div>Kälte
       </button>
     </div>
 
@@ -735,11 +747,11 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
     </div>
 
     <div class="fml">
-      &#7745;&nbsp;=&nbsp;<em>Q</em>&nbsp;/&nbsp;(<em>c<sub>p</sub></em>&nbsp;&times;&nbsp;<em>&Delta;T</em>)
+      &#7745;&nbsp;=&nbsp;<em>Q&#775;</em>&nbsp;/&nbsp;(<em>c<sub>p</sub></em>&nbsp;&times;&nbsp;<em>&Delta;T</em>)
       &ensp;&middot;&ensp;
       Q&nbsp;=&nbsp;<em>&#7745;</em>&nbsp;&times;&nbsp;<em>c<sub>p</sub></em>&nbsp;&times;&nbsp;<em>&Delta;T</em>
       &ensp;&middot;&ensp;
-      &Delta;T&nbsp;=&nbsp;<em>Q</em>&nbsp;/&nbsp;(<em>&#7745;</em>&nbsp;&times;&nbsp;<em>c<sub>p</sub></em>)
+      &Delta;T&nbsp;=&nbsp;<em>Q&#775;</em>&nbsp;/&nbsp;(<em>&#7745;</em>&nbsp;&times;&nbsp;<em>c<sub>p</sub></em>)
     </div>
 
   </div>
@@ -761,7 +773,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 
     <!-- Dynamic pipe results -->
     <div id="pi-card" style="display:none; flex-shrink:0">
-      <div id="pi-h" style="display:none; margin-bottom:14px">
+      <div id="pi-h" style="display:none; margin-bottom:14px" class="pipe-sec-heat">
         <div class="psec">
           <div class="dot dot-h"></div>
           <span class="psec-lbl" style="color:var(--heat-t)">Heizung</span>
@@ -828,37 +840,19 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
         <div class="iwrap"><input class="inp" id="luft-v" type="number" min="0" step="100" placeholder="0" inputmode="decimal"/><span class="iunit">m&sup3;/h</span></div>
       </div>
 
-      <!-- Temperatures -->
+      <!-- Temperaturspreizung: einzelnes Eingabefeld -->
       <div id="luft-temp-block">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap-s);min-width:0;width:100%">
-          <div class="igrp" style="margin-bottom:0;min-width:0;overflow:hidden">
-            <div class="ilbl" id="luft-lbl-tzl">Zuluft t<sub>ZL</sub></div>
-            <div class="iwrap"><input class="inp-sm" id="luft-tzl" type="number" step="0.5" placeholder="z.B. 40" inputmode="decimal"/><span class="iunit">&deg;C</span></div>
-          </div>
-          <div class="igrp" style="margin-bottom:0">
-            <div class="ilbl">Raum t<sub>R</sub></div>
-            <div class="iwrap"><input class="inp-sm" id="luft-tr" type="number" step="0.5" value="20" inputmode="decimal"/><span class="iunit">&deg;C</span></div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;margin:10px 0">
-          <div style="flex:1;height:1px;background:var(--gb-soft)"></div>
-          <span style="font-size:9px;color:var(--t3);font-family:var(--f)">Temperaturdifferenz</span>
-          <div style="flex:1;height:1px;background:var(--gb-soft)"></div>
-        </div>
         <div class="igrp" style="margin-bottom:0">
-          <div class="ilbl" id="luft-dt-auto-lbl">Δt = t<sub>ZL</sub> − t<sub>R</sub></div>
+          <div class="ilbl" id="luft-dt-auto-lbl">&Delta;t = t<sub>Zuluft</sub> &minus; t<sub>Raum</sub></div>
           <div class="iwrap">
-            <div class="inp-ro empty" id="luft-dt-auto-val" style="font-size:18px;padding:11px 52px 11px 14px">–</div>
+            <input class="inp" id="luft-dt-direct" type="number" min="0" step="0.5" placeholder="0"
+              inputmode="decimal" oninput="calcLuft()"/>
             <span class="iunit">K</span>
           </div>
         </div>
       </div>
 
-      <!-- Direct dt input (dt mode only) -->
-      <div class="igrp" id="luft-ig-dt" style="display:none">
-        <div class="ilbl" id="luft-dt-lbl">Δt direkt eingeben</div>
-        <div class="iwrap"><input class="inp" id="luft-dt-in" type="number" min="0" step="0.5" placeholder="0" inputmode="decimal"/><span class="iunit">K</span></div>
-      </div>
+
 
       <!-- Q input (modes v + dt) -->
       <div class="igrp" id="luft-ig-q" style="display:none;margin-top:var(--gap)">
@@ -1363,6 +1357,7 @@ function rhoAir(t){return 353.05/(t+273.15)}
 
 function luftSwitch(hk){
   LST.hk=hk;
+  setTimeout(luft_load,0);
   $('luft-btn-h').className='hk-btn'+(hk==='h'?' on-h':'');
   $('luft-btn-k').className='hk-btn'+(hk==='k'?' on-k':'');
   const card=$('luft-in-card');
@@ -1371,46 +1366,31 @@ function luftSwitch(hk){
     ?'<div class="dot dot-h"></div><span class="ptitle-lbl">Heizleistung \u2014 Eingaben</span>'
     :'<div class="dot dot-c"></div><span class="ptitle-lbl" style="color:var(--cold-t)">K\u00fchlleistung \u2014 Eingaben</span>';
   const dtl=$('luft-dt-auto-lbl');
-  if(dtl)dtl.innerHTML=hk==='h'?'\u0394t = t<sub>ZL</sub> \u2212 t<sub>R</sub>':'\u0394t = t<sub>R</sub> \u2212 t<sub>ZL</sub>';
-  const tl=$('luft-lbl-tzl');
-  if(tl)tl.textContent=hk==='h'?'Zuluft t_ZL (w\u00e4rmer)':'Zuluft t_ZL (k\u00e4lter)';
+  if(dtl)dtl.innerHTML=hk==='h'?'&Delta;t = t<sub>Zuluft</sub> &minus; t<sub>Raum</sub> (Heizung)':'&Delta;t = t<sub>Raum</sub> &minus; t<sub>Zuluft</sub> (K&uuml;hlung)';
+
   $('luft-out-title').textContent=hk==='h'?'Ergebnis \u2014 Heizleistung Luft':'Ergebnis \u2014 K\u00fchlleistung Luft';
   calcLuft();
 }
 
 function luftMode(m){
   LST.mode=m;
+  setTimeout(luft_load,0);
   document.querySelectorAll('.mbtn[data-lm]').forEach(b=>b.classList.toggle('active',b.dataset.lm===m));
-  show($('luft-ig-v'),    m!=='v');
-  show($('luft-temp-block'),m!=='dt');
-  show($('luft-ig-dt'),   m==='dt');
-  show($('luft-ig-q'),    m!=='q');
+  show($('luft-ig-v'),    m!=='v');   // V-input: versteckt wenn V berechnet wird
+  show($('luft-temp-block'),true);    // Δt-Feld: immer sichtbar
+  show($('luft-ig-q'),    m!=='q');   // Q-input: versteckt wenn Q berechnet wird
   calcLuft();
 }
 
 function calcLuft(){
+  luft_save();
   const hk=LST.hk,m=LST.mode;
   const vv=parseFloat($('luft-v')?.value)||0;
-  const tzl=parseFloat($('luft-tzl')?.value);
-  const tr=parseFloat($('luft-tr')?.value)||20;
-  const dtDir=parseFloat($('luft-dt-in')?.value)||0;
+  const dtDirect=parseFloat($('luft-dt-direct')?.value)||0;
   const qIn=parseFloat($('luft-q-in')?.value)||0;
 
-  let dtAuto=NaN;
-  if(!isNaN(tzl)){dtAuto=hk==='h'?tzl-tr:tr-tzl;}
-
-  const dtAutoEl=$('luft-dt-auto-val');
-  if(dtAutoEl){
-    const valid=!isNaN(dtAuto)&&dtAuto>0;
-    dtAutoEl.textContent=valid?loc(dtAuto,1):'\u2013';
-    dtAutoEl.className='inp-ro'+(valid?'':' empty');
-    const bc=hk==='h'?'rgba(255,107,53,.10)':'rgba(0,196,232,.10)';
-    const bc2=hk==='h'?'rgba(255,107,53,.40)':'rgba(0,196,232,.40)';
-    const tc=hk==='h'?'var(--heat-t)':'var(--cold-t)';
-    dtAutoEl.style.cssText=`font-size:18px;padding:11px 52px 11px 14px;`+(valid?`background:${bc};border:1.5px solid ${bc2};color:${tc}`:'');
-  }
-
-  const dt=m==='dt'?dtDir:(!isNaN(dtAuto)?dtAuto:0);
+  // Einzelnes Δt-Feld für alle Modi
+  const dt=m==='dt'?dtDirect:dtDirect;
   const tRef=!isNaN(tzl)&&tzl>-273?tzl:20;
   const rho=rhoAir(tRef);
   const fac=rho*CP_AIR/3600;
@@ -1447,7 +1427,30 @@ function calcLuft(){
 }
 
 document.querySelectorAll('.mbtn[data-lm]').forEach(b=>b.addEventListener('click',()=>luftMode(b.dataset.lm)));
-['luft-v','luft-tzl','luft-tr','luft-dt-in','luft-q-in'].forEach(id=>$(id)?.addEventListener('input',calcLuft));
+['luft-v','luft-dt-direct','luft-q-in'].forEach(id=>$(id)?.addEventListener('input',calcLuft));
+
+/* ── Luft-Eingaben persistieren ── */
+function luft_save(){
+  try{
+    const hk=LST.hk, m=LST.mode;
+    const key='luft_'+hk+'_'+m;
+    localStorage.setItem(key+'_v',   $('luft-v')?.value||'');
+    localStorage.setItem(key+'_dt',  $('luft-dt-direct')?.value||'');
+    localStorage.setItem(key+'_q',   $('luft-q-in')?.value||'');
+  }catch(e){}
+}
+function luft_load(){
+  try{
+    const hk=LST.hk, m=LST.mode;
+    const key='luft_'+hk+'_'+m;
+    const v  = localStorage.getItem(key+'_v');
+    const dt = localStorage.getItem(key+'_dt');
+    const q  = localStorage.getItem(key+'_q');
+    if(v  && $('luft-v'))         $('luft-v').value=v;
+    if(dt && $('luft-dt-direct')) $('luft-dt-direct').value=dt;
+    if(q  && $('luft-q-in'))      $('luft-q-in').value=q;
+  }catch(e){}
+}
 luftSwitch('h');luftMode('q');
 
 /* ═══ FLOW HK-SWITCH ═══ */
