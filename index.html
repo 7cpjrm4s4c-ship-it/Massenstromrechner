@@ -534,9 +534,9 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .hk-btn.on-h{background:rgba(255,107,53,.15);border-color:rgba(255,107,53,.35);color:var(--heat-t);box-shadow:inset 0 1px 0 rgba(255,107,53,.12),0 2px 6px rgba(0,0,0,.35)}
 .hk-btn.on-k{background:rgba(0,196,232,.12);border-color:rgba(0,196,232,.30);color:var(--cold-t);box-shadow:inset 0 1px 0 rgba(0,196,232,.10),0 2px 6px rgba(0,0,0,.35)}
 
-/* Prevent grid blowout on iOS */
-* { min-width: 0; }
-.gc, .out-card, .gc-h, .gc-c, .gc-a { overflow: hidden; }
+/* Prevent grid blowout on iOS — nur Grid/Flex-Kinder */
+.col-L > *, .col-R > *, .twin > *, .pipe-pair > /* gc: overflow sichtbar damit Dropdowns/Buttons nicht abgeschnitten */
+.gc, .out-card { overflow: visible; }
 #tab-flow, #tab-luft, #tab-pipe, #tab-unit { overflow-x: hidden; max-width: 100%; }
 
 /* Unit converter */
@@ -849,7 +849,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
     </div>
 
     <!-- Calc modes -->
-    <div class="modes" style="grid-template-columns:repeat(3,1fr);margin-bottom:0">
+    <div class="modes" style="grid-template-columns:repeat(3,1fr)">
       <button class="mbtn active" data-lm="q">Q Leistung</button>
       <button class="mbtn"        data-lm="v">V&#x307; Volumenstrom</button>
       <button class="mbtn"        data-lm="dt">Δt Temperatur</button>
@@ -1719,7 +1719,8 @@ function unitSwap() {
 }
 
 // Init unit tab
-unitCat('pressure');
+// Einheiten-Tab: selects beim ersten Laden befüllen
+setTimeout(() => unitCat('pressure'), 100);
 
 </script>
 
