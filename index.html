@@ -170,7 +170,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
     gap:0;
     padding:0;
     height:calc(100vh - var(--hdr) - var(--sat));
-    /* overflow entfernt - blockiert Touch-Events auf iOS/Desktop */
+    overflow:hidden;
   }
   .col-L {
     display:flex; flex-direction:column; gap:var(--gap);
@@ -215,7 +215,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
   backdrop-filter:saturate(160%) blur(24px);
   -webkit-backdrop-filter:saturate(160%) blur(24px);
   padding:var(--pad);
-  position:relative; overflow:visible;
+  position:relative; overflow:hidden;
   flex-shrink:0;
   /* Depth shadow */
   box-shadow:
@@ -410,7 +410,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
   box-shadow:
     0 2px 0 0 rgba(255,255,255,0.06) inset,
     0 8px 32px rgba(0,0,0,0.55);
-  position:relative; overflow:visible;
+  position:relative; overflow:hidden;
 }
 .out-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:var(--shimmer); }
 
@@ -526,19 +526,18 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 /* ═══════════════════════════════════════════════════════
    ANIMATIONS
 ═══════════════════════════════════════════════════════ */
-/* Animation entfernt — verhinderte Touch-Events durch Stacking Context */
-/* .gc, .out-card { animation:fadeUp .30s ease both; } */
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.gc, .out-card { animation:fadeUp .30s ease both; }
 
 /* Heiz/Kühl Switch Button */
 .hk-btn{display:flex;align-items:center;justify-content:center;gap:7px;font-family:var(--f);font-size:12px;font-weight:600;padding:10px 8px;border-radius:var(--r-m);border:1px solid transparent;cursor:pointer;background:transparent;color:var(--t3);transition:all .18s}
 .hk-btn.on-h{background:rgba(255,107,53,.15);border-color:rgba(255,107,53,.35);color:var(--heat-t);box-shadow:inset 0 1px 0 rgba(255,107,53,.12),0 2px 6px rgba(0,0,0,.35)}
 .hk-btn.on-k{background:rgba(0,196,232,.12);border-color:rgba(0,196,232,.30);color:var(--cold-t);box-shadow:inset 0 1px 0 rgba(0,196,232,.10),0 2px 6px rgba(0,0,0,.35)}
 
-/* Grid-Kinder: min-width verhindert Blowout ohne alle Elemente zu betreffen */
-.col-L > *, .col-R > *, .twin > *, .pipe-pair > * { min-width: 0; }
-/* gc: overflow visible damit Buttons/Dropdowns nicht abgeschnitten werden */
-.gc, .out-card { overflow: visible; }
-#tab-flow, #tab-luft, #tab-pipe, #tab-unit { max-width: 100%; width: 100%; }
+/* Prevent grid blowout on iOS */
+* { min-width: 0; }
+.gc, .out-card, .gc-h, .gc-c, .gc-a { overflow: hidden; }
+#tab-flow, #tab-luft, #tab-pipe, #tab-unit { overflow-x: hidden; max-width: 100%; }
 
 /* Unit converter */
 /* Category select styled like gl-sel but green accent */
@@ -579,28 +578,6 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
   border-color:rgba(255,107,53,.40);
   color:var(--heat-t);
 }
-
-/* Einheiten-Toggle neben Eingabefeld */
-.unit-toggle {
-  position:absolute; right:6px; top:50%; transform:translateY(-50%);
-  display:flex; border-radius:8px; overflow:hidden;
-  border:1px solid var(--gb-mid);
-  background:var(--glass-mid);
-  z-index:2; flex-shrink:0;
-}
-.ut-btn {
-  font-family:var(--f); font-size:11px; font-weight:700;
-  padding:5px 9px; border:none; background:transparent;
-  color:var(--t3); cursor:pointer; transition:all .15s;
-  white-space:nowrap;
-}
-.ut-btn.active {
-  background:rgba(255,255,255,.18);
-  color:var(--t1);
-}
-/* Angepasstes Padding für inp mit Toggle rechts */
-.inp.has-toggle { padding-right:90px; }
-.inp-sm.has-toggle { padding-right:90px; }
 </style>
 </head>
 <body>
@@ -654,7 +631,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
     </div>
 
     <!-- Heiz/Kühl Switch -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:rgba(0,0,0,.40);border:1px solid var(--gb-soft);border-radius:var(--r-l);padding:4px;position:relative;z-index:2">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:rgba(0,0,0,.40);border:1px solid var(--gb-soft);border-radius:var(--r-l);padding:4px">
       <button class="hk-btn on-h" id="flow-btn-h" onclick="flowSwitch('h')">
         <div class="dot dot-h"></div>Heizung
       </button>
@@ -677,24 +654,18 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
         </div>
         <!-- Q input -->
         <div class="igrp" id="h-ig-q">
-          <div class="ilbl" id="h-q-lbl">Heizlast [W]</div>
+          <div class="ilbl">Heizlast [W]</div>
           <div class="iwrap">
-            <input class="inp has-toggle" id="h-q" type="text" inputmode="decimal" placeholder="0"/>
-            <div class="unit-toggle">
-              <button class="ut-btn active" id="h-q-W"  onclick="setQUnit('h','W')">W</button>
-              <button class="ut-btn"        id="h-q-kW" onclick="setQUnit('h','kW')">kW</button>
-            </div>
+            <input class="inp" id="h-q" type="number" min="0" step="100" placeholder="0" inputmode="decimal"/>
+            <span class="iunit">W</span>
           </div>
         </div>
-        <!-- ṁ input [kg/h or m³/h] -->
+        <!-- ṁ input [kg/h] -->
         <div class="igrp" id="h-ig-ms" style="display:none">
-          <div class="ilbl" id="h-ms-lbl">Massenstrom [kg/h]</div>
+          <div class="ilbl">Massenstrom [kg/h]</div>
           <div class="iwrap">
-            <input class="inp has-toggle" id="h-ms-in" type="text" inputmode="decimal" placeholder="0"/>
-            <div class="unit-toggle">
-              <button class="ut-btn active" id="h-ms-kgh" onclick="setMsUnit('h','kgh')">kg/h</button>
-              <button class="ut-btn"        id="h-ms-m3h" onclick="setMsUnit('h','m3h')">m³/h</button>
-            </div>
+            <input class="inp" id="h-ms-in" type="number" min="0" step="1" placeholder="0" inputmode="decimal"/>
+            <span class="iunit">kg/h</span>
           </div>
         </div>
         <!-- ΔT input -->
@@ -726,23 +697,17 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
           <button class="mbtn"        data-p="k" data-v="dt">&Delta;T&nbsp;Temperatur</button>
         </div>
         <div class="igrp" id="k-ig-q">
-          <div class="ilbl" id="k-q-lbl">K&uuml;hllast [W]</div>
+          <div class="ilbl">K&uuml;hllast [W]</div>
           <div class="iwrap">
-            <input class="inp has-toggle" id="k-q" type="text" inputmode="decimal" placeholder="0"/>
-            <div class="unit-toggle">
-              <button class="ut-btn active" id="k-q-W"  onclick="setQUnit('k','W')">W</button>
-              <button class="ut-btn"        id="k-q-kW" onclick="setQUnit('k','kW')">kW</button>
-            </div>
+            <input class="inp" id="k-q" type="number" min="0" step="100" placeholder="0" inputmode="decimal"/>
+            <span class="iunit">W</span>
           </div>
         </div>
         <div class="igrp" id="k-ig-ms" style="display:none">
-          <div class="ilbl" id="k-ms-lbl">Massenstrom [kg/h]</div>
+          <div class="ilbl">Massenstrom [kg/h]</div>
           <div class="iwrap">
-            <input class="inp has-toggle" id="k-ms-in" type="text" inputmode="decimal" placeholder="0"/>
-            <div class="unit-toggle">
-              <button class="ut-btn active" id="k-ms-kgh" onclick="setMsUnit('k','kgh')">kg/h</button>
-              <button class="ut-btn"        id="k-ms-m3h" onclick="setMsUnit('k','m3h')">m³/h</button>
-            </div>
+            <input class="inp" id="k-ms-in" type="number" min="0" step="1" placeholder="0" inputmode="decimal"/>
+            <span class="iunit">kg/h</span>
           </div>
         </div>
         <div class="igrp" id="k-ig-dt">
@@ -824,6 +789,12 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
         </div>
         <div class="pipe-pair" id="pi-k-pair"></div>
       </div>
+      <div class="legend" style="margin-top:12px">
+        <span style="color:var(--ok)">&#9679;&thinsp;&le;&thinsp;75&thinsp;% &mdash; optimal</span>
+        <span style="color:var(--warn)">&#9679;&thinsp;&le;&thinsp;100&thinsp;Pa/m</span>
+        <span style="color:var(--danger)">&#9679;&thinsp;&gt;&thinsp;100&thinsp;Pa/m</span>
+        <span style="color:var(--blue)">&#9733;&thinsp;empfohlen</span>
+      </div>
     </div>
 
     <div id="pi-placeholder" class="placeholder">
@@ -841,106 +812,101 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 
 <!-- ══ TAB: LUFT ══ -->
 <div id="tab-luft" style="display:none">
-<div id="luft-inner" style="padding:12px;padding-left:calc(12px + var(--sal));padding-right:calc(12px + var(--sar));padding-bottom:calc(32px + var(--sab));display:flex;flex-direction:column;gap:var(--gap);max-width:640px;width:100%;margin:0 auto">
+  <div style="padding:12px;padding-left:calc(12px + var(--sal));padding-right:calc(12px + var(--sar));padding-bottom:calc(32px + var(--sab));display:flex;flex-direction:column;gap:var(--gap);max-width:640px;width:100%;margin:0 auto">
 
-  <!-- Heiz/Kühl Switch — gleiche Struktur wie flow-tab -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:rgba(0,0,0,.40);border:1px solid var(--gb-soft);border-radius:var(--r-l);padding:4px">
-    <button class="hk-btn on-h" id="luft-btn-h" onclick="luftSwitch('h')">
-      <div class="dot dot-h"></div>Heizleistung
-    </button>
-    <button class="hk-btn" id="luft-btn-k" onclick="luftSwitch('k')">
-      <div class="dot dot-c"></div>K&uuml;hlleistung
-    </button>
-  </div>
-
-  <!-- Berechnungsmodus -->
-  <div class="modes" style="grid-template-columns:repeat(3,1fr)">
-    <button class="mbtn active" onclick="luftMode('q')">Q Leistung</button>
-    <button class="mbtn"        onclick="luftMode('v')">V&#x307; Volumenstrom</button>
-    <button class="mbtn"        onclick="luftMode('dt')">&Delta;t Temperatur</button>
-  </div>
-
-  <!-- Eingaben -->
-  <div class="gc gc-h" id="luft-in-card">
-    <div class="ptitle" id="luft-ptitle">
-      <div class="dot dot-h"></div>
-      <span class="ptitle-lbl">Heizleistung &mdash; Eingaben</span>
+    <!-- Heiz/Kühl Switch -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:rgba(0,0,0,.40);border:1px solid var(--gb-soft);border-radius:var(--r-l);padding:4px">
+      <button class="hk-btn" id="luft-btn-h" onclick="luftSwitch('h')"><div class="dot dot-h"></div>Heizleistung</button>
+      <button class="hk-btn" id="luft-btn-k" onclick="luftSwitch('k')"><div class="dot dot-c"></div>Kühlleistung</button>
     </div>
 
-    <!-- V-dot: sichtbar wenn mode=q oder mode=dt -->
-    <div class="igrp" id="luft-ig-v">
-      <div class="ilbl">Luftvolumenstrom V&#x307;</div>
-      <div class="iwrap">
-        <input class="inp" id="luft-v" type="text" inputmode="decimal" placeholder="0" oninput="calcLuft()"/>
-        <span class="iunit">m&sup3;/h</span>
+    <!-- Calc modes -->
+    <div class="modes" style="grid-template-columns:repeat(3,1fr);margin-bottom:0">
+      <button class="mbtn active" data-lm="q">Q Leistung</button>
+      <button class="mbtn"        data-lm="v">V&#x307; Volumenstrom</button>
+      <button class="mbtn"        data-lm="dt">Δt Temperatur</button>
+    </div>
+
+    <!-- Input card -->
+    <div class="gc gc-h" id="luft-in-card">
+      <div class="ptitle" id="luft-ptitle">
+        <div class="dot dot-h"></div>
+        <span class="ptitle-lbl">Heizleistung — Eingaben</span>
       </div>
-    </div>
 
-    <!-- &Delta;t: sichtbar wenn mode=q oder mode=v -->
-    <div class="igrp" id="luft-ig-dt" style="display:none">
-      <div class="ilbl" id="luft-dt-lbl">&Delta;t Temperaturspreizung</div>
-      <div class="iwrap">
-        <input class="inp" id="luft-dt-direct" type="number" min="0" step="0.5" placeholder="0" inputmode="decimal" oninput="calcLuft()"/>
-        <span class="iunit">K</span>
+      <!-- V-dot (shown in modes q + dt) -->
+      <div class="igrp" id="luft-ig-v">
+        <div class="ilbl">Luftvolumenstrom V&#x307;</div>
+        <div class="iwrap"><input class="inp" id="luft-v" type="number" min="0" step="100" placeholder="0" inputmode="decimal"/><span class="iunit">m&sup3;/h</span></div>
       </div>
-    </div>
 
-    <!-- Q: sichtbar wenn mode=v oder mode=dt -->
-    <div class="igrp" id="luft-ig-q" style="display:none">
-      <div class="ilbl" id="luft-q-lbl">Leistung Q [W]</div>
-      <div class="iwrap">
-        <input class="inp has-toggle" id="luft-q-in" type="text" inputmode="decimal" placeholder="0" oninput="calcLuft()"/>
-        <div class="unit-toggle">
-          <button class="ut-btn active" id="luft-q-W"  onclick="setQUnit('luft','W')">W</button>
-          <button class="ut-btn"        id="luft-q-kW" onclick="setQUnit('luft','kW')">kW</button>
+      <!-- Temperaturspreizung: einzelnes Eingabefeld -->
+      <div id="luft-temp-block">
+        <div class="igrp" style="margin-bottom:0">
+          <div class="ilbl" id="luft-dt-auto-lbl">&Delta;t = t<sub>Zuluft</sub> &minus; t<sub>Raum</sub></div>
+          <div class="iwrap">
+            <input class="inp" id="luft-dt-direct" type="number" min="0" step="0.5" placeholder="0"
+              inputmode="decimal" oninput="calcLuft()"/>
+            <span class="iunit">K</span>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Ergebnis -->
-  <div class="out-card">
-    <div class="slbl" id="luft-out-title">Ergebnis &mdash; Heizleistung Luft</div>
-    <div style="margin-bottom:14px">
-      <div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--t3);margin-bottom:4px" id="luft-main-lbl">Leistung Q</div>
-      <div style="font-family:var(--fm);font-size:34px;font-weight:700;line-height:1;transition:color .2s;color:var(--t4)" id="luft-main-val">&ndash;<span style="font-size:16px;font-weight:400;color:var(--t3)"> W</span></div>
-      <div style="font-family:var(--fm);font-size:14px;margin-top:3px;color:var(--t4)" id="luft-main-sub"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding-top:12px;border-top:1px solid var(--gb-soft)">
-      <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">kW</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--t4)" id="luft-kw">&ndash;</div></div>
-      <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">V&#x307; m&sup3;/h</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--t4)" id="luft-v-out">&ndash;</div></div>
-      <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">&Delta;t K</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--t4)" id="luft-dt-out">&ndash;</div></div>
-      <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">&#7745; kg/h</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--air-t)" id="luft-ms">&ndash;</div></div>
-    </div>
-  </div>
 
-  <!-- Formel -->
-  <div style="text-align:center;font-family:var(--fm);font-size:10px;color:var(--t3);line-height:1.9">
-    Q = <span style="color:var(--t2)">V&#x307;</span> &times; <span style="color:var(--t2)">&rho;<sub>L</sub>(20&deg;C)</span> &times; <span style="color:var(--t2)">c<sub>p,L</sub></span> &times; <span style="color:var(--t2)">&Delta;t</span>
-  </div>
 
-  <!-- Luftkennwerte -->
-  <div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.20);border-radius:var(--r-l);padding:12px 14px">
-    <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--air-t);margin-bottom:9px;font-family:var(--f)">Luftkennwerte (Normluft 20&thinsp;&deg;C)</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
-      <div style="font-size:10px;color:var(--t2)">&rho;<sub>L</sub> bei 20&thinsp;&deg;C</div>
-      <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)" id="luft-rho-display">1,204&thinsp;kg/m&sup3;</div>
-      <div style="font-size:10px;color:var(--t2)">c<sub>p,L</sub></div>
-      <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)">1.005&thinsp;J/(kg&middot;K)</div>
-      <div style="font-size:10px;color:var(--t2)">&rho; &times; c<sub>p</sub> / 3600</div>
-      <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)" id="luft-factor-display">0,3347&thinsp;Wh/(m&sup3;&middot;K)</div>
+      <!-- Q input (modes v + dt) -->
+      <div class="igrp" id="luft-ig-q" style="display:none;margin-top:var(--gap)">
+        <div class="ilbl">Leistung Q</div>
+        <div class="iwrap"><input class="inp" id="luft-q-in" type="number" min="0" step="100" placeholder="0" inputmode="decimal"/><span class="iunit">W</span></div>
+      </div>
     </div>
-  </div>
 
+    <!-- Result card -->
+    <div class="out-card">
+      <div class="slbl" id="luft-out-title">Ergebnis — Heizleistung Luft</div>
+      <div style="margin-bottom:14px">
+        <div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--t3);margin-bottom:4px" id="luft-main-lbl">Leistung Q</div>
+        <div style="font-family:var(--fm);font-size:34px;font-weight:700;line-height:1;transition:color .2s;color:var(--t4)" id="luft-main-val">–<span style="font-size:16px;font-weight:400;color:var(--t3)"> W</span></div>
+        <div style="font-family:var(--fm);font-size:14px;margin-top:3px;color:var(--t4)" id="luft-main-sub"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding-top:12px;border-top:1px solid var(--gb-soft)">
+        <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">kW</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--t4)" id="luft-kw">–</div></div>
+        <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">V&#x307; m&sup3;/h</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--t4)" id="luft-v-out">–</div></div>
+        <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">Δt K</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--t4)" id="luft-dt-out">–</div></div>
+        <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">&#7745; kg/h</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--air-t)" id="luft-ms">–</div></div>
+      </div>
+    </div>
+
+    <!-- Formula -->
+    <div style="text-align:center;font-family:var(--fm);font-size:10px;color:var(--t3);line-height:1.9">
+      Q = <span style="color:var(--t2)">V&#x307;</span> × <span style="color:var(--t2)">&rho;<sub>L</sub>(t<sub>ZL</sub>)</span> × <span style="color:var(--t2)">c<sub>p,L</sub></span> × <span style="color:var(--t2)">Δt</span>
+      &ensp;&middot;&ensp;
+      &rho;<sub>L</sub>(t) = <span style="color:var(--t2)">353,05 / (t + 273,15)</span> kg/m&sup3;
+    </div>
+
+    <!-- Air constants -->
+    <div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.20);border-radius:var(--r-l);padding:12px 14px">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--air-t);margin-bottom:9px;font-family:var(--f)">Luftkennwerte (aktuell)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+        <div style="font-size:10px;color:var(--t2)">&rho;<sub>L</sub> bei t<sub>ZL</sub></div>
+        <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)" id="luft-rho-display">– kg/m³</div>
+        <div style="font-size:10px;color:var(--t2)">c<sub>p,L</sub></div>
+        <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)">1.005 J/(kg·K)</div>
+        <div style="font-size:10px;color:var(--t2)">&rho; × c<sub>p</sub> / 3600</div>
+        <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)" id="luft-factor-display">– Wh/(m³·K)</div>
+      </div>
+    </div>
+
+  </div>
 </div>
-</div>
+
 <div id="tab-pipe" style="display:none">
 
   <div class="pipe-params">
     <div class="igrp" style="margin-bottom:0">
       <div class="ilbl">Volumenstrom</div>
       <div class="iwrap">
-        <input class="inp" id="p-vol" type="text" inputmode="decimal" placeholder="0,00" style="font-size:18px;padding:12px 52px 12px 14px"/>
+        <input class="inp" id="p-vol" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal" style="font-size:18px;padding:12px 52px 12px 14px"/>
         <span class="iunit">m&sup3;/h</span>
       </div>
     </div>
@@ -1004,18 +970,11 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
         <div class="ilbl">Eingabe</div>
         <div style="display:flex;gap:8px;align-items:stretch">
           <div class="iw" style="flex:1">
-            <input class="inp" id="unit-from-val" type="text" inputmode="decimal" placeholder="0"
+            <input class="inp" id="unit-from-val" type="number" placeholder="0" inputmode="decimal"
               style="font-size:22px;padding:12px 14px;border-radius:var(--r-m)"
               oninput="unitCalc()"/>
           </div>
-          <select class="gl-sel" id="unit-from-sel" style="width:auto;flex-shrink:0;min-width:100px;padding:11px 32px 11px 12px;font-size:13px" onchange="unitCalc()">
-              <option value="mbar" selected>mbar</option>
-              <option value="bar">bar</option>
-              <option value="mWs">mWs</option>
-              <option value="Pa">Pa</option>
-              <option value="hPa">hPa</option>
-              <option value="kPa">kPa</option>
-            </select>
+          <select class="gl-sel" id="unit-from-sel" style="width:auto;flex-shrink:0;min-width:100px;padding:11px 32px 11px 12px;font-size:13px" onchange="unitCalc()"></select>
         </div>
       </div>
 
@@ -1038,14 +997,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
               style="width:100%;background:rgba(52,211,153,.08);border:1.5px solid rgba(52,211,153,.38);color:var(--grn);font-family:var(--fm);font-size:22px;font-weight:700;padding:12px 14px;border-radius:var(--r-m);min-height:52px;transition:color .2s"
               class="unit-ro">&ndash;</div>
           </div>
-          <select class="gl-sel" id="unit-to-sel" style="width:auto;flex-shrink:0;min-width:100px;padding:11px 32px 11px 12px;font-size:13px;border-color:rgba(52,211,153,.35);background-color:rgba(52,211,153,.08)" onchange="unitCalc()">
-              <option value="mbar">mbar</option>
-              <option value="bar">bar</option>
-              <option value="mWs">mWs</option>
-              <option value="Pa">Pa</option>
-              <option value="hPa">hPa</option>
-              <option value="kPa" selected>kPa</option>
-            </select>
+          <select class="gl-sel" id="unit-to-sel" style="width:auto;flex-shrink:0;min-width:100px;padding:11px 32px 11px 12px;font-size:13px;border-color:rgba(52,211,153,.35)" onchange="unitCalc()"></select>
         </div>
       </div>
     </div>
@@ -1118,34 +1070,6 @@ const loc  = (v,d) => v.toLocaleString('de-DE', {minimumFractionDigits:d, maximu
 /* ═══════════════════════════════════════
    HYDRAULICS
 ═══════════════════════════════════════ */
-
-/** Parst deutsche Zahlenformatierung: "1.234,56" → 1234.56 */
-function parseDE(s) {
-  if (!s && s !== 0) return NaN;
-  const str = String(s).trim()
-    .replace(/\.(?=\d{3})/g, '')   // Tausenderpunkt entfernen
-    .replace(',', '.');               // Komma → Dezimalpunkt
-  return parseFloat(str);
-}
-
-/** Formatiert eine Zahl mit deutschem Tausenderpunkt für Eingabefelder */
-function fmtInput(v, decimals) {
-  if (isNaN(v) || v === null || v === '') return '';
-  if (decimals !== undefined) {
-    return v.toLocaleString('de-DE', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: decimals
-    });
-  }
-  // Auto: keine Nachkommastellen wenn ganzzahlig
-  const s = String(v);
-  const hasDec = s.includes('.');
-  return v.toLocaleString('de-DE', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: hasDec ? 6 : 0
-  });
-}
-
 function lambdaCW(Re, eps, D) {
   if (Re < 1e-9) return 0;
   if (Re < 2300) return 64 / Re;
@@ -1259,9 +1183,9 @@ function calcPanel(p) {
   const rho = f.rho;
   const m   = ST[p].mode;
 
-  const qv    = getQWatt(p);                      // W (mit Einheit-Toggle)
-  const msh   = getMsKgh(p);                      // kg/h (mit Einheit-Toggle)
-  const ms_in = msh / 3600;                       // → kg/s
+  const qv    = parseFloat($(p+'-q')?.value)     || 0;
+  const msh   = parseFloat($(p+'-ms-in')?.value) || 0;  // kg/h input
+  const ms_in = msh / 3600;                              // → kg/s
   const dtv   = parseFloat($(p+'-dt')?.value)    || 0;
 
   let ms=0, q=0, dt=0, ok=false;
@@ -1330,7 +1254,7 @@ function calcAll() {
    PIPE TAB
 ═══════════════════════════════════════ */
 function calcPipeTab() {
-  const vol = parseDE($('p-vol').value) || 0;
+  const vol = parseFloat($('p-vol').value) || 0;
   const mx  = parseFloat($('p-dp').value)  || 100;
   const el  = $('pipe-results');
   if (!vol) {
@@ -1380,7 +1304,6 @@ document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', (
   show($('tab-luft'), t==='luft');
   show($('tab-pipe'), t==='pipe');
   show($('tab-unit'), t==='unit');
-  if(t==='unit'){buildSelects(UCurrent);}
 }));
 
 /* ═══════════════════════════════════════
@@ -1435,53 +1358,44 @@ function rhoAir(t){return 353.05/(t+273.15)}
 function luftSwitch(hk){
   LST.hk=hk;
   setTimeout(luft_load,0);
-  const bh=$('luft-btn-h'),bk=$('luft-btn-k');
-  if(bh)bh.className='hk-btn'+(hk==='h'?' on-h':'');
-  if(bk)bk.className='hk-btn'+(hk==='k'?' on-k':'');
+  $('luft-btn-h').className='hk-btn'+(hk==='h'?' on-h':'');
+  $('luft-btn-k').className='hk-btn'+(hk==='k'?' on-k':'');
   const card=$('luft-in-card');
-  if(card)card.className='gc '+(hk==='h'?'gc-h':'gc-c');
-  const lpt=$('luft-ptitle'); if(lpt)lpt.innerHTML=hk==='h'
+  card.className='gc '+(hk==='h'?'gc-h':'gc-c');
+  $('luft-ptitle').innerHTML=hk==='h'
     ?'<div class="dot dot-h"></div><span class="ptitle-lbl">Heizleistung \u2014 Eingaben</span>'
     :'<div class="dot dot-c"></div><span class="ptitle-lbl" style="color:var(--cold-t)">K\u00fchlleistung \u2014 Eingaben</span>';
-  // Δt-Label aktualisieren (ID luft-dt-lbl im neuen Tab)
-  const dtl=$('luft-dt-lbl');
-  if(dtl)dtl.textContent=hk==='h'
-    ?'\u0394t Temperaturspreizung (Zuluft \u2212 Raum)'
-    :'\u0394t Temperaturspreizung (Raum \u2212 Zuluft)';
+  const dtl=$('luft-dt-auto-lbl');
+  if(dtl)dtl.innerHTML=hk==='h'?'&Delta;t = t<sub>Zuluft</sub> &minus; t<sub>Raum</sub> (Heizung)':'&Delta;t = t<sub>Raum</sub> &minus; t<sub>Zuluft</sub> (K&uuml;hlung)';
 
-  const ot=$('luft-out-title');
-  if(ot)ot.textContent=hk==='h'?'Ergebnis \u2014 Heizleistung Luft':'Ergebnis \u2014 K\u00fchlleistung Luft';
+  $('luft-out-title').textContent=hk==='h'?'Ergebnis \u2014 Heizleistung Luft':'Ergebnis \u2014 K\u00fchlleistung Luft';
   calcLuft();
 }
 
 function luftMode(m){
   LST.mode=m;
   setTimeout(luft_load,0);
-  // Modes-Buttons aktiv setzen
-  const luft_inner = $('luft-inner');
-  if(luft_inner) luft_inner.querySelectorAll('.modes .mbtn').forEach((b,i)=>{
-    b.classList.toggle('active', ['q','v','dt'][i]===m);
-  });
-  show($('luft-ig-v'),  m!=='v');   // V: ausgeblendet wenn V berechnet
-  show($('luft-ig-dt'), m!=='dt');  // Δt: ausgeblendet wenn Δt berechnet
-  show($('luft-ig-q'),  m!=='q');   // Q: ausgeblendet wenn Q berechnet
+  document.querySelectorAll('.mbtn[data-lm]').forEach(b=>b.classList.toggle('active',b.dataset.lm===m));
+  show($('luft-ig-v'),    m!=='v');   // V-input: versteckt wenn V berechnet wird
+  show($('luft-temp-block'),true);    // Δt-Feld: immer sichtbar
+  show($('luft-ig-q'),    m!=='q');   // Q-input: versteckt wenn Q berechnet wird
   calcLuft();
 }
 
 function calcLuft(){
   luft_save();
   const hk=LST.hk,m=LST.mode;
-  const vv=parseDE($('luft-v')?.value)||0;
-  const dtDirect=parseFloat($('luft-dt-direct')?.value)||0;  // K direkt
-  const qIn=getLuftQWatt();  // W (mit Einheit-Toggle)
+  const vv=parseFloat($('luft-v')?.value)||0;
+  const dtDirect=parseFloat($('luft-dt-direct')?.value)||0;
+  const qIn=parseFloat($('luft-q-in')?.value)||0;
 
   // Einzelnes Δt-Feld für alle Modi
-  const dt = dtDirect;
-  const tRef = 20;  // Normluft 20°C (keine Temperatureingabe mehr)
+  const dt=m==='dt'?dtDirect:dtDirect;
+  const tRef=!isNaN(tzl)&&tzl>-273?tzl:20;
   const rho=rhoAir(tRef);
   const fac=rho*CP_AIR/3600;
 
-  const rd=$('luft-rho-display');if(rd)rd.textContent=rho.toFixed(3)+'\u202fkg/m\u00b3 (20\u00b0C)';
+  const rd=$('luft-rho-display');if(rd)rd.textContent=rho.toFixed(3)+'\u202fkg/m\u00b3';
   const fd=$('luft-factor-display');if(fd)fd.textContent=(fac).toFixed(4)+'\u202fWh/(m\u00b3\u00b7K)';
 
   let Q=0,V=0,dT=0,ok=false;
@@ -1512,7 +1426,7 @@ function calcLuft(){
   if(msel){msel.textContent=ok?loc(ms,1):'\u2013';msel.style.color=ok?'var(--air-t)':'var(--t4)';}
 }
 
-// Luft-Modi: jetzt per onclick direkt (robuster auf iOS)
+document.querySelectorAll('.mbtn[data-lm]').forEach(b=>b.addEventListener('click',()=>luftMode(b.dataset.lm)));
 ['luft-v','luft-dt-direct','luft-q-in'].forEach(id=>$(id)?.addEventListener('input',calcLuft));
 
 /* ── Luft-Eingaben persistieren ── */
@@ -1666,12 +1580,9 @@ function buildSelects(cat) {
   fs.innerHTML = '';
   ts.innerHTML = '';
   d.units.forEach(u => {
-    fs.innerHTML += `<option value="${u.key}">${u.label}</option>`;
-    ts.innerHTML += `<option value="${u.key}">${u.label}</option>`;
+    fs.innerHTML += `<option value="${u.key}"${u.key===d.defFrom?' selected':''}>${u.label}</option>`;
+    ts.innerHTML += `<option value="${u.key}"${u.key===d.defTo  ?' selected':''}>${u.label}</option>`;
   });
-  // Explizit setzen (innerHTML selected-Attribut ist nicht zuverlässig auf iOS)
-  fs.value = d.defFrom;
-  ts.value = d.defTo;
 }
 
 function unitCat(cat) {
@@ -1689,7 +1600,7 @@ function unitCat(cat) {
 
 function unitCalc() {
   const d    = UNITS[UCurrent];
-  const raw  = parseDE($('unit-from-val').value);
+  const raw  = parseFloat($('unit-from-val').value);
   const fKey = $('unit-from-sel').value;
   const tKey = $('unit-to-sel').value;
 
@@ -1702,24 +1613,6 @@ function unitCalc() {
 
   const fUnit = d.units.find(u => u.key === fKey);
   const tUnit = d.units.find(u => u.key === tKey);
-
-  // Guard: Einheit nicht in aktueller Kategorie → selects neu aufbauen
-  if (!fUnit || !tUnit) {
-    // Selects reparieren und sofort neu rechnen
-    buildSelects(UCurrent);
-    // Nach rebuild: fUnit/tUnit nochmal holen
-    const d2 = UNITS[UCurrent];
-    const fKey2 = $('unit-from-sel').value;
-    const tKey2 = $('unit-to-sel').value;
-    const fUnit2 = d2.units.find(u => u.key === fKey2);
-    const tUnit2 = d2.units.find(u => u.key === tKey2);
-    if (!fUnit2 || !tUnit2) return;  // echte Einheit fehlt
-    const base2 = raw * fUnit2.factor;
-    const result2 = base2 / tUnit2.factor;
-    $('unit-to-val').textContent = ufmt(result2, tUnit2.decimals);
-    $('unit-to-val').style.color = 'var(--grn)';
-    return;
-  }
 
   // Convert: raw → base → target
   const base   = raw * fUnit.factor;
@@ -1761,8 +1654,7 @@ function unitSwap() {
 }
 
 // Init unit tab
-// Einheiten-Tab: selects beim ersten Laden befüllen
-setTimeout(() => unitCat('pressure'), 100);
+unitCat('pressure');
 
 </script>
 
@@ -1816,139 +1708,6 @@ setTimeout(() => unitCat('pressure'), 100);
     window.addEventListener('load', track, { once: true });
   }
 })();
-
-/* Select-all-on-focus für alle Eingabefelder */
-/* Tausendertrennzeichen: Formatierung beim Verlassen, klare Anzeige beim Eingeben */
-const FMT_INPUTS = {
-  'h-q':0,'k-q':0,'h-ms-in':1,'k-ms-in':1,
-  'luft-v':0,'luft-q-in':0,'p-vol':3
-};
-
-function applyThousands(el) {
-  const dec = FMT_INPUTS[el.id];
-  if (dec === undefined) return;
-  const v = parseDE(el.value);
-  if (!isNaN(v) && el.value.trim() !== '') {
-    el.value = v.toLocaleString('de-DE', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: dec
-    });
-  }
-}
-
-function stripForEditing(el) {
-  // Beim Antippen: Tausenderpunkte entfernen damit man normal tippen kann
-  const dec = FMT_INPUTS[el.id];
-  if (dec === undefined) return;
-  const v = parseDE(el.value);
-  if (!isNaN(v) && el.value.trim() !== '') {
-    // Zeige Rohzahl mit Komma als Dezimaltrennzeichen
-    el.value = dec > 0
-      ? v.toLocaleString('de-DE', {minimumFractionDigits:0, maximumFractionDigits:dec})
-          .replace(/\./g, '')   // Tausenderpunkte raus
-      : String(Math.round(v));
-  }
-  setTimeout(() => el.select(), 0);
-}
-
-document.addEventListener('focusin', function(e) {
-  if (e.target && e.target.tagName === 'INPUT' &&
-      e.target.type === 'text' && !e.target.readOnly) {
-    stripForEditing(e.target);
-  }
-});
-
-document.addEventListener('focusout', function(e) {
-  if (e.target && e.target.tagName === 'INPUT' &&
-      e.target.type === 'text' && !e.target.readOnly) {
-    applyThousands(e.target);
-  }
-});
-
-
-/* ═══════════════════════════════════════════════════════
-   EINHEITEN-TOGGLE STATE
-   qUnit[p]  = 'W' | 'kW'
-   msUnit[p] = 'kgh' | 'm3h'
-   luftQUnit = 'W' | 'kW'
-═══════════════════════════════════════════════════════ */
-const qUnit   = { h:'W',   k:'W'   };
-const msUnit  = { h:'kgh', k:'kgh' };
-let   luftQUnit = 'W';
-
-function setQUnit(p, u) {
-  if (p === 'luft') {
-    luftQUnit = u;
-    $('luft-q-W') .classList.toggle('active', u === 'W');
-    $('luft-q-kW').classList.toggle('active', u === 'kW');
-    $('luft-q-lbl').textContent = 'Leistung Q [' + u + ']';
-    // Wert umrechnen
-    const el = $('luft-q-in');
-    const v = parseDE(el.value);
-    if (!isNaN(v) && el.value.trim() !== '') {
-      el.value = u === 'kW'
-        ? fmtInput(v / 1000, 3)
-        : fmtInput(v * 1000, 0);
-    }
-    calcLuft();
-  } else {
-    qUnit[p] = u;
-    $(p + '-q-W') .classList.toggle('active', u === 'W');
-    $(p + '-q-kW').classList.toggle('active', u === 'kW');
-    const lbl = $(p + '-q-lbl');
-    if (lbl) lbl.textContent = (p === 'h' ? 'Heizlast' : 'Kühllast') + ' [' + u + ']';
-    // Wert umrechnen
-    const el = $(p + '-q');
-    const v = parseDE(el.value);
-    if (!isNaN(v) && el.value.trim() !== '') {
-      el.value = u === 'kW'
-        ? fmtInput(v / 1000, 3)
-        : fmtInput(v * 1000, 0);
-    }
-    calcAll();
-  }
-}
-
-function setMsUnit(p, u) {
-  const f = FL[$('medium').value];
-  const oldU = msUnit[p];
-  msUnit[p] = u;
-  $(p + '-ms-kgh').classList.toggle('active', u === 'kgh');
-  $(p + '-ms-m3h').classList.toggle('active', u === 'm3h');
-  const lbl = $(p + '-ms-lbl');
-  if (lbl) lbl.textContent = 'Massenstrom [' + (u === 'kgh' ? 'kg/h' : 'm\u00b3/h') + ']';
-  // Wert umrechnen
-  const el = $(p + '-ms-in');
-  const v = parseDE(el.value);
-  if (!isNaN(v) && el.value.trim() !== '') {
-    if (oldU === 'kgh' && u === 'm3h') {
-      el.value = fmtInput(v / f.rho, 4);
-    } else if (oldU === 'm3h' && u === 'kgh') {
-      el.value = fmtInput(v * f.rho, 1);
-    }
-  }
-  calcAll();
-}
-
-/** Gibt Leistung in Watt zurück, unabhängig von der gewählten Einheit */
-function getQWatt(p) {
-  const raw = parseDE($(p + '-q')?.value) || 0;
-  return qUnit[p] === 'kW' ? raw * 1000 : raw;
-}
-
-/** Gibt Massenstrom in kg/h zurück, unabhängig von der gewählten Einheit */
-function getMsKgh(p) {
-  const raw = parseDE($(p + '-ms-in')?.value) || 0;
-  const f   = FL[$('medium').value];
-  return msUnit[p] === 'm3h' ? raw * f.rho : raw;
-}
-
-/** Gibt Luft-Leistung in Watt zurück */
-function getLuftQWatt() {
-  const raw = parseDE($('luft-q-in')?.value) || 0;
-  return luftQUnit === 'kW' ? raw * 1000 : raw;
-}
-
 </script>
 </body>
 </html>
