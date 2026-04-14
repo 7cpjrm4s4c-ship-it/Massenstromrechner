@@ -1435,19 +1435,22 @@ function rhoAir(t){return 353.05/(t+273.15)}
 function luftSwitch(hk){
   LST.hk=hk;
   setTimeout(luft_load,0);
-  $('luft-btn-h').className='hk-btn'+(hk==='h'?' on-h':'');
-  $('luft-btn-k').className='hk-btn'+(hk==='k'?' on-k':'');
+  const bh=$('luft-btn-h'),bk=$('luft-btn-k');
+  if(bh)bh.className='hk-btn'+(hk==='h'?' on-h':'');
+  if(bk)bk.className='hk-btn'+(hk==='k'?' on-k':'');
   const card=$('luft-in-card');
-  card.className='gc '+(hk==='h'?'gc-h':'gc-c');
-  $('luft-ptitle').innerHTML=hk==='h'
+  if(card)card.className='gc '+(hk==='h'?'gc-h':'gc-c');
+  const lpt=$('luft-ptitle'); if(lpt)lpt.innerHTML=hk==='h'
     ?'<div class="dot dot-h"></div><span class="ptitle-lbl">Heizleistung \u2014 Eingaben</span>'
     :'<div class="dot dot-c"></div><span class="ptitle-lbl" style="color:var(--cold-t)">K\u00fchlleistung \u2014 Eingaben</span>';
-  const dtl=$('luft-dt-auto-lbl');
-  if(dtl)dtl.innerHTML=hk==='h'
-    ?'&Delta;t Temperaturspreizung &mdash; Heizung (Zuluft &gt; Raum)'
-    :'&Delta;t Temperaturspreizung &mdash; Kühlung (Raum &gt; Zuluft)';
+  // Δt-Label aktualisieren (ID luft-dt-lbl im neuen Tab)
+  const dtl=$('luft-dt-lbl');
+  if(dtl)dtl.textContent=hk==='h'
+    ?'\u0394t Temperaturspreizung (Zuluft \u2212 Raum)'
+    :'\u0394t Temperaturspreizung (Raum \u2212 Zuluft)';
 
-  $('luft-out-title').textContent=hk==='h'?'Ergebnis \u2014 Heizleistung Luft':'Ergebnis \u2014 K\u00fchlleistung Luft';
+  const ot=$('luft-out-title');
+  if(ot)ot.textContent=hk==='h'?'Ergebnis \u2014 Heizleistung Luft':'Ergebnis \u2014 K\u00fchlleistung Luft';
   calcLuft();
 }
 
@@ -1663,9 +1666,12 @@ function buildSelects(cat) {
   fs.innerHTML = '';
   ts.innerHTML = '';
   d.units.forEach(u => {
-    fs.innerHTML += `<option value="${u.key}"${u.key===d.defFrom?' selected':''}>${u.label}</option>`;
-    ts.innerHTML += `<option value="${u.key}"${u.key===d.defTo  ?' selected':''}>${u.label}</option>`;
+    fs.innerHTML += `<option value="${u.key}">${u.label}</option>`;
+    ts.innerHTML += `<option value="${u.key}">${u.label}</option>`;
   });
+  // Explizit setzen (innerHTML selected-Attribut ist nicht zuverlässig auf iOS)
+  fs.value = d.defFrom;
+  ts.value = d.defTo;
 }
 
 function unitCat(cat) {
@@ -1698,7 +1704,22 @@ function unitCalc() {
   const tUnit = d.units.find(u => u.key === tKey);
 
   // Guard: Einheit nicht in aktueller Kategorie → selects neu aufbauen
-  if (!fUnit || !tUnit) { buildSelects(UCurrent); return; }
+  if (!fUnit || !tUnit) {
+    // Selects reparieren und sofort neu rechnen
+    buildSelects(UCurrent);
+    // Nach rebuild: fUnit/tUnit nochmal holen
+    const d2 = UNITS[UCurrent];
+    const fKey2 = $('unit-from-sel').value;
+    const tKey2 = $('unit-to-sel').value;
+    const fUnit2 = d2.units.find(u => u.key === fKey2);
+    const tUnit2 = d2.units.find(u => u.key === tKey2);
+    if (!fUnit2 || !tUnit2) return;  // echte Einheit fehlt
+    const base2 = raw * fUnit2.factor;
+    const result2 = base2 / tUnit2.factor;
+    $('unit-to-val').textContent = ufmt(result2, tUnit2.decimals);
+    $('unit-to-val').style.color = 'var(--grn)';
+    return;
+  }
 
   // Convert: raw → base → target
   const base   = raw * fUnit.factor;
