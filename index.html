@@ -538,7 +538,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .col-L > *, .col-R > *, .twin > *, .pipe-pair > * { min-width: 0; }
 /* gc: overflow visible damit Buttons/Dropdowns nicht abgeschnitten werden */
 .gc, .out-card { overflow: visible; }
-#tab-flow, #tab-luft, #tab-pipe, #tab-unit { overflow-x: hidden; max-width: 100%; }
+#tab-flow, #tab-luft, #tab-pipe, #tab-unit { max-width: 100%; width: 100%; }
 
 /* Unit converter */
 /* Category select styled like gl-sel but green accent */
@@ -1009,7 +1009,14 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
               style="font-size:22px;padding:12px 14px;border-radius:var(--r-m)"
               oninput="unitCalc()"/>
           </div>
-          <select class="gl-sel" id="unit-from-sel" style="width:auto;flex-shrink:0;min-width:100px;padding:11px 32px 11px 12px;font-size:13px" onchange="unitCalc()"></select>
+          <select class="gl-sel" id="unit-from-sel" style="width:auto;flex-shrink:0;min-width:100px;padding:11px 32px 11px 12px;font-size:13px" onchange="unitCalc()">
+              <option value="mbar" selected>mbar</option>
+              <option value="bar">bar</option>
+              <option value="mWs">mWs</option>
+              <option value="Pa">Pa</option>
+              <option value="hPa">hPa</option>
+              <option value="kPa">kPa</option>
+            </select>
         </div>
       </div>
 
@@ -1032,7 +1039,14 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
               style="width:100%;background:rgba(52,211,153,.08);border:1.5px solid rgba(52,211,153,.38);color:var(--grn);font-family:var(--fm);font-size:22px;font-weight:700;padding:12px 14px;border-radius:var(--r-m);min-height:52px;transition:color .2s"
               class="unit-ro">&ndash;</div>
           </div>
-          <select class="gl-sel" id="unit-to-sel" style="width:auto;flex-shrink:0;min-width:100px;padding:11px 32px 11px 12px;font-size:13px;border-color:rgba(52,211,153,.35);background-color:rgba(52,211,153,.08)" onchange="unitCalc()"></select>
+          <select class="gl-sel" id="unit-to-sel" style="width:auto;flex-shrink:0;min-width:100px;padding:11px 32px 11px 12px;font-size:13px;border-color:rgba(52,211,153,.35);background-color:rgba(52,211,153,.08)" onchange="unitCalc()">
+              <option value="mbar">mbar</option>
+              <option value="bar">bar</option>
+              <option value="mWs">mWs</option>
+              <option value="Pa">Pa</option>
+              <option value="hPa">hPa</option>
+              <option value="kPa" selected>kPa</option>
+            </select>
         </div>
       </div>
     </div>
