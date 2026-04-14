@@ -215,7 +215,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
   backdrop-filter:saturate(160%) blur(24px);
   -webkit-backdrop-filter:saturate(160%) blur(24px);
   padding:var(--pad);
-  position:relative; overflow:hidden;
+  position:relative; overflow:visible;
   flex-shrink:0;
   /* Depth shadow */
   box-shadow:
@@ -410,7 +410,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
   box-shadow:
     0 2px 0 0 rgba(255,255,255,0.06) inset,
     0 8px 32px rgba(0,0,0,0.55);
-  position:relative; overflow:hidden;
+  position:relative; overflow:visible;
 }
 .out-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:var(--shimmer); }
 
@@ -526,16 +526,17 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 /* ═══════════════════════════════════════════════════════
    ANIMATIONS
 ═══════════════════════════════════════════════════════ */
-@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-.gc, .out-card { animation:fadeUp .30s ease both; }
+/* Animation entfernt — verhinderte Touch-Events durch Stacking Context */
+/* .gc, .out-card { animation:fadeUp .30s ease both; } */
 
 /* Heiz/Kühl Switch Button */
 .hk-btn{display:flex;align-items:center;justify-content:center;gap:7px;font-family:var(--f);font-size:12px;font-weight:600;padding:10px 8px;border-radius:var(--r-m);border:1px solid transparent;cursor:pointer;background:transparent;color:var(--t3);transition:all .18s}
 .hk-btn.on-h{background:rgba(255,107,53,.15);border-color:rgba(255,107,53,.35);color:var(--heat-t);box-shadow:inset 0 1px 0 rgba(255,107,53,.12),0 2px 6px rgba(0,0,0,.35)}
 .hk-btn.on-k{background:rgba(0,196,232,.12);border-color:rgba(0,196,232,.30);color:var(--cold-t);box-shadow:inset 0 1px 0 rgba(0,196,232,.10),0 2px 6px rgba(0,0,0,.35)}
 
-/* Prevent grid blowout on iOS — nur Grid/Flex-Kinder */
-.col-L > *, .col-R > *, .twin > *, .pipe-pair > /* gc: overflow sichtbar damit Dropdowns/Buttons nicht abgeschnitten */
+/* Grid-Kinder: min-width verhindert Blowout ohne alle Elemente zu betreffen */
+.col-L > *, .col-R > *, .twin > *, .pipe-pair > * { min-width: 0; }
+/* gc: overflow visible damit Buttons/Dropdowns nicht abgeschnitten werden */
 .gc, .out-card { overflow: visible; }
 #tab-flow, #tab-luft, #tab-pipe, #tab-unit { overflow-x: hidden; max-width: 100%; }
 
@@ -653,7 +654,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
     </div>
 
     <!-- Heiz/Kühl Switch -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:rgba(0,0,0,.40);border:1px solid var(--gb-soft);border-radius:var(--r-l);padding:4px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:rgba(0,0,0,.40);border:1px solid var(--gb-soft);border-radius:var(--r-l);padding:4px;position:relative;z-index:2">
       <button class="hk-btn on-h" id="flow-btn-h" onclick="flowSwitch('h')">
         <div class="dot dot-h"></div>Heizung
       </button>
@@ -843,13 +844,13 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
   <div style="padding:12px;padding-left:calc(12px + var(--sal));padding-right:calc(12px + var(--sar));padding-bottom:calc(32px + var(--sab));display:flex;flex-direction:column;gap:var(--gap);max-width:640px;width:100%;margin:0 auto">
 
     <!-- Heiz/Kühl Switch -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:rgba(0,0,0,.40);border:1px solid var(--gb-soft);border-radius:var(--r-l);padding:4px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:rgba(0,0,0,.40);border:1px solid var(--gb-soft);border-radius:var(--r-l);padding:4px;position:relative;z-index:2">
       <button class="hk-btn" id="luft-btn-h" onclick="luftSwitch('h')"><div class="dot dot-h"></div>Heizleistung</button>
       <button class="hk-btn" id="luft-btn-k" onclick="luftSwitch('k')"><div class="dot dot-c"></div>Kühlleistung</button>
     </div>
 
     <!-- Calc modes -->
-    <div class="modes" style="grid-template-columns:repeat(3,1fr)">
+    <div class="modes" style="grid-template-columns:repeat(3,1fr);position:relative;z-index:2">
       <button class="mbtn active" data-lm="q">Q Leistung</button>
       <button class="mbtn"        data-lm="v">V&#x307; Volumenstrom</button>
       <button class="mbtn"        data-lm="dt">Δt Temperatur</button>
