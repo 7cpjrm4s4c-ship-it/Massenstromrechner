@@ -133,12 +133,12 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.15);
 }
 .hdr-title { font-size:15px; font-weight:700; letter-spacing:-.25px; }
-.hdr-sub   { font-size:10px; color:var(--t3); margin-top:1px; }
+.hdr-sub   { font-size:12px; color:var(--t3); margin-top:1px; }
 .tab-bar   { display:flex; border-top:1px solid var(--gb-soft); overflow-x:auto; scrollbar-width:none; }
 .tab-bar::-webkit-scrollbar { display:none; }
 .tab-btn {
   font-family:var(--f); font-size:13px; font-weight:600;
-  padding:10px 20px; flex:1; min-width:max-content; text-align:center;
+  padding:10px 16px; flex:1; min-width:max-content; text-align:center;
   border:none; border-bottom:2px solid transparent;
   background:transparent; color:var(--t3);
   cursor:pointer; transition:all .18s;
@@ -243,7 +243,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 
 /* Section label */
 .slbl {
-  font-family:var(--f); font-size:9px; font-weight:700;
+  font-family:var(--f); font-size:11px; font-weight:700;
   letter-spacing:.15em; text-transform:uppercase;
   color:var(--t3); margin-bottom:14px;
 }
@@ -253,7 +253,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 .dot-h { background:var(--heat); box-shadow:0 0 7px var(--heat); }
 .dot-c { background:var(--cold); box-shadow:0 0 7px var(--cold); }
-.ptitle-lbl { font-family:var(--f); font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+.ptitle-lbl { font-family:var(--f); font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
 .gc-h .ptitle-lbl { color:var(--heat-t); }
 .gc-c .ptitle-lbl { color:var(--cold-t); }
 
@@ -282,7 +282,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .chip {
   background:var(--glass-mid); border:1px solid var(--gb-soft);
   border-radius:8px; padding:4px 10px;
-  font-family:var(--fm); font-size:10px; color:var(--t2);
+  font-family:var(--fm); font-size:12px; color:var(--t2);
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.07);
 }
 .chip strong { color:var(--blue); }
@@ -299,7 +299,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 }
 .mbtn {
   background:transparent; border:1px solid transparent;
-  color:var(--t3); font-family:var(--f); font-size:11px; font-weight:600;
+  color:var(--t3); font-family:var(--f); font-size:13px; font-weight:600;
   padding:8px 4px; border-radius:var(--r-s);
   cursor:pointer; transition:all .15s; text-align:center;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
@@ -321,7 +321,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .igrp:last-of-type { margin-bottom:0; }
 
 .ilbl {
-  font-family:var(--f); font-size:9px; font-weight:700;
+  font-family:var(--f); font-size:11px; font-weight:700;
   letter-spacing:.13em; text-transform:uppercase; color:var(--t3);
 }
 .iwrap { position:relative; }
@@ -394,7 +394,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 /* Unit badge */
 .iunit {
   position:absolute; right:14px; top:50%; transform:translateY(-50%);
-  font-family:var(--f); font-size:10px; font-weight:700;
+  font-family:var(--f); font-size:12px; font-weight:700;
   color:rgba(255,255,255,0.40); pointer-events:none;
 }
 
@@ -430,15 +430,16 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .ob-c::before { background:linear-gradient(90deg,transparent,rgba(0,196,232,0.55),transparent); }
 
 .ob-title { display:flex; align-items:center; gap:7px; margin-bottom:14px; }
-.ob-title-lbl { font-family:var(--f); font-size:9px; font-weight:700; letter-spacing:.13em; text-transform:uppercase; }
+.ob-title-lbl { font-family:var(--f); font-size:11px; font-weight:700; letter-spacing:.13em; text-transform:uppercase; }
 .ob-h .ob-title-lbl { color:var(--heat-t); }
 .ob-c .ob-title-lbl { color:var(--cold-t); }
 
 .out-row { margin-bottom:10px; }
 .out-row:last-child { margin-bottom:0; }
-.out-key { font-family:var(--f); font-size:9px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--t3); margin-bottom:4px; }
+/* out-key: no text-transform — units must keep correct capitalisation */
+.out-key { font-family:var(--f); font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--t3); margin-bottom:4px; }
 .out-val { font-family:var(--fm); font-weight:700; line-height:1; font-size:clamp(18px,3.8vw,26px); transition:color .22s; }
-.out-val .u { font-size:11px; font-weight:400; margin-left:3px; color:var(--t3); }
+.out-val .u { font-size:12px; font-weight:400; margin-left:3px; color:var(--t3); }
 
 /* Default state: dim */
 .ob-h .out-val { color:var(--t4); }
@@ -448,17 +449,17 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .ob-c .out-val.has { color:var(--out-c); }
 
 /* Formula */
-.fml { text-align:center; font-family:var(--fm); font-size:10px; color:var(--t3); line-height:1.9; flex-shrink:0; }
+.fml { text-align:center; font-family:var(--fm); font-size:12px; color:var(--t3); line-height:1.9; flex-shrink:0; }
 .fml em { color:var(--t2); font-style:normal; }
 
 /* Desktop right-col header */
-.rcol-hdr { display:none; font-family:var(--f); font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--t2); flex-shrink:0; }
+.rcol-hdr { display:none; font-family:var(--f); font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--t2); flex-shrink:0; }
 @media (min-width:900px) { .rcol-hdr { display:block; } }
 
 /* Pipe section header */
 .psec { display:flex; align-items:center; gap:7px; margin-bottom:8px; flex-shrink:0; }
-.psec-lbl { font-family:var(--f); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.09em; }
-.psec-vol { font-family:var(--fm); font-size:10px; color:var(--t3); margin-left:3px; }
+.psec-lbl { font-family:var(--f); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.09em; }
+.psec-vol { font-family:var(--fm); font-size:12px; color:var(--t3); margin-left:3px; }
 
 /* ═══════════════════════════════════════════════════════
    PIPE MINI CARDS
@@ -475,35 +476,40 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.07),0 4px 12px rgba(0,0,0,0.35);
 }
 .pm::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.14) 50%,transparent); }
-.pm.best { border-color:rgba(79,168,255,0.45); background:rgba(79,168,255,0.07); box-shadow:inset 0 1px 0 rgba(79,168,255,0.12),0 0 18px rgba(79,168,255,0.08); }
+/* best (neutral/Rohr-Tab): blue */
+.pm.best   { border-color:rgba(79,168,255,0.45);  background:rgba(79,168,255,0.07);  box-shadow:inset 0 1px 0 rgba(79,168,255,0.12), 0 0 18px rgba(79,168,255,0.08); }
+/* best-h: heat orange */
+.pm.best-h { border-color:rgba(255,107,53,0.50);  background:rgba(255,107,53,0.08);  box-shadow:inset 0 1px 0 rgba(255,107,53,0.14), 0 0 18px rgba(255,107,53,0.09); }
+/* best-k: cold cyan */
+.pm.best-k { border-color:rgba(0,196,232,0.48);   background:rgba(0,196,232,0.07);   box-shadow:inset 0 1px 0 rgba(0,196,232,0.12), 0 0 18px rgba(0,196,232,0.08); }
 .pm.over { border-color:rgba(255,69,58,0.30); background:rgba(255,69,58,0.04); }
 .pm.na   { opacity:0.5; }
 
-.pm-std { font-family:var(--f); font-size:8px; font-weight:700; letter-spacing:.10em; text-transform:uppercase; color:var(--t3); margin-bottom:5px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+.pm-std { font-family:var(--f); font-size:10px; font-weight:700; letter-spacing:.10em; text-transform:uppercase; color:var(--t3); margin-bottom:5px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
 .pm-std.mp { color:var(--blue); }
-.star { background:rgba(79,168,255,0.18); border:1px solid rgba(79,168,255,0.35); color:var(--blue); font-family:var(--f); font-size:8px; font-weight:700; padding:1px 5px; border-radius:4px; }
+.star { background:rgba(79,168,255,0.18); border:1px solid rgba(79,168,255,0.35); color:var(--blue); font-family:var(--f); font-size:10px; font-weight:700; padding:1px 5px; border-radius:4px; }
 .pm-dn { font-family:var(--fm); font-size:17px; font-weight:700; color:var(--t1); margin-bottom:2px; }
-.pm-dim { font-family:var(--fm); font-size:9px; color:var(--t3); margin-bottom:9px; line-height:1.5; }
+.pm-dim { font-family:var(--fm); font-size:11px; color:var(--t3); margin-bottom:9px; line-height:1.5; }
 .pm-r { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:3px; }
-.pm-k { font-family:var(--f); font-size:8px; text-transform:uppercase; letter-spacing:.08em; color:var(--t3); }
+.pm-k { font-family:var(--f); font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--t3); }
 .pm-v { font-family:var(--fm); font-size:13px; font-weight:700; }
 .dpbar { height:3px; border-radius:2px; background:rgba(255,255,255,0.08); overflow:hidden; margin-top:8px; }
 .dpfill { height:100%; border-radius:2px; transition:width .38s ease; }
 
 /* N/A card */
-.pm-na-txt { font-family:var(--f); font-size:11px; color:var(--t3); text-align:center; padding:16px 8px; line-height:1.5; }
+.pm-na-txt { font-family:var(--f); font-size:13px; color:var(--t3); text-align:center; padding:16px 8px; line-height:1.5; }
 
 /* Legend */
 .legend { display:flex; gap:10px; flex-wrap:wrap; padding-top:10px; border-top:1px solid var(--gb-soft); flex-shrink:0; }
-.legend span { font-family:var(--f); font-size:9px; }
+.legend span { font-family:var(--f); font-size:11px; }
 
 /* Info text */
-.info-txt { font-family:var(--f); font-size:10px; color:var(--t3); line-height:1.65; flex-shrink:0; }
+.info-txt { font-family:var(--f); font-size:12px; color:var(--t3); line-height:1.65; flex-shrink:0; }
 
 /* Placeholder */
 .placeholder { text-align:center; padding:28px 20px; flex-shrink:0; }
 .placeholder-icon { font-size:30px; opacity:.2; margin-bottom:10px; }
-.placeholder-txt { font-family:var(--f); font-size:11px; color:var(--t3); line-height:1.6; }
+.placeholder-txt { font-family:var(--f); font-size:13px; color:var(--t3); line-height:1.6; }
 
 /* Pipe tab param grid */
 .pipe-params { display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); margin-bottom:0; }
@@ -566,6 +572,24 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 .unit-k { font-family:var(--f); font-size:11px; font-weight:600; color:var(--t2); }
 .unit-v { font-family:var(--fm); font-size:13px; font-weight:700; color:var(--t1); }
 
+/* ── W/kW unit toggle pill ── */
+.unit-pill{display:flex;gap:2px;background:rgba(0,0,0,.35);border:1px solid var(--gb-soft);border-radius:8px;padding:2px;flex-shrink:0}
+.up-btn{font-family:var(--f);font-size:11px;font-weight:700;padding:3px 8px;border:none;border-radius:6px;background:transparent;color:var(--t3);cursor:pointer;transition:all .15s;white-space:nowrap}
+.up-btn.active{background:var(--glass-raise);color:var(--t1);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+/* ilbl row with toggle */
+.ilbl-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:0}
+/* Zuluft pill card */
+.tzl-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.tzl-side{padding:12px 16px}
+.tzl-side:first-child{border-right:1px solid var(--gb-soft)}
+.tzl-lbl{font-family:var(--f);font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:8px}
+.tzl-h .tzl-lbl{color:var(--heat-t)}
+.tzl-k .tzl-lbl{color:var(--cold-t)}
+.tzl-inp{width:100%;background:var(--glass-mid);border:1px solid var(--gb-strong);color:var(--t1);font-family:var(--fm);font-size:18px;font-weight:700;padding:10px 46px 10px 12px;border-radius:var(--r-m);outline:none;-webkit-appearance:none;box-shadow:inset 0 2px 4px rgba(0,0,0,.35);transition:border-color .15s}
+.tzl-inp::placeholder{color:var(--t4);font-weight:400}
+.tzl-h .tzl-inp:focus{border-color:rgba(255,107,53,.60)}
+.tzl-k .tzl-inp:focus{border-color:rgba(0,196,232,.55)}
+
 </style>
 </head>
 <body>
@@ -576,13 +600,13 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
     <div class="hdr-icon">&#7745;</div>
     <div>
       <div class="hdr-title">Massenstromrechner</div>
-      <div class="hdr-sub">HLS-Anlagen &middot; Heizung &middot; K&auml;lte &middot; Rohr</div>
+      <div class="hdr-sub">HLK-Anlagen &middot; Heizung &middot; K&auml;lte &middot; L&uuml;ftung</div>
     </div>
   </div>
   <nav class="tab-bar">
     <button class="tab-btn active" data-tab="flow">Heizung/K&auml;lte</button>
-    <button class="tab-btn"        data-tab="luft">Luft</button>
-    <button class="tab-btn"        data-tab="pipe">Rohr</button>
+    <button class="tab-btn"        data-tab="luft">L&uuml;ftung</button>
+    <button class="tab-btn"        data-tab="pipe">Rohrdimensionierung</button>
     <button class="tab-btn"        data-tab="unit">Einheiten</button>
   </nav>
 </header>
@@ -624,7 +648,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
         <div class="dot dot-h"></div>Heizung
       </button>
       <button class="hk-btn" id="flow-btn-k" onclick="flowSwitch('k')">
-        <div class="dot dot-c"></div>Kühlkreis
+        <div class="dot dot-c"></div>K&auml;lte
       </button>
     </div>
 
@@ -642,10 +666,16 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
         </div>
         <!-- Q input -->
         <div class="igrp" id="h-ig-q">
-          <div class="ilbl">Heizlast [W]</div>
+          <div class="ilbl ilbl-row">
+            <span>Heizlast</span>
+            <div class="unit-pill">
+              <button class="up-btn active" id="h-wu"  onclick="setQUnit('h','W')">W</button>
+              <button class="up-btn"        id="h-kwu" onclick="setQUnit('h','kW')">kW</button>
+            </div>
+          </div>
           <div class="iwrap">
             <input class="inp" id="h-q" type="number" min="0" step="100" placeholder="0" inputmode="decimal"/>
-            <span class="iunit">W</span>
+            <span class="iunit" id="h-q-unit">W</span>
           </div>
         </div>
         <!-- ṁ input [kg/h] -->
@@ -658,18 +688,10 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
         </div>
         <!-- ΔT input -->
         <div class="igrp" id="h-ig-dt">
-          <div class="ilbl">&Delta;T [K]</div>
+          <div class="ilbl" id="h-dt-lbl">&Delta;T [K]</div>
           <div class="iwrap">
             <input class="inp-sm" id="h-dt" type="number" min="0.5" step="0.5" value="10" inputmode="decimal"/>
             <span class="iunit">K</span>
-          </div>
-        </div>
-        <!-- Result (read-only) -->
-        <div class="igrp" id="h-ro-wrap" style="display:none">
-          <div class="ilbl" id="h-ro-lbl">Ergebnis</div>
-          <div class="iwrap">
-            <div class="inp-ro empty" id="h-ro-val">&ndash;</div>
-            <span class="iunit" id="h-ro-unit"></span>
           </div>
         </div>
       </div>
@@ -685,10 +707,16 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
           <button class="mbtn"        data-p="k" data-v="dt">&Delta;T&nbsp;Temperatur</button>
         </div>
         <div class="igrp" id="k-ig-q">
-          <div class="ilbl">K&uuml;hllast [W]</div>
+          <div class="ilbl ilbl-row">
+            <span>Kühllast</span>
+            <div class="unit-pill">
+              <button class="up-btn active" id="k-wu"  onclick="setQUnit('k','W')">W</button>
+              <button class="up-btn"        id="k-kwu" onclick="setQUnit('k','kW')">kW</button>
+            </div>
+          </div>
           <div class="iwrap">
             <input class="inp" id="k-q" type="number" min="0" step="100" placeholder="0" inputmode="decimal"/>
-            <span class="iunit">W</span>
+            <span class="iunit" id="k-q-unit">W</span>
           </div>
         </div>
         <div class="igrp" id="k-ig-ms" style="display:none">
@@ -699,17 +727,10 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
           </div>
         </div>
         <div class="igrp" id="k-ig-dt">
-          <div class="ilbl">&Delta;T [K]</div>
+          <div class="ilbl" id="k-dt-lbl">&Delta;T [K]</div>
           <div class="iwrap">
             <input class="inp-sm" id="k-dt" type="number" min="0.5" step="0.5" value="6" inputmode="decimal"/>
             <span class="iunit">K</span>
-          </div>
-        </div>
-        <div class="igrp" id="k-ro-wrap" style="display:none">
-          <div class="ilbl" id="k-ro-lbl">Ergebnis</div>
-          <div class="iwrap">
-            <div class="inp-ro empty" id="k-ro-val">&ndash;</div>
-            <span class="iunit" id="k-ro-unit"></span>
           </div>
         </div>
       </div>
@@ -719,17 +740,17 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 
     <!-- Output -->
     <div class="out-card">
-      <div class="slbl">Ergebnis &mdash; Massenstrom</div>
+      <div class="slbl" id="out-card-slbl">Ergebnis &mdash; Massenstrom</div>
       <div class="out-grid">
         <div class="ob ob-h">
           <div class="ob-title"><div class="dot dot-h"></div><span class="ob-title-lbl">Heizung</span></div>
-          <div class="out-row"><div class="out-key">kg/h</div><div class="out-val" id="h-kgh">&ndash;<span class="u">kg/h</span></div></div>
-          <div class="out-row"><div class="out-key">m&sup3;/h</div><div class="out-val" id="h-m3h">&ndash;<span class="u">m&sup3;/h</span></div></div>
+          <div class="out-row"><div class="out-key" id="h-out-key1">kg/h</div><div class="out-val" id="h-out-v1">&ndash;<span class="u" id="h-out-u1">kg/h</span></div></div>
+          <div class="out-row"><div class="out-key" id="h-out-key2">m&sup3;/h</div><div class="out-val" id="h-out-v2">&ndash;<span class="u" id="h-out-u2">m&sup3;/h</span></div></div>
         </div>
         <div class="ob ob-c">
           <div class="ob-title"><div class="dot dot-c"></div><span class="ob-title-lbl">K&auml;lte</span></div>
-          <div class="out-row"><div class="out-key">kg/h</div><div class="out-val" id="k-kgh">&ndash;<span class="u">kg/h</span></div></div>
-          <div class="out-row"><div class="out-key">m&sup3;/h</div><div class="out-val" id="k-m3h">&ndash;<span class="u">m&sup3;/h</span></div></div>
+          <div class="out-row"><div class="out-key" id="k-out-key1">kg/h</div><div class="out-val" id="k-out-v1">&ndash;<span class="u" id="k-out-u1">kg/h</span></div></div>
+          <div class="out-row"><div class="out-key" id="k-out-key2">m&sup3;/h</div><div class="out-val" id="k-out-v2">&ndash;<span class="u" id="k-out-u2">m&sup3;/h</span></div></div>
         </div>
       </div>
     </div>
@@ -777,12 +798,6 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
         </div>
         <div class="pipe-pair" id="pi-k-pair"></div>
       </div>
-      <div class="legend" style="margin-top:12px">
-        <span style="color:var(--ok)">&#9679;&thinsp;&le;&thinsp;75&thinsp;% &mdash; optimal</span>
-        <span style="color:var(--warn)">&#9679;&thinsp;&le;&thinsp;100&thinsp;Pa/m</span>
-        <span style="color:var(--danger)">&#9679;&thinsp;&gt;&thinsp;100&thinsp;Pa/m</span>
-        <span style="color:var(--blue)">&#9733;&thinsp;empfohlen</span>
-      </div>
     </div>
 
     <div id="pi-placeholder" class="placeholder">
@@ -802,104 +817,148 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 <div id="tab-luft" style="display:none">
   <div style="padding:12px;padding-left:calc(12px + var(--sal));padding-right:calc(12px + var(--sar));padding-bottom:calc(32px + var(--sab));display:flex;flex-direction:column;gap:var(--gap);max-width:640px;width:100%;margin:0 auto">
 
-    <!-- Heiz/Kühl Switch -->
+    <!-- ① Zulufttemperatur + Raumtemperatur pill — Heizen & Kühlen getrennt -->
+    <div class="gc" style="padding:0;overflow:hidden">
+      <div style="padding:12px 16px 6px;font-family:var(--f);font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--t3)">Temperaturen</div>
+      <!-- Header row -->
+      <div class="tzl-grid" style="padding:0 16px 6px">
+        <div style="font-family:var(--f);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--heat-t)">&#8593; Heizen</div>
+        <div style="font-family:var(--f);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cold-t)">&#8595; K&uuml;hlen</div>
+      </div>
+      <!-- Zuluft row -->
+      <div class="tzl-grid" style="border-top:1px solid var(--gb-soft)">
+        <div class="tzl-side tzl-h">
+          <div class="tzl-lbl">Zuluft t<sub>ZL,H</sub></div>
+          <div class="iwrap">
+            <input class="tzl-inp" id="luft-tzl-h" type="number" step="0.5" placeholder="z.B. 40" inputmode="decimal"/>
+            <span class="iunit">&deg;C</span>
+          </div>
+        </div>
+        <div class="tzl-side tzl-k">
+          <div class="tzl-lbl">Zuluft t<sub>ZL,K</sub></div>
+          <div class="iwrap">
+            <input class="tzl-inp" id="luft-tzl-k" type="number" step="0.5" placeholder="z.B. 16" inputmode="decimal"/>
+            <span class="iunit">&deg;C</span>
+          </div>
+        </div>
+      </div>
+      <!-- Raum row -->
+      <div class="tzl-grid" style="border-top:1px solid var(--gb-soft)">
+        <div class="tzl-side tzl-h">
+          <div class="tzl-lbl">Raum t<sub>R,H</sub></div>
+          <div class="iwrap">
+            <input class="tzl-inp" id="luft-tr-h" type="number" step="0.5" value="20" inputmode="decimal"/>
+            <span class="iunit">&deg;C</span>
+          </div>
+        </div>
+        <div class="tzl-side tzl-k">
+          <div class="tzl-lbl">Raum t<sub>R,K</sub></div>
+          <div class="iwrap">
+            <input class="tzl-inp" id="luft-tr-k" type="number" step="0.5" value="26" inputmode="decimal"/>
+            <span class="iunit">&deg;C</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② Heiz/Kühl Switch -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:rgba(0,0,0,.40);border:1px solid var(--gb-soft);border-radius:var(--r-l);padding:4px">
-      <button class="hk-btn" id="luft-btn-h" onclick="luftSwitch('h')"><div class="dot dot-h"></div>Heizleistung</button>
-      <button class="hk-btn" id="luft-btn-k" onclick="luftSwitch('k')"><div class="dot dot-c"></div>Kühlleistung</button>
+      <button class="hk-btn on-h" id="luft-btn-h" onclick="luftSwitch('h')"><div class="dot dot-h"></div>Heizleistung</button>
+      <button class="hk-btn"      id="luft-btn-k" onclick="luftSwitch('k')"><div class="dot dot-c"></div>K&uuml;hlleistung</button>
     </div>
 
-    <!-- Calc modes -->
-    <div class="modes" style="grid-template-columns:repeat(3,1fr);margin-bottom:0">
-      <button class="mbtn active" data-lm="q">Q Leistung</button>
-      <button class="mbtn"        data-lm="v">V&#x307; Volumenstrom</button>
-      <button class="mbtn"        data-lm="dt">Δt Temperatur</button>
-    </div>
-
-    <!-- Input card -->
+    <!-- ③ Eingabe-Karte — identisch zu Heizung/Kälte -->
     <div class="gc gc-h" id="luft-in-card">
       <div class="ptitle" id="luft-ptitle">
         <div class="dot dot-h"></div>
-        <span class="ptitle-lbl">Heizleistung — Eingaben</span>
+        <span class="ptitle-lbl">Heizleistung &mdash; Eingaben</span>
       </div>
 
-      <!-- V-dot (shown in modes q + dt) -->
-      <div class="igrp" id="luft-ig-v">
-        <div class="ilbl">Luftvolumenstrom V&#x307;</div>
-        <div class="iwrap"><input class="inp" id="luft-v" type="number" min="0" step="100" placeholder="0" inputmode="decimal"/><span class="iunit">m&sup3;/h</span></div>
+      <!-- Mode-Switcher (exakt wie Heizung/Kälte) -->
+      <div class="modes">
+        <button class="mbtn active" data-lm="v">&#7745;&nbsp;Volumenstrom</button>
+        <button class="mbtn"        data-lm="q">Q&nbsp;Leistung</button>
+        <button class="mbtn"        data-lm="dt">&Delta;t&nbsp;Temperatur</button>
       </div>
 
-      <!-- Temperatures -->
-      <div id="luft-temp-block">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap-s);min-width:0;width:100%">
-          <div class="igrp" style="margin-bottom:0;min-width:0;overflow:hidden">
-            <div class="ilbl" id="luft-lbl-tzl">Zuluft t<sub>ZL</sub></div>
-            <div class="iwrap"><input class="inp-sm" id="luft-tzl" type="number" step="0.5" placeholder="z.B. 40" inputmode="decimal"/><span class="iunit">&deg;C</span></div>
-          </div>
-          <div class="igrp" style="margin-bottom:0">
-            <div class="ilbl">Raum t<sub>R</sub></div>
-            <div class="iwrap"><input class="inp-sm" id="luft-tr" type="number" step="0.5" value="20" inputmode="decimal"/><span class="iunit">&deg;C</span></div>
+      <!-- Q-Eingabe — getrennt für Heizen (h) und Kühlen (k) -->
+      <div class="igrp" id="luft-ig-q">
+        <div class="ilbl ilbl-row">
+          <span>Leistung Q</span>
+          <div class="unit-pill">
+            <button class="up-btn active" id="luft-wu"  onclick="setLuftQUnit('W')">W</button>
+            <button class="up-btn"        id="luft-kwu" onclick="setLuftQUnit('kW')">kW</button>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;margin:10px 0">
+        <div class="iwrap" id="luft-q-wrap-h">
+          <input class="inp" id="luft-q-in-h" type="number" min="0" step="100" placeholder="0" inputmode="decimal"/>
+          <span class="iunit" id="luft-q-unit-badge">W</span>
+        </div>
+        <div class="iwrap" id="luft-q-wrap-k" style="display:none">
+          <input class="inp" id="luft-q-in-k" type="number" min="0" step="100" placeholder="0" inputmode="decimal"/>
+          <span class="iunit" id="luft-q-unit-badge-k">W</span>
+        </div>
+      </div>
+
+      <!-- V̇-Eingabe (ausgeblendet wenn mode=v) -->
+      <div class="igrp" id="luft-ig-v" style="display:none">
+        <div class="ilbl">Luftvolumenstrom V&#x307;</div>
+        <div class="iwrap">
+          <input class="inp" id="luft-v" type="number" min="0" step="100" placeholder="0" inputmode="decimal"/>
+          <span class="iunit">m&sup3;/h</span>
+        </div>
+      </div>
+
+      <!-- Δt-Block: auto Δt (ausgeblendet wenn mode=dt) -->
+      <div id="luft-temp-block">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
           <div style="flex:1;height:1px;background:var(--gb-soft)"></div>
-          <span style="font-size:9px;color:var(--t3);font-family:var(--f)">Temperaturdifferenz</span>
+          <span style="font-size:11px;color:var(--t3);font-family:var(--f)">Temperaturdifferenz</span>
           <div style="flex:1;height:1px;background:var(--gb-soft)"></div>
         </div>
         <div class="igrp" style="margin-bottom:0">
-          <div class="ilbl" id="luft-dt-auto-lbl">Δt = t<sub>ZL</sub> − t<sub>R</sub></div>
+          <div class="ilbl" id="luft-dt-auto-lbl">&Delta;t = t<sub>ZL,H</sub> &minus; t<sub>R,H</sub></div>
           <div class="iwrap">
-            <div class="inp-ro empty" id="luft-dt-auto-val" style="font-size:18px;padding:11px 52px 11px 14px">–</div>
+            <div class="inp-ro empty" id="luft-dt-auto-val" style="font-size:18px;padding:11px 52px 11px 14px">&ndash;</div>
             <span class="iunit">K</span>
           </div>
         </div>
       </div>
-
-      <!-- Direct dt input (dt mode only) -->
-      <div class="igrp" id="luft-ig-dt" style="display:none">
-        <div class="ilbl" id="luft-dt-lbl">Δt direkt eingeben</div>
-        <div class="iwrap"><input class="inp" id="luft-dt-in" type="number" min="0" step="0.5" placeholder="0" inputmode="decimal"/><span class="iunit">K</span></div>
-      </div>
-
-      <!-- Q input (modes v + dt) -->
-      <div class="igrp" id="luft-ig-q" style="display:none;margin-top:var(--gap)">
-        <div class="ilbl">Leistung Q</div>
-        <div class="iwrap"><input class="inp" id="luft-q-in" type="number" min="0" step="100" placeholder="0" inputmode="decimal"/><span class="iunit">W</span></div>
-      </div>
     </div>
 
-    <!-- Result card -->
+    <!-- ④ Ergebnis-Karte -->
     <div class="out-card">
-      <div class="slbl" id="luft-out-title">Ergebnis — Heizleistung Luft</div>
+      <div class="slbl" id="luft-out-title">Ergebnis &mdash; Heizleistung Luft</div>
       <div style="margin-bottom:14px">
-        <div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--t3);margin-bottom:4px" id="luft-main-lbl">Leistung Q</div>
-        <div style="font-family:var(--fm);font-size:34px;font-weight:700;line-height:1;transition:color .2s;color:var(--t4)" id="luft-main-val">–<span style="font-size:16px;font-weight:400;color:var(--t3)"> W</span></div>
+        <div style="font-family:var(--f);font-size:11px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--t3);margin-bottom:4px" id="luft-main-lbl">Leistung Q</div>
+        <div style="font-family:var(--fm);font-size:34px;font-weight:700;line-height:1;transition:color .2s;color:var(--t4)" id="luft-main-val">&ndash;<span style="font-size:16px;font-weight:400;color:var(--t3)"> W</span></div>
         <div style="font-family:var(--fm);font-size:14px;margin-top:3px;color:var(--t4)" id="luft-main-sub"></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding-top:12px;border-top:1px solid var(--gb-soft)">
-        <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">kW</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--t4)" id="luft-kw">–</div></div>
-        <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">V&#x307; m&sup3;/h</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--t4)" id="luft-v-out">–</div></div>
-        <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">Δt K</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--t4)" id="luft-dt-out">–</div></div>
-        <div><div style="font-family:var(--f);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:3px">&#7745; kg/h</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--air-t)" id="luft-ms">–</div></div>
+        <div><div style="font-family:var(--f);font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--t3);margin-bottom:3px">kW</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--t4)" id="luft-kw">&ndash;</div></div>
+        <div><div style="font-family:var(--f);font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--t3);margin-bottom:3px">V&#x307; m&sup3;/h</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--t4)" id="luft-v-out">&ndash;</div></div>
+        <div><div style="font-family:var(--f);font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--t3);margin-bottom:3px">&Delta;t K</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--t4)" id="luft-dt-out">&ndash;</div></div>
+        <div><div style="font-family:var(--f);font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--t3);margin-bottom:3px">&#7745; kg/h</div><div style="font-family:var(--fm);font-size:14px;font-weight:700;color:var(--air-t)" id="luft-ms">&ndash;</div></div>
       </div>
     </div>
 
-    <!-- Formula -->
-    <div style="text-align:center;font-family:var(--fm);font-size:10px;color:var(--t3);line-height:1.9">
-      Q = <span style="color:var(--t2)">V&#x307;</span> × <span style="color:var(--t2)">&rho;<sub>L</sub>(t<sub>ZL</sub>)</span> × <span style="color:var(--t2)">c<sub>p,L</sub></span> × <span style="color:var(--t2)">Δt</span>
+    <!-- ⑤ Formel -->
+    <div style="text-align:center;font-family:var(--fm);font-size:12px;color:var(--t3);line-height:1.9">
+      Q = <span style="color:var(--t2)">V&#x307;</span> &times; <span style="color:var(--t2)">&rho;<sub>L</sub>(t<sub>ZL</sub>)</span> &times; <span style="color:var(--t2)">c<sub>p,L</sub></span> &times; <span style="color:var(--t2)">&Delta;t</span>
       &ensp;&middot;&ensp;
       &rho;<sub>L</sub>(t) = <span style="color:var(--t2)">353,05 / (t + 273,15)</span> kg/m&sup3;
     </div>
 
-    <!-- Air constants -->
+    <!-- ⑥ Luftkennwerte -->
     <div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.20);border-radius:var(--r-l);padding:12px 14px">
-      <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--air-t);margin-bottom:9px;font-family:var(--f)">Luftkennwerte (aktuell)</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--air-t);margin-bottom:9px;font-family:var(--f)">Luftkennwerte (aktuell)</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
-        <div style="font-size:10px;color:var(--t2)">&rho;<sub>L</sub> bei t<sub>ZL</sub></div>
-        <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)" id="luft-rho-display">– kg/m³</div>
-        <div style="font-size:10px;color:var(--t2)">c<sub>p,L</sub></div>
-        <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)">1.005 J/(kg·K)</div>
-        <div style="font-size:10px;color:var(--t2)">&rho; × c<sub>p</sub> / 3600</div>
-        <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)" id="luft-factor-display">– Wh/(m³·K)</div>
+        <div style="font-size:12px;color:var(--t2)">&rho;<sub>L</sub> bei t<sub>ZL</sub></div>
+        <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)" id="luft-rho-display">&ndash; kg/m&sup3;</div>
+        <div style="font-size:12px;color:var(--t2)">c<sub>p,L</sub></div>
+        <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)">1.005 J/(kg&middot;K)</div>
+        <div style="font-size:12px;color:var(--t2)">&rho; &times; c<sub>p</sub> / 3600</div>
+        <div style="font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1)" id="luft-factor-display">&ndash; Wh/(m&sup3;&middot;K)</div>
       </div>
     </div>
 
@@ -1099,24 +1158,26 @@ function dpCol(dp, mx) {
 /* ═══════════════════════════════════════
    PIPE CARD HTML
 ═══════════════════════════════════════ */
-function pCardSteel(p, vol, mx, isBest) {
+function pCardSteel(p, vol, mx, isBest, bestCls) {
+  bestCls = bestCls || 'best';
   const {dp, v} = pdrop(vol, p[1], ES);
   const col = dpCol(dp, mx);
   const pct = Math.min(100, dp/mx*100).toFixed(1);
-  const cls = isBest ? 'best' : dp > mx ? 'over' : '';
+  const cls = isBest ? bestCls : dp > mx ? 'over' : '';
   const star = isBest ? '<span class="star">\u2605</span>' : '';
   const dpTxt = dp < 10 ? dp.toFixed(1) : Math.round(dp);
   return `<div class="pm ${cls}">
     <div class="pm-std">${p[4]} ${star}</div>
     <div class="pm-dn">DN\u2009${p[0]}</div>
     <div class="pm-dim">\u00d8\u2009${p[2]}\u202f\u00d7\u202f${p[3]}\u202fmm<br>d\u1d62\u2009${p[1].toFixed(1)}\u202fmm</div>
-    <div class="pm-r"><span class="pm-k">\u0394p/m</span><span class="pm-v" style="color:${col}">${dpTxt}<span style="font-size:9px;color:var(--t3)"> Pa/m</span></span></div>
+    <div class="pm-r"><span class="pm-k">\u0394p/m</span><span class="pm-v" style="color:${col}">${dpTxt}<span style="font-size:11px;color:var(--t3)"> Pa/m</span></span></div>
     <div class="pm-r"><span class="pm-k">v</span><span class="pm-v" style="font-size:11px;color:var(--t2)">${v.toFixed(2)}\u202fm/s</span></div>
     <div class="dpbar"><div class="dpfill" style="width:${pct}%;background:${col}"></div></div>
   </div>`;
 }
 
-function pCardMapress(p, vol, mx, isBest) {
+function pCardMapress(p, vol, mx, isBest, bestCls) {
+  bestCls = bestCls || 'best';
   // Mapress not available above DN100
   if (p[0] > MAPRESS_MAX_DN || p[5] === null) {
     return `<div class="pm na">
@@ -1128,20 +1189,21 @@ function pCardMapress(p, vol, mx, isBest) {
   const {dp, v} = pdrop(vol, p[5], EM);
   const col = dpCol(dp, mx);
   const pct = Math.min(100, dp/mx*100).toFixed(1);
-  const cls = isBest ? 'best' : dp > mx ? 'over' : '';
+  const cls = isBest ? bestCls : dp > mx ? 'over' : '';
   const star = isBest ? '<span class="star">\u2605</span>' : '';
   const dpTxt = dp < 10 ? dp.toFixed(1) : Math.round(dp);
   return `<div class="pm ${cls}">
     <div class="pm-std mp">Mapress Edelstahl ${star}</div>
     <div class="pm-dn">DN\u2009${p[0]}</div>
     <div class="pm-dim">\u00d8\u2009${p[6]}\u202f\u00d7\u202f${p[7]}\u202fmm<br>d\u1d62\u2009${p[5].toFixed(1)}\u202fmm</div>
-    <div class="pm-r"><span class="pm-k">\u0394p/m</span><span class="pm-v" style="color:${col}">${dpTxt}<span style="font-size:9px;color:var(--t3)"> Pa/m</span></span></div>
+    <div class="pm-r"><span class="pm-k">\u0394p/m</span><span class="pm-v" style="color:${col}">${dpTxt}<span style="font-size:11px;color:var(--t3)"> Pa/m</span></span></div>
     <div class="pm-r"><span class="pm-k">v</span><span class="pm-v" style="font-size:11px;color:var(--t2)">${v.toFixed(2)}\u202fm/s</span></div>
     <div class="dpbar"><div class="dpfill" style="width:${pct}%;background:${col}"></div></div>
   </div>`;
 }
 
-function renderPair(cid, vol, mx) {
+function renderPair(cid, vol, mx, bestCls) {
+  bestCls = bestCls || 'best';
   const el = $(cid); if (!el) return;
   if (!vol) { el.innerHTML = ''; return; }
 
@@ -1156,28 +1218,50 @@ function renderPair(cid, vol, mx) {
     ? PIPES.findIndex(p => p[0] === MAPRESS_MAX_DN)  // fallback to DN100
     : bM;
 
-  el.innerHTML = pCardSteel(PIPES[iS], vol, mx, bS >= 0)
-               + pCardMapress(PIPES[iM], vol, mx, bM >= 0);
+  el.innerHTML = pCardSteel(PIPES[iS], vol, mx, bS >= 0, bestCls)
+               + pCardMapress(PIPES[iM], vol, mx, bM >= 0, bestCls);
 }
 
 /* ═══════════════════════════════════════
    STATE + LAYOUT
 ═══════════════════════════════════════ */
-const ST = { h:{mode:'ms'}, k:{mode:'ms'} };
+const ST = { h:{mode:'ms', qUnit:'W'}, k:{mode:'ms', qUnit:'W'} };
 
 function updateLayout(p) {
   const m = ST[p].mode;
   show($(p+'-ig-q'),  m !== 'q');
   show($(p+'-ig-ms'), m !== 'ms');
   show($(p+'-ig-dt'), m !== 'dt');
-  const showRO = (m === 'q' || m === 'dt');
-  show($(p+'-ro-wrap'), showRO);
-  if (showRO) {
-    const lbl  = $(p+'-ro-lbl');
-    const unit = $(p+'-ro-unit');
-    if (m === 'q')  { lbl.textContent='Leistung';            unit.textContent='W'; }
-    if (m === 'dt') { lbl.textContent='Temperaturdifferenz'; unit.textContent='K'; }
+
+  /* ΔT label adapts to the companion input being used */
+  const dtLbl = $(p+'-dt-lbl');
+  if (dtLbl) {
+    const heatWord = p === 'h' ? 'Heizlast' : 'K\u00fchllast';
+    if      (m === 'ms') dtLbl.textContent = '\u0394T — ' + heatWord + ' [K]';
+    else if (m === 'q')  dtLbl.textContent = '\u0394T — Massenstrom [K]';
+    else                 dtLbl.textContent = '\u0394T [K]';
   }
+}
+
+/* W/kW toggle for Heizung/Kälte */
+function setQUnit(p, unit) {
+  ST[p].qUnit = unit;
+  const inp = $(p+'-q');
+  const unitSpan = $(p+'-q-unit');
+  const wBtn  = $(p+'-wu');
+  const kwBtn = $(p+'-kwu');
+  if (unit === 'kW') {
+    if(inp){ inp.step='0.1'; inp.placeholder='0.00'; }
+    if(unitSpan) unitSpan.textContent='kW';
+    if(wBtn)  wBtn.classList.remove('active');
+    if(kwBtn) kwBtn.classList.add('active');
+  } else {
+    if(inp){ inp.step='100'; inp.placeholder='0'; }
+    if(unitSpan) unitSpan.textContent='W';
+    if(kwBtn) kwBtn.classList.remove('active');
+    if(wBtn)  wBtn.classList.add('active');
+  }
+  calcAll();
 }
 
 /* ═══════════════════════════════════════
@@ -1189,7 +1273,8 @@ function calcPanel(p) {
   const rho = f.rho;
   const m   = ST[p].mode;
 
-  const qv    = parseFloat($(p+'-q')?.value)     || 0;
+  const qRaw  = parseFloat($(p+'-q')?.value)     || 0;
+  const qv    = ST[p].qUnit === 'kW' ? qRaw * 1000 : qRaw;   // always W
   const msh   = parseFloat($(p+'-ms-in')?.value) || 0;  // kg/h input
   const ms_in = msh / 3600;                              // → kg/s
   const dtv   = parseFloat($(p+'-dt')?.value)    || 0;
@@ -1200,16 +1285,9 @@ function calcPanel(p) {
   if (m==='dt' && qv>0  && ms_in>0)  { dt=qv/(ms_in*cp); q=qv; ms=ms_in; ok=true; }
 
   const mh  = ms * 3600;   // kg/h
-  const m3h = mh / rho;    // m³/h — correct: kg/h ÷ kg/m³
+  const m3h = mh / rho;    // m³/h
 
-  // Update read-only result field
-  const ro = $(p+'-ro-val');
-  if (ro) {
-    const v = m==='q' ? loc(q,0) : m==='dt' ? loc(dt,2) : '';
-    if (v !== '') { ro.textContent = ok ? v : '\u2013'; ro.classList.toggle('empty', !ok); }
-  }
-
-  return { ok, ms, mh, m3h };
+  return { ok, ms, mh, m3h, q, dt };
 }
 
 /* Set output value — preserve unit <span> */
@@ -1223,6 +1301,39 @@ function setOut(id, on, txt) {
   el.classList.toggle('has', on);
 }
 
+/* Set output value AND update unit label */
+function setOutFull(valId, unitId, on, numTxt, unitTxt) {
+  setOut(valId, on, numTxt);
+  const uel = $(unitId); if (uel) uel.textContent = unitTxt;
+}
+
+/* Update one output block (h or k) based on its current mode */
+function updateOutBlock(p, res) {
+  const m = ST[p].mode;
+  const k1 = $(p+'-out-key1'), k2 = $(p+'-out-key2');
+
+  if (m === 'ms') {
+    if (k1) k1.textContent = 'kg/h';
+    if (k2) k2.textContent = 'm\u00b3/h';
+    setOutFull(p+'-out-v1', p+'-out-u1', res.ok, loc(res.mh,  1), 'kg/h');
+    setOutFull(p+'-out-v2', p+'-out-u2', res.ok, loc(res.m3h, 3), 'm\u00b3/h');
+  } else if (m === 'q') {
+    const isKw  = ST[p].qUnit === 'kW';
+    const qDisp = isKw ? res.q / 1000 : res.q;
+    const qDec  = isKw ? 3 : 0;
+    const uLbl  = ST[p].qUnit;
+    if (k1) k1.textContent = uLbl;
+    if (k2) k2.textContent = 'kg/h';
+    setOutFull(p+'-out-v1', p+'-out-u1', res.ok, loc(qDisp, qDec), uLbl);
+    setOutFull(p+'-out-v2', p+'-out-u2', res.ok, loc(res.mh, 1),   'kg/h');
+  } else {                          // dt
+    if (k1) k1.textContent = '\u0394T';
+    if (k2) k2.textContent = 'kg/h';
+    setOutFull(p+'-out-v1', p+'-out-u1', res.ok, loc(res.dt, 2), 'K');
+    setOutFull(p+'-out-v2', p+'-out-u2', res.ok, loc(res.mh, 1), 'kg/h');
+  }
+}
+
 function calcAll() {
   const f = FL[$('medium').value];
   $('cp-val').textContent  = f.cp.toFixed(3);
@@ -1234,10 +1345,19 @@ function calcAll() {
   const rH = calcPanel('h');
   const rK = calcPanel('k');
 
-  setOut('h-kgh', rH.ok, loc(rH.mh,  1));
-  setOut('h-m3h', rH.ok, loc(rH.m3h, 3));
-  setOut('k-kgh', rK.ok, loc(rK.mh,  1));
-  setOut('k-m3h', rK.ok, loc(rK.m3h, 3));
+  updateOutBlock('h', rH);
+  updateOutBlock('k', rK);
+
+  // Out-card title reflects active mode(s)
+  const slbl = $('out-card-slbl');
+  if (slbl) {
+    const mH = ST.h.mode, mK = ST.k.mode;
+    const same = mH === mK;
+    const label = same
+      ? { ms:'Ergebnis \u2014 Massenstrom', q:'Ergebnis \u2014 Leistung', dt:'Ergebnis \u2014 \u0394T' }[mH]
+      : 'Ergebnis';
+    slbl.textContent = label;
+  }
 
   const any = rH.ok || rK.ok;
   show($('pi-card'),        any);
@@ -1246,13 +1366,13 @@ function calcAll() {
   if (rH.ok) {
     show($('pi-h'), true);
     $('pi-h-vol').textContent = '(' + loc(rH.m3h,3) + '\u202fm\u00b3/h)';
-    renderPair('pi-h-pair', rH.m3h, DP0);
+    renderPair('pi-h-pair', rH.m3h, DP0, 'best-h');
   } else { show($('pi-h'), false); }
 
   if (rK.ok) {
     show($('pi-k'), true);
     $('pi-k-vol').textContent = '(' + loc(rK.m3h,3) + '\u202fm\u00b3/h)';
-    renderPair('pi-k-pair', rK.m3h, DP0);
+    renderPair('pi-k-pair', rK.m3h, DP0, 'best-k');
   } else { show($('pi-k'), false); }
 }
 
@@ -1276,7 +1396,7 @@ function calcPipeTab() {
   for (let i=lo; i<=hi; i++) {
     const p = PIPES[i];
     h += `<div style="margin-bottom:12px">
-      <div style="font-family:Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--t3);margin-bottom:7px">DN ${p[0]}</div>
+      <div style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--t3);margin-bottom:7px">DN ${p[0]}</div>
       <div class="pipe-pair">
         ${pCardSteel(p, vol, mx, i===bS)}
         ${pCardMapress(p, vol, mx, i===bM)}
@@ -1326,6 +1446,9 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
       .then(reg => {
+        // iOS: sofort auf Updates prüfen (WebKit cached sonst aggressiv)
+        reg.update();
+
         // Pruefe beim Start ob ein neuer SW wartet
         if (reg.waiting) {
           reg.waiting.postMessage('SKIP_WAITING');
@@ -1356,99 +1479,142 @@ $('ib-n').addEventListener('click', () => { $('ib').style.display='none'; });
 window.addEventListener('appinstalled', () => { $('ib').style.display='none'; });
 
 /* ═══ LUFT ═══ */
-const CP_AIR=1005;
-const LST={hk:'h',mode:'q'};
+const CP_AIR = 1005;
+const LST = { hk:'h', mode:'v', qUnit:'W' };
 
-function rhoAir(t){return 353.05/(t+273.15)}
+function rhoAir(t) { return 353.05 / (t + 273.15); }
 
-function luftSwitch(hk){
-  LST.hk=hk;
-  $('luft-btn-h').className='hk-btn'+(hk==='h'?' on-h':'');
-  $('luft-btn-k').className='hk-btn'+(hk==='k'?' on-k':'');
-  const card=$('luft-in-card');
-  card.className='gc '+(hk==='h'?'gc-h':'gc-c');
-  $('luft-ptitle').innerHTML=hk==='h'
-    ?'<div class="dot dot-h"></div><span class="ptitle-lbl">Heizleistung \u2014 Eingaben</span>'
-    :'<div class="dot dot-c"></div><span class="ptitle-lbl" style="color:var(--cold-t)">K\u00fchlleistung \u2014 Eingaben</span>';
-  const dtl=$('luft-dt-auto-lbl');
-  if(dtl)dtl.innerHTML=hk==='h'?'\u0394t = t<sub>ZL</sub> \u2212 t<sub>R</sub>':'\u0394t = t<sub>R</sub> \u2212 t<sub>ZL</sub>';
-  const tl=$('luft-lbl-tzl');
-  if(tl)tl.textContent=hk==='h'?'Zuluft t_ZL (w\u00e4rmer)':'Zuluft t_ZL (k\u00e4lter)';
-  $('luft-out-title').textContent=hk==='h'?'Ergebnis \u2014 Heizleistung Luft':'Ergebnis \u2014 K\u00fchlleistung Luft';
+/* W/kW toggle for Luft */
+function setLuftQUnit(unit) {
+  LST.qUnit = unit;
+  ['luft-q-in-h','luft-q-in-k'].forEach(id => {
+    const inp = $(id);
+    if(inp){ inp.step = unit==='kW' ? '0.1' : '100'; inp.placeholder = unit==='kW' ? '0.00' : '0'; }
+  });
+  const badge  = $('luft-q-unit-badge');   if(badge)  badge.textContent  = unit;
+  const badge2 = $('luft-q-unit-badge-k'); if(badge2) badge2.textContent = unit;
+  const wBtn  = $('luft-wu');
+  const kwBtn = $('luft-kwu');
+  if (unit === 'kW') {
+    if(wBtn)  wBtn.classList.remove('active');
+    if(kwBtn) kwBtn.classList.add('active');
+  } else {
+    if(kwBtn) kwBtn.classList.remove('active');
+    if(wBtn)  wBtn.classList.add('active');
+  }
   calcLuft();
 }
 
-function luftMode(m){
-  LST.mode=m;
-  document.querySelectorAll('.mbtn[data-lm]').forEach(b=>b.classList.toggle('active',b.dataset.lm===m));
-  show($('luft-ig-v'),    m!=='v');
-  show($('luft-temp-block'),m!=='dt');
-  show($('luft-ig-dt'),   m==='dt');
-  show($('luft-ig-q'),    m!=='q');
+/* Visibility — identical logic to updateLayout(p) */
+function updateLuftLayout() {
+  const m = LST.mode;
+  show($('luft-ig-q'),       m !== 'q');
+  show($('luft-ig-v'),       m !== 'v');
+  show($('luft-temp-block'), m !== 'dt');
+}
+
+function luftSwitch(hk) {
+  LST.hk = hk;
+  $('luft-btn-h').className = 'hk-btn' + (hk==='h' ? ' on-h' : '');
+  $('luft-btn-k').className = 'hk-btn' + (hk==='k' ? ' on-k' : '');
+  const card = $('luft-in-card');
+  card.className = 'gc ' + (hk==='h' ? 'gc-h' : 'gc-c');
+  $('luft-ptitle').innerHTML = hk==='h'
+    ? '<div class="dot dot-h"></div><span class="ptitle-lbl">Heizleistung \u2014 Eingaben</span>'
+    : '<div class="dot dot-c"></div><span class="ptitle-lbl" style="color:var(--cold-t)">K\u00fchlleistung \u2014 Eingaben</span>';
+  const dtl = $('luft-dt-auto-lbl');
+  if(dtl) dtl.innerHTML = hk==='h'
+    ? '\u0394t = t<sub>ZL,H</sub> \u2212 t<sub>R,H</sub>'
+    : '\u0394t = t<sub>R,K</sub> \u2212 t<sub>ZL,K</sub>';
+  $('luft-out-title').textContent = hk==='h'
+    ? 'Ergebnis \u2014 Heizleistung Luft'
+    : 'Ergebnis \u2014 K\u00fchlleistung Luft';
+  /* Show the correct Q input for this mode */
+  show($('luft-q-wrap-h'), hk === 'h');
+  show($('luft-q-wrap-k'), hk === 'k');
   calcLuft();
 }
 
-function calcLuft(){
-  const hk=LST.hk,m=LST.mode;
-  const vv=parseFloat($('luft-v')?.value)||0;
-  const tzl=parseFloat($('luft-tzl')?.value);
-  const tr=parseFloat($('luft-tr')?.value)||20;
-  const dtDir=parseFloat($('luft-dt-in')?.value)||0;
-  const qIn=parseFloat($('luft-q-in')?.value)||0;
+function luftMode(m) {
+  LST.mode = m;
+  document.querySelectorAll('.mbtn[data-lm]').forEach(b => b.classList.toggle('active', b.dataset.lm === m));
+  updateLuftLayout();
+  calcLuft();
+}
 
-  let dtAuto=NaN;
-  if(!isNaN(tzl)){dtAuto=hk==='h'?tzl-tr:tr-tzl;}
+function calcLuft() {
+  const hk = LST.hk, m = LST.mode;
+  const vv = parseFloat($('luft-v')?.value) || 0;
+  const tzlH = parseFloat($('luft-tzl-h')?.value);
+  const tzlK = parseFloat($('luft-tzl-k')?.value);
+  const tzl  = hk === 'h' ? tzlH : tzlK;
+  const trH  = parseFloat($('luft-tr-h')?.value) || 20;
+  const trK  = parseFloat($('luft-tr-k')?.value) || 26;
+  const tr   = hk === 'h' ? trH : trK;
+  const qInRaw = parseFloat($('luft-q-in-' + hk)?.value) || 0;
+  const qIn  = LST.qUnit === 'kW' ? qInRaw * 1000 : qInRaw;
 
-  const dtAutoEl=$('luft-dt-auto-val');
-  if(dtAutoEl){
-    const valid=!isNaN(dtAuto)&&dtAuto>0;
-    dtAutoEl.textContent=valid?loc(dtAuto,1):'\u2013';
-    dtAutoEl.className='inp-ro'+(valid?'':' empty');
-    const bc=hk==='h'?'rgba(255,107,53,.10)':'rgba(0,196,232,.10)';
-    const bc2=hk==='h'?'rgba(255,107,53,.40)':'rgba(0,196,232,.40)';
-    const tc=hk==='h'?'var(--heat-t)':'var(--cold-t)';
-    dtAutoEl.style.cssText=`font-size:18px;padding:11px 52px 11px 14px;`+(valid?`background:${bc};border:1.5px solid ${bc2};color:${tc}`:'');
+  let dtAuto = NaN;
+  if (!isNaN(tzl)) { dtAuto = hk==='h' ? tzl - tr : tr - tzl; }
+
+  const dtAutoEl = $('luft-dt-auto-val');
+  if (dtAutoEl) {
+    const valid = !isNaN(dtAuto) && dtAuto > 0;
+    dtAutoEl.textContent = valid ? loc(dtAuto, 1) : '\u2013';
+    dtAutoEl.className = 'inp-ro' + (valid ? '' : ' empty');
+    const bc  = hk==='h' ? 'rgba(255,107,53,.10)' : 'rgba(0,196,232,.10)';
+    const bc2 = hk==='h' ? 'rgba(255,107,53,.40)' : 'rgba(0,196,232,.40)';
+    const tc  = hk==='h' ? 'var(--heat-t)' : 'var(--cold-t)';
+    dtAutoEl.style.cssText = 'font-size:18px;padding:11px 52px 11px 14px;' +
+      (valid ? `background:${bc};border:1.5px solid ${bc2};color:${tc}` : '');
   }
 
-  const dt=m==='dt'?dtDir:(!isNaN(dtAuto)?dtAuto:0);
-  const tRef=!isNaN(tzl)&&tzl>-273?tzl:20;
-  const rho=rhoAir(tRef);
-  const fac=rho*CP_AIR/3600;
+  const dt   = m !== 'dt' ? (!isNaN(dtAuto) && dtAuto > 0 ? dtAuto : 0) : 0;
+  const tRef = !isNaN(tzl) && tzl > -273 ? tzl : 20;
+  const rho  = rhoAir(tRef);
+  const fac  = rho * CP_AIR / 3600;
 
-  const rd=$('luft-rho-display');if(rd)rd.textContent=rho.toFixed(3)+'\u202fkg/m\u00b3';
-  const fd=$('luft-factor-display');if(fd)fd.textContent=(fac).toFixed(4)+'\u202fWh/(m\u00b3\u00b7K)';
+  const rd = $('luft-rho-display');    if(rd) rd.textContent = rho.toFixed(3) + '\u202fkg/m\u00b3';
+  const fd = $('luft-factor-display'); if(fd) fd.textContent = fac.toFixed(4) + '\u202fWh/(m\u00b3\u00b7K)';
 
-  let Q=0,V=0,dT=0,ok=false;
-  if(m==='q' &&vv>0&&dt>0){Q=vv*fac*dt;   V=vv;  dT=dt;  ok=true;}
-  if(m==='v' &&qIn>0&&dt>0){V=qIn/fac/dt;  Q=qIn; dT=dt;  ok=true;}
-  if(m==='dt'&&vv>0&&qIn>0){dT=qIn/(vv*fac);Q=qIn;V=vv;   ok=true;}
+  let Q = 0, V = 0, dT = 0, ok = false;
+  if (m === 'v'  && qIn > 0 && dt > 0)  { V = qIn / (fac * dt);  Q = qIn; dT = dt; ok = true; }
+  if (m === 'q'  && vv  > 0 && dt > 0)  { Q = vv * fac * dt;     V = vv;  dT = dt; ok = true; }
+  if (m === 'dt' && vv  > 0 && qIn > 0) { dT = qIn / (vv * fac); Q = qIn; V = vv;  ok = true; }
 
-  const ms=ok?V*rho:0;
-  const col=hk==='h'?'var(--heat-t)':'var(--cold-t)';
-  const sub2=hk==='h'?'rgba(255,170,122,.6)':'rgba(102,223,255,.6)';
-  const lbl={'q':'Leistung Q','v':'Volumenstrom V\u0307','dt':'\u0394t'}[m];
-  const val=ok?(m==='q'?loc(Q,0):m==='v'?loc(V,1):loc(dT,2)):'\u2013';
-  const unit={'q':'W','v':'m\u00b3/h','dt':'K'}[m];
-  const sub=ok?(m==='q'?loc(Q/1000,2)+'\u202fkW':m==='v'?loc(V*rho,1)+'\u202fkg/h':''):'';
+  const ms   = ok ? V * rho : 0;
+  const col  = hk==='h' ? 'var(--heat-t)' : 'var(--cold-t)';
+  const sub2 = hk==='h' ? 'rgba(255,170,122,.6)' : 'rgba(102,223,255,.6)';
+  const lbl  = { 'v':'Volumenstrom V\u0307', 'q':'Leistung Q', 'dt':'\u0394t' }[m];
+  const val  = ok ? (m==='v' ? loc(V,1) : m==='q' ? loc(Q,0) : loc(dT,2)) : '\u2013';
+  const unit = { 'v':'m\u00b3/h', 'q':'W', 'dt':'K' }[m];
+  const sub  = ok ? (
+    m==='v' ? loc(V*rho,1)+'\u202fkg/h' :
+    m==='q' ? loc(Q/1000,2)+'\u202fkW' : ''
+  ) : '';
 
-  $('luft-main-lbl').textContent=lbl;
-  const mv=$('luft-main-val');
-  mv.style.color=ok?col:'var(--t4)';
-  mv.innerHTML=val+'<span style="font-size:16px;font-weight:400;color:var(--t3)"> '+unit+'</span>';
-  const ms2=$('luft-main-sub');
-  ms2.style.color=sub2;ms2.textContent=sub;
+  $('luft-main-lbl').textContent = lbl;
+  const mv = $('luft-main-val');
+  mv.style.color = ok ? col : 'var(--t4)';
+  mv.innerHTML = val + '<span style="font-size:16px;font-weight:400;color:var(--t3)"> ' + unit + '</span>';
+  const ms2 = $('luft-main-sub');
+  ms2.style.color = sub2; ms2.textContent = sub;
 
-  function sv(id,ok,v){const e=$(id);if(e){e.textContent=ok?v:'\u2013';e.style.color=ok?'var(--t1)':'var(--t4)';}}
-  sv('luft-kw',   ok&&m!=='dt',loc(Q/1000,2)+'\u202fkW');
-  sv('luft-v-out',ok,loc(V,1));
-  sv('luft-dt-out',ok,loc(dT,2));
-  const msel=$('luft-ms');
-  if(msel){msel.textContent=ok?loc(ms,1):'\u2013';msel.style.color=ok?'var(--air-t)':'var(--t4)';}
+  function sv(id, on, v){ const e=$(id); if(e){ e.textContent=on?v:'\u2013'; e.style.color=on?'var(--t1)':'var(--t4)'; } }
+  sv('luft-kw',    ok && m!=='dt', loc(Q/1000,2)+'\u202fkW');
+  sv('luft-v-out', ok, loc(V,1));
+  sv('luft-dt-out', ok, loc(dT,2));
+  const msel = $('luft-ms');
+  if(msel){ msel.textContent = ok ? loc(ms,1) : '\u2013'; msel.style.color = ok ? 'var(--air-t)' : 'var(--t4)'; }
 }
 
-document.querySelectorAll('.mbtn[data-lm]').forEach(b=>b.addEventListener('click',()=>luftMode(b.dataset.lm)));
-['luft-v','luft-tzl','luft-tr','luft-dt-in','luft-q-in'].forEach(id=>$(id)?.addEventListener('input',calcLuft));
-luftSwitch('h');luftMode('q');
+document.querySelectorAll('.mbtn[data-lm]').forEach(b => b.addEventListener('click', () => luftMode(b.dataset.lm)));
+['luft-v','luft-tzl-h','luft-tzl-k','luft-tr-h','luft-tr-k','luft-q-in-h','luft-q-in-k']
+  .forEach(id => $(id)?.addEventListener('input', calcLuft));
+luftSwitch('h');
+updateLuftLayout();
+calcLuft();
+
 
 /* ═══ FLOW HK-SWITCH ═══ */
 function flowSwitch(hk){
